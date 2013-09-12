@@ -7,208 +7,18 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ecd9a19d-81b5-460d-99eb-1de3193b00ca" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/AWSConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/AWSUtilities.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/ApplicationException.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/payload/AuthorizedState.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/help/BadRequestException.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/BadgeAuthorityDAO.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/BadgeAuthorityDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/impl/mongo/dao/BadgeAuthorityDAOImpl.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/payload/BadgeAuthorityPayload.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/BadgeAuthoritySchema.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/BadgeDAO.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/BadgeDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/impl/mongo/dao/BadgeDAOImpl.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/payload/BadgePayload.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/BadgeSchema.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/BadgeTransactionDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/type/BadgeTransactionState.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/payload/BadgingNotificationEntity.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/BaseDAO.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/BaseDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/impl/mongo/dao/BaseDAOImpl.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/error/BaseException.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/payload/BasePayload.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/BaseSchema.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/cache/BlahCache.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/cache/BlahCacheConfiguration.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/BlahDAO.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/BlahDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/impl/mongo/dao/BlahDAOImpl.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/BlahDemographics.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/BlahDescriptiveStats.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/payload/BlahPayload.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/BlahSchema.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/BlahTrackerDAO.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/BlahTrackerDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/impl/mongo/dao/BlahTrackerDAOImpl.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/payload/BlahTrackerPayload.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/BlahTrackerSchema.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/type/BlahTypeCategoryType.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/BlahTypeDAO.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/BlahTypeDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/impl/mongo/dao/BlahTypeDAOImpl.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/payload/BlahTypePayload.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/BlahTypeSchema.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/type/BooleanDataTypeValidator.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/Boxer.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/CacheException.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/CommentDAO.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/CommentDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/impl/mongo/dao/CommentDAOImpl.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/CommentDemographics.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/payload/CommentPayload.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/CommentSchema.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/CommentTrackerDAO.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/CommentTrackerDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/impl/mongo/dao/CommentTrackerDAOImpl.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/payload/CommentTrackerPayload.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/CommonUtilities.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/help/Constants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/DAOMethods.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/type/DAOUpdateType.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/DBCollections.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/DBException.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/DataException.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/type/DateDataTypeValidator.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/type/DateTimeDataTypeValidator.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/date/DateUtils.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/type/DefaultEmbeddedDataTypeValidator.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/DemographicsObjectDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/DescriptiveUserStatsDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/help/DumpToR.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/error/DuplicateKeyException.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/error/ErrorCodes.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/payload/ErrorResponsePayload.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/type/FieldDescriptor.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/cache/FieldMapComparator.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/type/FieldValidator.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/type/GPSDataTypeValidator.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/GroupDAO.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/GroupDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/impl/mongo/dao/GroupDAOImpl.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/GroupDemographics.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/payload/GroupPayload.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/GroupSchema.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/GroupTypeDAO.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/GroupTypeDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/impl/mongo/dao/GroupTypeDAOImpl.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/payload/GroupTypePayload.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/GroupTypeSchema.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/cache/Inbox.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/InboxBlahDAO.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/InboxBlahDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/impl/mongo/dao/InboxBlahDAOImpl.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/payload/InboxBlahPayload.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/InboxBlahSchema.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/cache/InboxState.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/InboxStateDAO.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/InboxStateDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/impl/mongo/dao/InboxStateDAOImpl.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/Inboxer.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/Inboxer1.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/type/IndexedListValidator.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/type/IntegerDataTypeValidator.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/error/InvalidAuthorizedStateException.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/error/InvalidRequestException.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/error/InvalidUserValidationKey.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/error/InvalidUserValidationMethodParameters.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/help/JSONUtilities.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/help/LocalCache.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/i18n/LocaleId.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/log/LogFormatter.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/type/LongDataTypeValidator.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/META-INF/MANIFEST.MF" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/Main.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/mgr/ManagerInterface.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/mgr/ManagerState.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/MediaDAO.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/MediaDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/impl/mongo/dao/MediaDAOImpl.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/type/MediaReferendType.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/MediaSchema.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/type/MediaType.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/impl/mongo/MongoFieldTypes.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/type/MongoObjectIdValidator.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/impl/mongo/dao/MongoStoreManager.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/ObjectInfo.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/PollOptionDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/PollOptionTextDAO.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/impl/mongo/dao/PollOptionTextImpl.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/type/PollOptionTextValidator.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/payload/PollOptionsTextPayload.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/type/RealDataTypeValidator.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/type/RecoveryMethodType.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/error/ResourceNotFoundException.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/type/RunMode.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/SchemaConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/type/SchemaDataType.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/type/SchemaDataTypeFieldMap.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/SchemaSpec.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/error/StateConflictException.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/StoreManager.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/type/StringDataTypeValidator.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/error/SystemErrorException.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/mgr/SystemManager.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/TestMemcached.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/TrackerDAO.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/TrackerDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/impl/mongo/dao/TrackerDAOImpl.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/tracker/TrackerOperation.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/TrackerSchema.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/type/TrackerType.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/UpdateRecents.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/UserAccountDAO.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/UserAccountDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/impl/mongo/dao/UserAccountDAOImpl.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/payload/UserAccountPayload.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/type/UserAccountType.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/UserBlahInfoDAO.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/UserBlahInfoDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/impl/mongo/dao/UserBlahInfoDAOImpl.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/payload/UserBlahInfoPayload.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/UserBlahInfoSchema.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/UserBlahSummaryDAO.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/UserBlahSummaryDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/UserCommentInfoDAO.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/UserCommentInfoDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/impl/mongo/dao/UserCommentInfoDAOImpl.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/UserCommentInfoSchema.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/UserDAO.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/UserDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/impl/mongo/dao/UserDAOImpl.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/UserDemographics.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/UserDescriptiveStats.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/UserGroupDAO.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/UserGroupDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/impl/mongo/dao/UserGroupDAOImpl.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/payload/UserGroupPayload.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/UserGroupSchema.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/payload/UserPayload.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/UserProfileDAO.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/UserProfileDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/impl/mongo/dao/UserProfileDAOImpl.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/payload/UserProfilePayload.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/type/UserProfilePermissions.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/UserProfileSchema.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/UserSchema.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/UserTrackerDAO.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/UserTrackerDAOConstants.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/impl/mongo/dao/UserTrackerDAOImpl.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/service/base/payload/UserTrackerPayload.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/help/Utilities.java" />
+      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/com/eweware/stats/Inboxer1.java" afterPath="" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="stats.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Dummy.txt" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379011213812" ignored="false" />
+    <file path="/Dummy.txt" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379014498688" ignored="false" />
     <file path="/Main.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1373677714653" ignored="false" />
     <file path="/BlahSummarizerTest.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1362426983233" ignored="false" />
     <file path="/InboxBuilder.scala" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1366681079315" ignored="false" />
     <file path="/fragment.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1378935971065" ignored="false" />
     <file path="/DBMethods.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1362426881670" ignored="false" />
-    <file path="/a.dummy" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1378841936353" ignored="false" />
+    <file path="/a.dummy" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379014480047" ignored="false" />
     <file path="/HighLevelAPICallMethods.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1363114030149" ignored="false" />
     <file path="/TestConstants.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1357952934611" ignored="false" />
     <file path="/Utilities.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1375741227616" ignored="false" />
@@ -370,7 +180,7 @@
     <file path="$PROJECT_DIR$/../blahguarest/.idea/workspace.xml" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1378929881289" ignored="false" />
     <file path="/api.js" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1365043203520" ignored="false" />
     <file path="$PROJECT_DIR$/../RestUnitTests/src/main/java/com/eweware/service/demo/Test.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1363225207450" ignored="false" />
-    <file path="/Test.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1363225203905" ignored="false" />
+    <file path="/Test.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379012238167" ignored="false" />
     <file path="$PROJECT_DIR$/../blahguarest/src/main/java/com/eweware/service/base/error/ErrorCodes.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1373411339444" ignored="false" />
     <file path="$PROJECT_DIR$/../blahguarest/src/main/java/com/eweware/service/base/store/impl/mongo/dao/UserAccountDAOImpl.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1362299304402" ignored="false" />
     <file path="/BaseDAOImpl.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1366965856748" ignored="false" />
@@ -660,12 +470,12 @@
     <file path="$PROJECT_DIR$/../reports/pom.xml" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1375991385679" ignored="false" />
     <file path="$PROJECT_DIR$/../reports/src/main/scala/com/eweware/job/FeedbackChannelReport.scala" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1375989315291" ignored="false" />
     <file path="$PROJECT_DIR$/../reports/src/main/scala/com/eweware/job/db/Database.scala" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1375989740838" ignored="false" />
-    <file path="/Database.scala" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1376088641234" ignored="false" />
-    <file path="$PROJECT_DIR$/../reports/src/main/scala/com/eweware/report/db/Database.scala" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1375991474867" ignored="false" />
-    <file path="$PROJECT_DIR$/../reports/src/main/scala/com/eweware/report/FeedbackChannelReport.scala" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1375990670702" ignored="false" />
-    <file path="/FeedbackChannelReport.scala" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1375990670342" ignored="false" />
-    <file path="$PROJECT_DIR$/../reports/src/main/scala/com/eweware/job/BadgeFakeUsers.scala" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1376008524113" ignored="false" />
-    <file path="/BadgeFakeUsers.scala" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1376007591000" ignored="false" />
+    <file path="/Database.scala" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379013909860" ignored="false" />
+    <file path="$PROJECT_DIR$/../reports/src/main/scala/com/eweware/report/db/Database.scala" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379013983568" ignored="false" />
+    <file path="$PROJECT_DIR$/../reports/src/main/scala/com/eweware/report/FeedbackChannelReport.scala" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379013965928" ignored="false" />
+    <file path="/FeedbackChannelReport.scala" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379013964265" ignored="false" />
+    <file path="$PROJECT_DIR$/../reports/src/main/scala/com/eweware/job/BadgeFakeUsers.scala" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379014009961" ignored="false" />
+    <file path="/BadgeFakeUsers.scala" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379013877628" ignored="false" />
     <file path="/badge-usernames.txt" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1375998044264" ignored="false" />
     <file path="$PROJECT_DIR$/../reports/inputs/badge-usernames.txt" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1375998045098" ignored="false" />
     <file path="$PROJECT_DIR$/../../../digital-tools/services/lemma-service/src/main/scala/com/rubenkleiman/service/lemma/handler/ProvideHeadwords.scala" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1376088759168" ignored="false" />
@@ -698,6 +508,23 @@
     <file path="/Index.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1376430337700" ignored="false" />
     <file path="$PROJECT_DIR$/../blahguarest/docs/main/java/com/eweware/service/mgr/UserManager.html" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1376514982740" ignored="false" />
     <file path="/push-to-dev.sh" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379010829182" ignored="false" />
+    <file path="$PROJECT_DIR$/../caca/src/main/java/com/rubenkleiman/caca/ConvertToDateString.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379012174205" ignored="false" />
+    <file path="/ConvertToDateString.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379012172404" ignored="false" />
+    <file path="$PROJECT_DIR$/../caca/src/main/java/com/rubenkleiman/caca/ConvertToWeekOfYearString.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379012150892" ignored="false" />
+    <file path="/ConvertToWeekOfYearString.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379012147476" ignored="false" />
+    <file path="$PROJECT_DIR$/../caca/pom.xml" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379012037522" ignored="false" />
+    <file path="$PROJECT_DIR$/../caca/caca.iml" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379012052290" ignored="false" />
+    <file path="$PROJECT_DIR$/../caca/src/main/java/com/rubenkleiman/caca/Range.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379012206807" ignored="false" />
+    <file path="/Range.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379012203319" ignored="false" />
+    <file path="$PROJECT_DIR$/../caca/src/main/java/com/rubenkleiman/caca/CutLoadFunc.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379012228778" ignored="false" />
+    <file path="/CutLoadFunc.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379012228778" ignored="false" />
+    <file path="$PROJECT_DIR$/../caca/src/main/java/com/rubenkleiman/caca/Test.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379012237777" ignored="false" />
+    <file path="$PROJECT_DIR$/../caca/src/main/java/com/rubenkleiman/caca/Trim.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379012249019" ignored="false" />
+    <file path="/Trim.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379012248698" ignored="false" />
+    <file path="$PROJECT_DIR$/../caca/.idea/workspace.xml" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379012693377" ignored="false" />
+    <file path="$PROJECT_DIR$/../reports/README.md" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379013304429" ignored="false" />
+    <file path="/README.md" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379013301607" ignored="false" />
+    <file path="$PROJECT_DIR$/../reports/.idea/workspace.xml" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379014515313" ignored="false" />
     <option name="TRACKING_ENABLED" value="true" />
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -845,11 +672,13 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="push-to-dev.sh" pinned="false" current="true" current-in-tab="true">
-        <entry file="file://$PROJECT_DIR$/scripts/push-to-dev.sh">
+      <file leaf-file-name="Inboxer.java" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/eweware/stats/Inboxer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="6" column="8" selection-start="218" selection-end="218" vertical-scroll-proportion="0.098146126">
-              <folding />
+            <state line="302" column="46" selection-start="14914" selection-end="14918" vertical-scroll-proportion="2.9911504">
+              <folding>
+                <element signature="e#13832#13842#0" expanded="true" />
+              </folding>
             </state>
           </provider>
         </entry>
@@ -900,7 +729,7 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="347" />
+    <option name="x" value="342" />
     <option name="y" value="22" />
     <option name="width" value="1637" />
     <option name="height" value="1418" />
@@ -980,6 +809,54 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="META-INF" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="stats" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="stats" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+          </PATH>
+          <PATH>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="stats" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="stats" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="src" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="main" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="java" />
+              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
+            </PATH_ELEMENT>
+            <PATH_ELEMENT>
+              <option name="myItemId" value="stats" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -1258,16 +1135,21 @@
       <created>1379011220008</created>
       <updated>1379011220008</updated>
     </task>
-    <option name="localTasksCounter" value="2" />
+    <task id="LOCAL-00002" summary="First checkin">
+      <created>1379011604732</created>
+      <updated>1379011604732</updated>
+    </task>
+    <option name="localTasksCounter" value="3" />
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="347" y="22" width="1637" height="1418" extended-state="0" />
+    <frame x="342" y="22" width="1637" height="1418" extended-state="0" />
     <editor active="false" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="JetGradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32538462" sideWeight="0.49778622" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.37827426" sideWeight="0.49778622" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.45755237" sideWeight="0.49778622" order="0" side_tool="true" content_ui="tabs" />
@@ -1282,7 +1164,6 @@
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.18104777" sideWeight="0.9466292" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32538462" sideWeight="0.49778622" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24638592" sideWeight="0.47919875" order="5" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
     </layout>
@@ -1357,11 +1238,6 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/schema/UserProfileSchema.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="126" column="15" selection-start="6150" selection-end="6150" vertical-scroll-proportion="0.0" />
-      </provider>
-    </entry>
     <entry file="jar:///System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/classes.jar!/java/io/PrintStream.class">
       <provider selected="true" editor-type-id="text-editor">
         <state line="88" column="16" selection-start="3202" selection-end="3202" vertical-scroll-proportion="0.5571245" />
@@ -1428,15 +1304,6 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/eweware/stats/Inboxer.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="302" column="46" selection-start="14914" selection-end="14918" vertical-scroll-proportion="0.0">
-          <folding>
-            <element signature="e#13832#13842#0" expanded="true" />
-          </folding>
-        </state>
-      </provider>
-    </entry>
     <entry file="file://$PROJECT_DIR$/pom.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state line="0" column="0" selection-start="0" selection-end="0" vertical-scroll-proportion="0.0">
@@ -1462,6 +1329,15 @@
       <provider selected="true" editor-type-id="text-editor">
         <state line="6" column="8" selection-start="218" selection-end="218" vertical-scroll-proportion="0.098146126">
           <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/eweware/stats/Inboxer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="302" column="46" selection-start="14914" selection-end="14918" vertical-scroll-proportion="2.9911504">
+          <folding>
+            <element signature="e#13832#13842#0" expanded="true" />
+          </folding>
         </state>
       </provider>
     </entry>
