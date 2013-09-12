@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project name="module_stats" default="compile.module.stats">
+  <dirname property="module.stats.basedir" file="${ant.file.module_stats}"/>
+  
+  <property name="module.jdk.home.stats" value="${project.jdk.home}"/>
+  <property name="module.jdk.bin.stats" value="${project.jdk.bin}"/>
+  <property name="module.jdk.classpath.stats" value="${project.jdk.classpath}"/>
+  
+  <property name="compiler.args.stats" value="${compiler.args}"/>
+  
+  <property name="stats.output.dir" value="${module.stats.basedir}/out/production/Stats"/>
+  <property name="stats.testoutput.dir" value="${module.stats.basedir}/out/test/Stats"/>
+  
+  <path id="stats.module.bootclasspath">
+    <!-- Paths to be included in compilation bootclasspath -->
+  </path>
+  
+  <path id="stats.module.production.classpath">
+    <path refid="${module.jdk.classpath.stats}"/>
+    <path refid="library.lib.classpath"/>
+  </path>
+  
+  <path id="stats.runtime.production.module.classpath">
+    <pathelement location="${stats.output.dir}"/>
+    <path refid="library.lib.classpath"/>
+  </path>
+  
+  <path id="stats.module.classpath">
+    <path refid="${module.jdk.classpath.stats}"/>
+    <pathelement location="${stats.output.dir}"/>
+    <path refid="library.lib.classpath"/>
+  </path>
+  
+  <path id="stats.runtime.module.classpath">
+    <pathelement location="${stats.testoutput.dir}"/>
+    <pathelement location="${stats.output.dir}"/>
+    <path refid="library.lib.classpath"/>
+  </path>
+  
+  
+  <patternset id="excluded.from.module.stats">
+    <patternset refid="ignored.files"/>
+  </patternset>
+  
+  <patternset id="excluded.from.compilation.stats">
+    <patternset refid="excluded.from.module.stats"/>
+  </patternset>
+  
+  <path id="stats.module.sourcepath">
+    <dirset dir="${module.stats.basedir}">
+      <include name="src"/>
+    </dirset>
+  </path>
+  
+  
+  <target name="compile.module.stats" depends="compile.module.stats.production,compile.module.stats.tests" description="Compile module Stats"/>
+  
+  <target name="compile.module.stats.production" depends="register.custom.compilers" description="Compile module Stats; production classes">
+    <mkdir dir="${stats.output.dir}"/>
+    <javac2 destdir="${stats.output.dir}" debug="${compiler.debug}" nowarn="${compiler.generate.no.warnings}" memorymaximumsize="${compiler.max.memory}" fork="true" executable="${module.jdk.bin.stats}/javac">
+      <compilerarg line="${compiler.args.stats}"/>
+      <bootclasspath refid="stats.module.bootclasspath"/>
+      <classpath refid="stats.module.production.classpath"/>
+      <src refid="stats.module.sourcepath"/>
+      <patternset refid="excluded.from.compilation.stats"/>
+    </javac2>
+    
+    <copy todir="${stats.output.dir}">
+      <fileset dir="${module.stats.basedir}/src">
+        <patternset refid="compiler.resources"/>
+        <type type="file"/>
+      </fileset>
+    </copy>
+  </target>
+  
+  <target name="compile.module.stats.tests" depends="register.custom.compilers,compile.module.stats.production" description="compile module Stats; test classes" unless="skip.tests"/>
+  
+  <target name="clean.module.stats" description="cleanup module">
+    <delete dir="${stats.output.dir}"/>
+    <delete dir="${stats.testoutput.dir}"/>
+  </target>
+</project>
