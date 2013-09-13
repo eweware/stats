@@ -108,7 +108,7 @@ public class Inboxer {
         final boolean useCappedCollections = true; // TODO experiment with this option
         for (int number = 0; number < numberOfInboxes; number++) {
             if (wraparound) {
-                // TODO we assume that if we are wrapping around inbox numbers, the previous collections will have been dropped by an external maintenance process.
+                // TODO we assume that if we are wrapping around inbox numbers, the previous collections will have been dropped by an external (cron) job.
                 // If that's not the case, then delete them here.
             }
             final String inboxCollectionName = CommonUtilities.makeInboxCollectionName(groupId, number + lastInboxNumber + 1);
@@ -142,51 +142,7 @@ public class Inboxer {
 
             blahCount++;
 
-            // IMPORTANT: to fetch these fields, include them #makeBlahFieldsToReturn() */
-            final BasicDBObject inboxItem = new BasicDBObject(InboxBlahDAOConstants.BLAH_ID, blah.get(BaseDAOConstants.ID).toString());
-            inboxItem.put(BaseDAOConstants.CREATED, blah.get(BaseDAOConstants.CREATED));
-            inboxItem.put(InboxBlahDAOConstants.BLAH_TEXT, blah.get(BlahDAOConstants.TEXT));
-            inboxItem.put(InboxBlahDAOConstants.TYPE, blah.get(BlahDAOConstants.TYPE_ID));
-            inboxItem.put(InboxBlahDAOConstants.GROUP_ID, groupId);
-            Object tmp = blah.get(BlahDAOConstants.AUTHOR_ID);
-            if (tmp != null) {
-                inboxItem.put(InboxBlahDAOConstants.AUTHOR_ID, tmp);
-            }
-//            tmp = blah.get(BlahDAOConstants.PROMOTED_COUNT);
-//            if (tmp != null) {
-//                inboxItem.put(InboxBlahDAOConstants.UP_VOTES, tmp);
-//            }
-//            tmp = blah.get(BlahDAOConstants.DEMOTED_COUNT);
-//            if (tmp != null) {
-//                inboxItem.put(InboxBlahDAOConstants.DOWN_VOTES, tmp);
-//            }
-//            tmp = blah.get(BlahDAOConstants.OPENS);
-//            if (tmp != null) {
-//                inboxItem.put(InboxBlahDAOConstants.OPENS, tmp);
-//            }
-//            tmp = blah.get(BlahDAOConstants.VIEWS);
-//            if (tmp != null) {
-//                inboxItem.put(InboxBlahDAOConstants.VIEWS, tmp);
-//            }
-            tmp = blah.get(BlahDAOConstants.IMAGE_IDS);
-            if (tmp != null) {
-                inboxItem.put(InboxBlahDAOConstants.IMAGE_IDS, tmp);
-            }
-            tmp = blah.get(BlahDAOConstants.BADGE_IDS);
-            if (tmp != null) {
-                inboxItem.put(InboxBlahDAOConstants.BADGE_INDICATOR, "b");
-            }
-//            String nickname = _nicknameCache.get(blahAuthorId);
-//            if (noNickname(nickname)) {
-//                nickname = fetchAndCacheNickname(blahAuthorId);
-//            }
-//            if (!noNickname(nickname)) {
-//                inboxItem.put(InboxBlahDAOConstants.AUTHOR_NICKNAME, nickname);
-//            }
-            tmp = blah.get(BlahDAOConstants.BLAH_STRENGTH);
-            if (tmp != null) {
-                inboxItem.put(InboxBlahDAOConstants.BLAH_STRENGTH, tmp);
-            }
+            final BasicDBObject inboxItem = makeInboxItem(groupId, blah);
 
             // insert inbox item into its inbox db collection
             if (bulkInserts) {
@@ -230,10 +186,62 @@ public class Inboxer {
         }
         _groupsCol.update(query, new BasicDBObject("$set", setter));      // TODO use this in getInbox in rest
 
-        Utilities.printit(true, "Created " + blahsInGroupCount + " inboxes in '" + getGroupName(groupId) + "'. " + numberOfInboxes + " inboxes for group: ["
+        Utilities.printit(true, "Created " + blahsInGroupCount + " inbox items in group '" + getGroupName(groupId) + "'. " + numberOfInboxes + " new inboxes in range: ["
                 + setter.get(GroupDAOConstants.FIRST_INBOX_NUMBER) + "," + setter.get(GroupDAOConstants.LAST_INBOX_NUMBER) + "]");
 
         return blahsInGroupCount;
+    }
+
+    private BasicDBObject makeInboxItem(String groupId, DBObject blah) {
+
+        final BasicDBObject inboxItem = new BasicDBObject(InboxBlahDAOConstants.BLAH_ID, blah.get(BaseDAOConstants.ID).toString());
+
+        // IMPORTANT: to fetch the following fields, include them in makeBlahFieldsToReturn() */
+
+        inboxItem.put(BaseDAOConstants.CREATED, blah.get(BaseDAOConstants.CREATED));
+        inboxItem.put(InboxBlahDAOConstants.BLAH_TEXT, blah.get(BlahDAOConstants.TEXT));
+        inboxItem.put(InboxBlahDAOConstants.TYPE, blah.get(BlahDAOConstants.TYPE_ID));
+        inboxItem.put(InboxBlahDAOConstants.GROUP_ID, groupId);
+        Object tmp = blah.get(BlahDAOConstants.AUTHOR_ID);
+        if (tmp != null) {
+            inboxItem.put(InboxBlahDAOConstants.AUTHOR_ID, tmp);
+        }
+//            tmp = blah.get(BlahDAOConstants.PROMOTED_COUNT);
+//            if (tmp != null) {
+//                inboxItem.put(InboxBlahDAOConstants.UP_VOTES, tmp);
+//            }
+//            tmp = blah.get(BlahDAOConstants.DEMOTED_COUNT);
+//            if (tmp != null) {
+//                inboxItem.put(InboxBlahDAOConstants.DOWN_VOTES, tmp);
+//            }
+//            tmp = blah.get(BlahDAOConstants.OPENS);
+//            if (tmp != null) {
+//                inboxItem.put(InboxBlahDAOConstants.OPENS, tmp);
+//            }
+//            tmp = blah.get(BlahDAOConstants.VIEWS);
+//            if (tmp != null) {
+//                inboxItem.put(InboxBlahDAOConstants.VIEWS, tmp);
+//            }
+        tmp = blah.get(BlahDAOConstants.IMAGE_IDS);
+        if (tmp != null) {
+            inboxItem.put(InboxBlahDAOConstants.IMAGE_IDS, tmp);
+        }
+        tmp = blah.get(BlahDAOConstants.BADGE_IDS);
+        if (tmp != null) {
+            inboxItem.put(InboxBlahDAOConstants.BADGE_INDICATOR, "b");
+        }
+//            String nickname = _nicknameCache.get(blahAuthorId);
+//            if (noNickname(nickname)) {
+//                nickname = fetchAndCacheNickname(blahAuthorId);
+//            }
+//            if (!noNickname(nickname)) {
+//                inboxItem.put(InboxBlahDAOConstants.AUTHOR_NICKNAME, nickname);
+//            }
+        tmp = blah.get(BlahDAOConstants.BLAH_STRENGTH);
+        if (tmp != null) {
+            inboxItem.put(InboxBlahDAOConstants.BLAH_STRENGTH, tmp);
+        }
+        return inboxItem;
     }
 
     private List<List<DBObject>> makeBulkInsertList(int numberOfInboxes, int bulkInsertMax) {

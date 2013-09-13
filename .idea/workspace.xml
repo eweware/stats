@@ -7,18 +7,20 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="ecd9a19d-81b5-460d-99eb-1de3193b00ca" name="Default" comment="">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/com/eweware/stats/Inboxer1.java" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/eweware/stats/Inboxer.java" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/Inboxer.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/eweware/stats/Main.java" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/Main.java" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/scripts/push-to-dev.sh" afterPath="$PROJECT_DIR$/scripts/push-to-dev.sh" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="stats.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Dummy.txt" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379014498688" ignored="false" />
-    <file path="/Main.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1373677714653" ignored="false" />
+    <file path="/Dummy.txt" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379091208653" ignored="false" />
+    <file path="/Main.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379016077716" ignored="false" />
     <file path="/BlahSummarizerTest.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1362426983233" ignored="false" />
     <file path="/InboxBuilder.scala" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1366681079315" ignored="false" />
-    <file path="/fragment.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1378935971065" ignored="false" />
+    <file path="/fragment.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379022633115" ignored="false" />
     <file path="/DBMethods.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1362426881670" ignored="false" />
-    <file path="/a.dummy" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379014480047" ignored="false" />
+    <file path="/a.dummy" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379015969303" ignored="false" />
     <file path="/HighLevelAPICallMethods.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1363114030149" ignored="false" />
     <file path="/TestConstants.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1357952934611" ignored="false" />
     <file path="/Utilities.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1375741227616" ignored="false" />
@@ -30,7 +32,7 @@
     <file path="/BlahDescriptiveStats.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1377229429307" ignored="false" />
     <file path="/UserDescriptiveStats.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1377229306647" ignored="false" />
     <file path="$PROJECT_DIR$/../../blahgua/beta/blahguarest/src/main/webapp/WEB-INF/conf/blahguaConfiguration.properties" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1360796989990" ignored="false" />
-    <file path="/blahguaConfiguration.properties" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1373321509623" ignored="false" />
+    <file path="/blahguaConfiguration.properties" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379016802445" ignored="false" />
     <file path="$PROJECT_DIR$/../../blahgua/beta/blahguarest/src/main/webapp/WEB-INF/conf/applicationConfiguration.xml" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1360795152434" ignored="false" />
     <file path="$PROJECT_DIR$/../../blahgua/beta/blahguarest/src/main/java/com/eweware/service/mgr/BlahManager.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1360796843935" ignored="false" />
     <file path="/BlahManager.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1373570240733" ignored="false" />
@@ -177,7 +179,7 @@
     <file path="/web.xml" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1362267401775" ignored="false" />
     <file path="$PROJECT_DIR$/../blahguarest/src/main/java/com/eweware/service/rest/session/BlahguaSession.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1366964107786" ignored="false" />
     <file path="/BlahguaSession.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1366964102126" ignored="false" />
-    <file path="$PROJECT_DIR$/../blahguarest/.idea/workspace.xml" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1378929881289" ignored="false" />
+    <file path="$PROJECT_DIR$/../blahguarest/.idea/workspace.xml" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379035947353" ignored="false" />
     <file path="/api.js" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1365043203520" ignored="false" />
     <file path="$PROJECT_DIR$/../RestUnitTests/src/main/java/com/eweware/service/demo/Test.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1363225207450" ignored="false" />
     <file path="/Test.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379012238167" ignored="false" />
@@ -204,7 +206,7 @@
     <file path="$PROJECT_DIR$/../RestUnitTests/src/main/java/com/eweware/service/demo/InitializeMongo.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1362426599167" ignored="false" />
     <file path="$PROJECT_DIR$/../RestUnitTests/src/main/java/com/eweware/service/base/store/impl/mongo/dao/DBMethods.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1362426738104" ignored="false" />
     <file path="/index.html" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1363057825301" ignored="false" />
-    <file path="$PROJECT_DIR$/../blahguarest/src/main/webapp/WEB-INF/conf/blahguaConfiguration.properties" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1373321511317" ignored="false" />
+    <file path="$PROJECT_DIR$/../blahguarest/src/main/webapp/WEB-INF/conf/blahguaConfiguration.properties" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379016805102" ignored="false" />
     <file path="$PROJECT_DIR$/../blahguarest/docs/main/java/com/eweware/service/rest/resource/UsersResource.html" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1376514982740" ignored="false" />
     <file path="$PROJECT_DIR$/../blahguarest/docs/main/java/com/eweware/service/rest/resource/UserGroupsResource.html" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1376514982740" ignored="false" />
     <file path="$PROJECT_DIR$/../blahguarest/src/main/java/com/eweware/service/mgr/MailManager.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1366916763635" ignored="false" />
@@ -421,7 +423,7 @@
     <file path="$PROJECT_DIR$/../blahguarest/src/main/java/com/eweware/service/base/store/dao/UserCommentInfoDAO.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1373223987887" ignored="false" />
     <file path="/UserCommentInfoDAO.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1373223985720" ignored="false" />
     <file path="/UserCommentInfoDAOImpl.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1373224014974" ignored="false" />
-    <file path="/Inboxer.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1378931038250" ignored="false" />
+    <file path="/Inboxer.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379015743659" ignored="false" />
     <file path="/LocalCache.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1373271832259" ignored="false" />
     <file path="$PROJECT_DIR$/../../../storm-blahgua/src/main/java/util/LocalCache.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1373245286522" ignored="false" />
     <file path="$PROJECT_DIR$/../blahguarest/src/main/java/com/eweware/service/base/store/dao/GroupDAO.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1373392721040" ignored="false" />
@@ -539,11 +541,9 @@
     <disable_hints />
   </component>
   <component name="DebuggerManager">
-    <breakpoint_any default_suspend_policy="SuspendAll" default_condition_enabled="true">
-      <breakpoint>
-        <option name="NOTIFY_CAUGHT" value="true" />
-        <option name="NOTIFY_UNCAUGHT" value="true" />
-        <option name="ENABLED" value="false" />
+    <line_breakpoints default_suspend_policy="SuspendAll" default_condition_enabled="true">
+      <breakpoint url="file://$PROJECT_DIR$/src/main/java/com/eweware/stats/UserDemographics.java" line="156" class="main.java.com.eweware.stats.UserDemographics" package="main.java.com.eweware.stats">
+        <option name="ENABLED" value="true" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
         <option name="REMOVE_AFTER_HIT" value="false" />
@@ -557,24 +557,7 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-      <breakpoint>
-        <option name="NOTIFY_CAUGHT" value="true" />
-        <option name="NOTIFY_UNCAUGHT" value="true" />
-        <option name="ENABLED" value="false" />
-        <option name="LOG_ENABLED" value="false" />
-        <option name="LOG_EXPRESSION_ENABLED" value="false" />
-        <option name="REMOVE_AFTER_HIT" value="false" />
-        <option name="SUSPEND_POLICY" value="SuspendAll" />
-        <option name="SUSPEND" value="true" />
-        <option name="COUNT_FILTER_ENABLED" value="false" />
-        <option name="COUNT_FILTER" value="0" />
-        <option name="CONDITION_ENABLED" value="true" />
-        <option name="CLASS_FILTERS_ENABLED" value="false" />
-        <option name="INSTANCE_FILTERS_ENABLED" value="false" />
-        <option name="CONDITION" value="" />
-        <option name="LOG_MESSAGE" value="" />
-      </breakpoint>
-    </breakpoint_any>
+    </line_breakpoints>
     <exception_breakpoints default_suspend_policy="SuspendAll" default_condition_enabled="true">
       <breakpoint class_name="java.lang.IllegalArgumentException" package_name="java.lang">
         <option name="NOTIFY_CAUGHT" value="true" />
@@ -645,9 +628,11 @@
         <option name="LOG_MESSAGE" value="&#13;&#13;JAVA" />
       </breakpoint>
     </exception_breakpoints>
-    <line_breakpoints default_suspend_policy="SuspendAll" default_condition_enabled="true">
-      <breakpoint url="file://$PROJECT_DIR$/src/main/java/com/eweware/stats/UserDemographics.java" line="156" class="main.java.com.eweware.stats.UserDemographics" package="main.java.com.eweware.stats">
-        <option name="ENABLED" value="true" />
+    <breakpoint_any default_suspend_policy="SuspendAll" default_condition_enabled="true">
+      <breakpoint>
+        <option name="NOTIFY_CAUGHT" value="true" />
+        <option name="NOTIFY_UNCAUGHT" value="true" />
+        <option name="ENABLED" value="false" />
         <option name="LOG_ENABLED" value="false" />
         <option name="LOG_EXPRESSION_ENABLED" value="false" />
         <option name="REMOVE_AFTER_HIT" value="false" />
@@ -661,7 +646,24 @@
         <option name="CONDITION" value="" />
         <option name="LOG_MESSAGE" value="" />
       </breakpoint>
-    </line_breakpoints>
+      <breakpoint>
+        <option name="NOTIFY_CAUGHT" value="true" />
+        <option name="NOTIFY_UNCAUGHT" value="true" />
+        <option name="ENABLED" value="false" />
+        <option name="LOG_ENABLED" value="false" />
+        <option name="LOG_EXPRESSION_ENABLED" value="false" />
+        <option name="REMOVE_AFTER_HIT" value="false" />
+        <option name="SUSPEND_POLICY" value="SuspendAll" />
+        <option name="SUSPEND" value="true" />
+        <option name="COUNT_FILTER_ENABLED" value="false" />
+        <option name="COUNT_FILTER" value="0" />
+        <option name="CONDITION_ENABLED" value="true" />
+        <option name="CLASS_FILTERS_ENABLED" value="false" />
+        <option name="INSTANCE_FILTERS_ENABLED" value="false" />
+        <option name="CONDITION" value="" />
+        <option name="LOG_MESSAGE" value="" />
+      </breakpoint>
+    </breakpoint_any>
     <ui_properties default_suspend_policy="SuspendAll" default_condition_enabled="true" />
     <breakpoint_rules />
     <ui_properties />
@@ -672,13 +674,29 @@
   </component>
   <component name="FileEditorManager">
     <leaf>
-      <file leaf-file-name="Inboxer.java" pinned="false" current="true" current-in-tab="true">
+      <file leaf-file-name="Main.java" pinned="false" current="false" current-in-tab="false">
+        <entry file="file://$PROJECT_DIR$/src/main/java/com/eweware/stats/Main.java">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="167" column="12" selection-start="6112" selection-end="6112" vertical-scroll-proportion="0.0">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="push-to-dev.sh" pinned="false" current="true" current-in-tab="true">
+        <entry file="file://$PROJECT_DIR$/scripts/push-to-dev.sh">
+          <provider selected="true" editor-type-id="text-editor">
+            <state line="6" column="0" selection-start="221" selection-end="221" vertical-scroll-proportion="0.070754714">
+              <folding />
+            </state>
+          </provider>
+        </entry>
+      </file>
+      <file leaf-file-name="Inboxer.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/eweware/stats/Inboxer.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="302" column="46" selection-start="14914" selection-end="14918" vertical-scroll-proportion="2.9911504">
-              <folding>
-                <element signature="e#13832#13842#0" expanded="true" />
-              </folding>
+            <state line="110" column="150" selection-start="5118" selection-end="5118" vertical-scroll-proportion="0.0">
+              <folding />
             </state>
           </provider>
         </entry>
@@ -713,10 +731,10 @@
         <option value="$PROJECT_DIR$/src/main/java/com/eweware/stats/BlahDemographics.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/eweware/stats/help/Utilities.java" />
         <option value="$PROJECT_DIR$/attic/src/main/java/com/eweware/stats/UserDescriptiveStats.java" />
-        <option value="$PROJECT_DIR$/src/main/java/com/eweware/stats/Main.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/eweware/stats/UserDescriptiveStats.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/eweware/stats/BlahDescriptiveStats.java" />
         <option value="$PROJECT_DIR$/src/main/java/com/eweware/stats/Inboxer.java" />
+        <option value="$PROJECT_DIR$/src/main/java/com/eweware/stats/Main.java" />
         <option value="$PROJECT_DIR$/scripts/push-to-dev.sh" />
       </list>
     </option>
@@ -729,7 +747,7 @@
     </option>
   </component>
   <component name="ProjectFrameBounds">
-    <option name="x" value="342" />
+    <option name="x" value="603" />
     <option name="y" value="22" />
     <option name="width" value="1637" />
     <option name="height" value="1418" />
@@ -760,8 +778,6 @@
       <sortByType />
     </navigator>
     <panes>
-      <pane id="PackagesPane" />
-      <pane id="Scope" />
       <pane id="ProjectPane">
         <subPane>
           <PATH>
@@ -894,21 +910,23 @@
           </PATH>
         </subPane>
       </pane>
+      <pane id="PackagesPane" />
+      <pane id="Scope" />
     </panes>
   </component>
   <component name="PropertiesComponent">
     <property name="GenerateAntBuildDialog.generateIdeaHomeProperty" value="false" />
     <property name="project.structure.last.edited" value="Global Libraries" />
     <property name="com.intellij.testIntegration.createTest.CreateTestDialog.defaultLibrary" value="JUnit4" />
-    <property name="project.structure.proportion" value="0.11621094" />
     <property name="OverrideImplement.combined" value="true" />
+    <property name="project.structure.proportion" value="0.11621094" />
     <property name="options.splitter.main.proportions" value="0.3" />
     <property name="Repository.Attach.JavaDocs" value="false" />
-    <property name="MemberChooser.sorted" value="false" />
-    <property name="recentsLimit" value="5" />
     <property name="GenerateAntBuildDialog.generateSingleFile" value="false" />
-    <property name="GenerateAntBuildDialog.inclineRuntiemClasspath" value="false" />
+    <property name="recentsLimit" value="5" />
+    <property name="MemberChooser.sorted" value="false" />
     <property name="last_opened_file_path" value="$PROJECT_DIR$/../../../colt/src" />
+    <property name="GenerateAntBuildDialog.inclineRuntiemClasspath" value="false" />
     <property name="GenerateAntBuildDialog.outputFileNameProperty" value="stats" />
     <property name="GenerateAntBuildDialog.enableUiFormCompile" value="true" />
     <property name="GoToClass.toSaveIncludeLibraries" value="false" />
@@ -921,14 +939,14 @@
     <property name="last_directory_selection" value="$PROJECT_DIR$/src/main/java" />
     <property name="GoToFile.includeJavaFiles" value="false" />
     <property name="options.lastSelected" value="project.propVCSSupport.Mappings" />
-    <property name="project.structure.side.proportion" value="0.23128642" />
     <property name="GenerateAntBuildDialog.forceTargetJdk" value="true" />
+    <property name="project.structure.side.proportion" value="0.23128642" />
     <property name="MemberChooser.copyJavadoc" value="false" />
     <property name="com.intellij.testIntegration.createTest.CreateTestDialog.includeInheritedMembers" value="false" />
     <property name="restartRequiresConfirmation" value="true" />
     <property name="GenerateAntBuildDialog.backupFiles" value="true" />
-    <property name="options.searchVisible" value="true" />
     <property name="dynamic.classpath" value="false" />
+    <property name="options.searchVisible" value="true" />
   </component>
   <component name="RecentsManager">
     <key name="CreateTestDialog.RecentsKey">
@@ -994,19 +1012,6 @@
       <option name="PORT" value="5005" />
       <method />
     </configuration>
-    <configuration default="true" type="Applet" factoryName="Applet">
-      <module name="" />
-      <option name="MAIN_CLASS_NAME" />
-      <option name="HTML_FILE_NAME" />
-      <option name="HTML_USED" value="false" />
-      <option name="WIDTH" value="400" />
-      <option name="HEIGHT" value="300" />
-      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
-      <option name="VM_PARAMETERS" />
-      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
-      <option name="ALTERNATIVE_JRE_PATH" />
-      <method />
-    </configuration>
     <configuration default="true" type="TestNG" factoryName="TestNG">
       <module name="" />
       <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
@@ -1032,6 +1037,19 @@
       <envs />
       <properties />
       <listeners />
+      <method />
+    </configuration>
+    <configuration default="true" type="Applet" factoryName="Applet">
+      <module name="" />
+      <option name="MAIN_CLASS_NAME" />
+      <option name="HTML_FILE_NAME" />
+      <option name="HTML_USED" value="false" />
+      <option name="WIDTH" value="400" />
+      <option name="HEIGHT" value="300" />
+      <option name="POLICY_FILE" value="$APPLICATION_HOME_DIR$/bin/appletviewer.policy" />
+      <option name="VM_PARAMETERS" />
+      <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="false" />
+      <option name="ALTERNATIVE_JRE_PATH" />
       <method />
     </configuration>
     <configuration default="true" type="Application" factoryName="Application">
@@ -1139,31 +1157,35 @@
       <created>1379011604732</created>
       <updated>1379011604732</updated>
     </task>
-    <option name="localTasksCounter" value="3" />
+    <task id="LOCAL-00003" summary="Remove old version of inboxer">
+      <created>1379014740312</created>
+      <updated>1379014740312</updated>
+    </task>
+    <option name="localTasksCounter" value="4" />
     <servers />
   </component>
   <component name="ToolWindowManager">
-    <frame x="342" y="22" width="1637" height="1418" extended-state="0" />
+    <frame x="603" y="22" width="1637" height="1418" extended-state="0" />
     <editor active="false" />
     <layout>
       <window_info id="Changes" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
       <window_info id="JetGradle" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Palette" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="false" content_ui="tabs" />
-      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32538462" sideWeight="0.49778622" order="5" side_tool="false" content_ui="tabs" />
       <window_info id="Ant Build" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
       <window_info id="Debug" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.37827426" sideWeight="0.49778622" order="7" side_tool="false" content_ui="tabs" />
       <window_info id="Event Log" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.45755237" sideWeight="0.49778622" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Favorites" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="0" side_tool="true" content_ui="tabs" />
       <window_info id="Version Control" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
-      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.27195686" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="TODO" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="10" side_tool="false" content_ui="tabs" />
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.23015873" sideWeight="0.46459413" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32620993" sideWeight="0.72804314" order="1" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="true" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32620993" sideWeight="0.67488444" order="1" side_tool="false" content_ui="combo" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.18104777" sideWeight="0.9466292" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
       <window_info id="Message" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="4" side_tool="false" content_ui="tabs" />
+      <window_info id="Find" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32511556" sideWeight="0.49778622" order="5" side_tool="false" content_ui="tabs" />
+      <window_info id="Messages" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.27195686" sideWeight="0.5" order="2" side_tool="false" content_ui="tabs" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24638592" sideWeight="0.47919875" order="5" side_tool="false" content_ui="combo" />
       <window_info id="Inspection" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="9" side_tool="false" content_ui="tabs" />
     </layout>
@@ -1210,7 +1232,7 @@
     <option name="WRAP_WHEN_TYPING_REACHES_RIGHT_MARGIN" value="false" />
     <option name="FORCE_NON_EMPTY_COMMENT" value="false" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="false" />
-    <option name="LAST_COMMIT_MESSAGE" value="First checkin" />
+    <option name="LAST_COMMIT_MESSAGE" value="Remove old version of inboxer" />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="false" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_FILES_UP_TO_DATE_BEFORE_COMMIT" value="false" />
@@ -1225,6 +1247,7 @@
     <option name="SHOW_FILE_HISTORY_AS_TREE" value="false" />
     <option name="FILE_HISTORY_SPLITTER_PROPORTION" value="0.6" />
     <MESSAGE value="First checkin" />
+    <MESSAGE value="Remove old version of inboxer" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1238,6 +1261,13 @@
     <option name="FILTER_TARGETS" value="false" />
   </component>
   <component name="editorHistoryManager">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/eweware/stats/Inboxer.java">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="110" column="150" selection-start="5118" selection-end="5118" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
     <entry file="jar:///System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/classes.jar!/java/io/PrintStream.class">
       <provider selected="true" editor-type-id="text-editor">
         <state line="88" column="16" selection-start="3202" selection-end="3202" vertical-scroll-proportion="0.5571245" />
@@ -1264,23 +1294,12 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/BlahDAOConstants.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="75" column="30" selection-start="1975" selection-end="1975" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/eweware/stats/Main.java">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="29" column="90" selection-start="926" selection-end="926" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="75" column="30" selection-start="1975" selection-end="1975" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/eweware/service/base/store/dao/UserDAOConstants.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="11" column="2" selection-start="424" selection-end="424" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="11" column="2" selection-start="424" selection-end="424" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/eweware/stats/BlahDescriptiveStats.java">
@@ -1292,16 +1311,12 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/eweware/stats/help/Utilities.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="449" column="27" selection-start="22934" selection-end="22934" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="449" column="27" selection-start="22934" selection-end="22934" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="jar:///System/Library/Java/JavaVirtualMachines/1.6.0.jdk/Contents/Classes/classes.jar!/java/util/Collections.class">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="25" column="28" selection-start="1049" selection-end="1049" vertical-scroll-proportion="0.0">
-          <folding />
-        </state>
+        <state line="25" column="28" selection-start="1049" selection-end="1049" vertical-scroll-proportion="0.0" />
       </provider>
     </entry>
     <entry file="file://$PROJECT_DIR$/pom.xml">
@@ -1325,19 +1340,24 @@
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/push-to-dev.sh">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/eweware/stats/Inboxer.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="6" column="8" selection-start="218" selection-end="218" vertical-scroll-proportion="0.098146126">
+        <state line="110" column="150" selection-start="5118" selection-end="5118" vertical-scroll-proportion="0.0">
           <folding />
         </state>
       </provider>
     </entry>
-    <entry file="file://$PROJECT_DIR$/src/main/java/com/eweware/stats/Inboxer.java">
+    <entry file="file://$PROJECT_DIR$/src/main/java/com/eweware/stats/Main.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="302" column="46" selection-start="14914" selection-end="14918" vertical-scroll-proportion="2.9911504">
-          <folding>
-            <element signature="e#13832#13842#0" expanded="true" />
-          </folding>
+        <state line="167" column="12" selection-start="6112" selection-end="6112" vertical-scroll-proportion="0.0">
+          <folding />
+        </state>
+      </provider>
+    </entry>
+    <entry file="file://$PROJECT_DIR$/scripts/push-to-dev.sh">
+      <provider selected="true" editor-type-id="text-editor">
+        <state line="6" column="0" selection-start="221" selection-end="221" vertical-scroll-proportion="0.070754714">
+          <folding />
         </state>
       </provider>
     </entry>

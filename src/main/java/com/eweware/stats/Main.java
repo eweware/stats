@@ -155,14 +155,18 @@ public class Main extends Thread {
         long ms = 0L;
 
         if (_buildInboxes) {
+
+            // TODO: add semaphore for BlahDescriptiveStats now that we split this into two jobs
             blahCount = new BlahDescriptiveStats().execute();
             ms = System.currentTimeMillis() - lastTime;
             Utilities.printit(true, new Date() + ": BlahDescriptiveStats took " + (ms / 1000) + " seconds (" + (ms / ((blahCount == 0L) ? 1L : blahCount)) + " ms/blah)");
 
             lastTime = System.currentTimeMillis();
             new Inboxer().execute();
-            Utilities.printit(true, new Date() + ": InboxBuilder took " + ((System.currentTimeMillis() - lastTime) / 1000) + " seconds");
+            Utilities.printit(true, new Date() + ": Inboxer took " + ((System.currentTimeMillis() - lastTime) / 1000) + " seconds");
         } else {
+
+            // TODO: add semaphore for BlahDescriptiveStats now that we split this into two jobs
             lastTime = System.currentTimeMillis();
             new UserDescriptiveStats().execute();
             Utilities.printit(true, new Date() + ": UserDescriptiveStats took " + ((System.currentTimeMillis() - lastTime) / 1000) + " seconds");
