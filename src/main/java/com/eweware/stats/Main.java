@@ -4,7 +4,10 @@ import main.java.com.eweware.service.base.cache.BlahCache;
 import main.java.com.eweware.stats.help.Utilities;
 
 import java.lang.management.OperatingSystemMXBean;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.NumberFormat;
+import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -15,23 +18,20 @@ import static java.lang.management.ManagementFactory.getOperatingSystemMXBean;
  * @author rk@post.harvard.edu
  *         Date: 10/11/12 Time: 9:22 PM
  */
-public class Main extends Thread {
+public class Main {
 
     private static final Logger logger = Logger.getLogger(Main.class.getName());
 
 
-    private static final int INBOX_REST_IN_MINUTES = 2;
-    private static final int INBOX_REST_IN_MILLIS = 1000 * 60 * INBOX_REST_IN_MINUTES;
-    private static final int STATS_REST_IN_MINUTES = 2;
-    private static final int STATS_REST_IN_MILLIS = 1000 * 60 * STATS_REST_IN_MINUTES;
+    private static final int WAIT_BETWEEN_PASSES_IN_MINUTES = 2;
+    private static final int WAIT_BETWEEN_PASSES_IN_MILLIS = 1000 * 60 * WAIT_BETWEEN_PASSES_IN_MINUTES;
+    private static final int DEFAULT_MILLIS_TO_WAIT_BEFORE_SENDING_ERROR_EMAIL = 1000 * 10;
+
+    /* Comma-separated list of email recipients.
+    Receives errors and startup/stop messages */
+    private static final String STATUS_EMAIL_RECIPIENTS = "rk@eweware.com";
 
     public static boolean _verbose;
-
-    /**
-     * <p>If true, we calculate blah strength and build inboxes; else
-     * we compute demographics.</p>
-     */
-    private static boolean _buildInboxes;
 
     // Range in days before today where a strength is considered "recent"
     public static int recentStrengthCutoffInDays = 1;
@@ -43,42 +43,60 @@ public class Main extends Thread {
     private static final Integer DEFAULT_DB_PORT = 21191;
 
     private static List<String> dbHostnames;
+    private static String environment; // dev or qa or prod
     private static final Integer _dbPort = DEFAULT_DB_PORT;
+    private static String localHostname;    // machine running this app
+
+    private long passCount = 1;  // number of passes of inboxer
+    private long lastTimeUserReputationDoneInMillis = System.currentTimeMillis();
+    private long millisToWaitForUserReputationBeforeSendingEmail = DEFAULT_MILLIS_TO_WAIT_BEFORE_SENDING_ERROR_EMAIL;
+
+    /**
+     * The stats thread calculates the statistics other
+     * than blah strength. Since the inboxing procedure
+     * is currently only based on blah strength, it should
+     * run (as much as possible) independently of the other stat calculations
+     * to create new inboxes more frequently.
+     */
+    private ReputationThread reputationThread;
 
     public static void main(String[] args) {
         parseArgs(args);
         printConfig();
-        new Main().start();
+        try {
+            localHostname = InetAddress.getLocalHost().getHostName();
+        } catch (UnknownHostException e) {
+            localHostname = "unknown";
+        }
+
+        new Main().run();
     }
 
     private static boolean parseArgs(String[] args) {
-        if (args.length > 1) {
-            final String job = args[1];
-            _buildInboxes = job.toLowerCase().equals("inboxes");
-            if (args.length > 2) {
-                final String verbose = args[2];
+        if (args.length > 0) {
+            if (args.length > 1) {
+                final String verbose = args[1];
                 _verbose = verbose.toLowerCase().equals("true");
             }
-            final String mode = args[0].toLowerCase();
-            if (mode.equals("prod")) {
+            environment = args[0].toLowerCase();
+            if (environment.equals("prod")) {
                 dbHostnames = PROD_DB_HOSTNAMES;
                 return true;
-            } else if (mode.equals("qa")) {
+            } else if (environment.equals("qa")) {
                 dbHostnames = QA_DB_HOSTNAMES;
                 return true;
-            } else if (mode.equals("dev")) {
+            } else if (environment.equals("dev")) {
                 dbHostnames = DEV_DB_HOSTNAMES;
                 return true;
             }
         }
         usageAndExit();
         return false;
-
     }
 
     private static void printConfig() {
         System.out.println("***** START CONFIGURATION *****");
-        System.out.println("OPERATION: " + (_buildInboxes ? "Inboxes" : "Demographics"));
+        System.out.println("EMAIL STATUS RECIPIENT(S): " + STATUS_EMAIL_RECIPIENTS);
         System.out.println("DB HOSTNAME(S): " + dbHostnames);
         System.out.println("DB PORT: " + _dbPort);
         System.out.println("VERBOSE: " + _verbose);
@@ -86,8 +104,8 @@ public class Main extends Thread {
     }
 
     private static void usageAndExit() {
-        System.err.println("\nUSAGE: java -jar stats-1.0.0-jar-with-dependencies.jar <mode> <operation>[<verbose>]");
-        System.err.println("WHERE, <mode> := {prod|qa|dev}\n       <job> := {inboxes|demo} (to create inboxes or demographics)\n       <verbose> := {true|false}");
+        System.err.println("\nUSAGE: java -jar stats-1.0.0-jar-with-dependencies.jar <environment> [<verbose>]");
+        System.err.println("WHERE, <environment> := {prod|qa|dev}\n       <verbose> := {true|false} - optional (DEFAULT: false)");
         System.exit(-1);
     }
 
@@ -105,31 +123,53 @@ public class Main extends Thread {
 
     public void run() {
         try {
+
             addShutdownHook();
 
-            Utilities.printit(true, new Date() + ": Calculating stats on DB host(s) " + dbHostnames);
-
-//            readConfigFile();
+            startupMsg();
 
             while (true) {
-
-                Utilities.printit(true, getResourceUsageReport());
-
                 try {
-                    doit();
+
+                    Utilities.printit(true, _verbose ? getResourceUsageReport() : getBriefMemoryReport());
+
+                    runPass();
+
                 } catch (Throwable e) {
                     logger.log(Level.SEVERE, "Failed pass due to unrecoverable error.", e);
-                    logger.warning("Continuing...");
+                    safeSendEmail("Stats process error", "Failed pass due to unrecoverable error: " + e.getMessage() + "<br/><br/>Check log (~/log/stats.log) for details.");
+                    logger.warning("Will try to continue in next pass...");
                 }
 
-                Utilities.printit(true, new Date() + ": Pausing " + (_buildInboxes ? "Inbox" : "Statistics") + " job for " + (_buildInboxes ? INBOX_REST_IN_MINUTES : STATS_REST_IN_MINUTES) + " minutes...");
-                Thread.sleep(_buildInboxes ? INBOX_REST_IN_MILLIS : STATS_REST_IN_MILLIS);
+                Thread.sleep(WAIT_BETWEEN_PASSES_IN_MILLIS);
             }
         } catch (Exception e) {
             logger.log(Level.SEVERE, "Aborted application.", e);
+            safeSendEmail("Aborted!", "Aborted application.<br/><br/>Error: " + e.getMessage() + "<br/><br/>Check log (~/log/stats.log) for details.");
             System.exit(-1);
         }
+        safeSendEmail("Stopped", "Process stopped.");
         System.exit(0);
+    }
+
+    private void startupMsg() {
+        final String msg = new Date() + ": Calculating stats on DB host(s) " + dbHostnames;
+        Utilities.printit(true, msg);
+        safeSendEmail("Started", msg);
+    }
+
+    /**
+     * Sends email and logs but ignores errors
+     */
+    public static void safeSendEmail(String subject, String msg) {
+        try {
+            subject = "Stats Process @" + environment + ": " + subject;
+            msg = "Environment '" + environment + "', DB hostname(s): " + dbHostnames + " Stats server hostname '" + localHostname + "'<br/><br/>" + msg;
+
+            Mailer.send(STATUS_EMAIL_RECIPIENTS, subject, msg);
+        } catch (Exception e) {
+            logger.log(Level.WARNING, "Ignoring mailer failure", e);
+        }
     }
 
     private void addShutdownHook() {
@@ -141,65 +181,74 @@ public class Main extends Thread {
                     cache.shutdown();
                     System.out.println("*** Shutdown: BlahCache ***");
                 }
+                safeSendEmail("Shutdown JVM", "Process shut down due to JVM interrupt");
             }
         });
     }
 
-    private long passCount = 1;
+    private void runPass() throws Exception {
 
-    private void doit() throws Exception {
+        // Proceed only if there is no reputation thread running or the user stats have been calculated
+        final String reputationThreadError = (reputationThread == null) ? null : reputationThread.getError();
+        if (reputationThread == null || (reputationThreadError == null && reputationThread.isUserReputationDone())) {
 
-        long lastTime = System.currentTimeMillis();
-        long startJob = lastTime;
-        long blahCount = 0L;
-        long ms = 0L;
+            lastTimeUserReputationDoneInMillis = System.currentTimeMillis();
 
-        if (_buildInboxes) {
+            long lastTime = System.currentTimeMillis();
+            long startJob = lastTime;
+            long blahCount = 0L;
+            long ms = 0L;
 
-            // TODO: add semaphore for BlahDescriptiveStats now that we split this into two jobs
             blahCount = new BlahDescriptiveStats().execute();
             ms = System.currentTimeMillis() - lastTime;
-            Utilities.printit(true, new Date() + ": BlahDescriptiveStats took " + (ms / 1000) + " seconds (" + (ms / ((blahCount == 0L) ? 1L : blahCount)) + " ms/blah)");
+            Utilities.printit(true, new Date() + ": Inboxer BlahDescriptiveStats took " + (ms / 1000) + " seconds (" + (ms / ((blahCount == 0L) ? 1L : blahCount)) + " ms/blah)");
+
+            maybeStartReputationThread();
 
             lastTime = System.currentTimeMillis();
             new Inboxer().execute();
-            Utilities.printit(true, new Date() + ": Inboxer took " + ((System.currentTimeMillis() - lastTime) / 1000) + " seconds");
-        } else {
-
-            // TODO: add semaphore for BlahDescriptiveStats now that we split this into two jobs
-            lastTime = System.currentTimeMillis();
-            new UserDescriptiveStats().execute();
-            Utilities.printit(true, new Date() + ": UserDescriptiveStats took " + ((System.currentTimeMillis() - lastTime) / 1000) + " seconds");
-
-            lastTime = System.currentTimeMillis();
-            blahCount = new BlahDemographics().execute();
-            Utilities.printit(true, new Date() + ": BlahDemographics took " + ((System.currentTimeMillis() - lastTime) / 1000) + " seconds");
-
-            lastTime = System.currentTimeMillis();
-            final long commentCount = new CommentDemographics().execute();
-            ms = System.currentTimeMillis() - lastTime;
-            Utilities.printit(true, new Date() + ": CommentDemographics took " + (ms / 1000) + " seconds (" + (ms / ((commentCount == 0L) ? 1L : commentCount)) + " ms/comment)");
-
-            lastTime = System.currentTimeMillis();
-            final long userCount = new UserDemographics().execute();
-            ms = System.currentTimeMillis() - lastTime;
-            Utilities.printit(true, new Date() + ": UserDemographics took " + (ms / 1000) + " seconds (" + (ms / ((userCount == 0L) ? 1L : userCount)) + " ms/user)");
-
-            lastTime = System.currentTimeMillis();
-            final long groupCount = new GroupDemographics().execute();
-            ms = System.currentTimeMillis() - lastTime;
-            Utilities.printit(true, new Date() + ": GroupDemographics took " + (ms / 1000) + " seconds (" + (ms / ((groupCount == 0L) ? 1L : groupCount)) + " ms/group)");
+            Utilities.printit(true, new Date() + ": Inboxer boxing took " + ((System.currentTimeMillis() - lastTime) / 1000) + " seconds");
 
             lastTime = System.currentTimeMillis();
             final long recentCount = new UpdateRecents().execute();
             ms = System.currentTimeMillis() - lastTime;
-            Utilities.printit(true, new Date() + ": UpdateRecents took " + (ms / 1000) + " seconds (" + (ms / ((recentCount == 0L) ? 1L : recentCount)) + " ms/recent)");
+            Utilities.printit(true, new Date() + ": Inboxer UpdateRecents took " + (ms / 1000) + " seconds (" + (ms / ((recentCount == 0L) ? 1L : recentCount)) + " ms/recent)");
+
+            final long timeInMillis = System.currentTimeMillis() - startJob;
+            final double millisPerBlah = (blahCount == 0) ? 0 : (timeInMillis * 1.0d) / blahCount;
+            Utilities.printit(true, new Date() + ": Inboxer pass " + (passCount++) + " done. Runtime " + (timeInMillis / 1000) + " secs (" + blahCount + " blahs @" + millisPerBlah + " ms/blah)");
+
+        } else {
+            if (reputationThreadError == null) {
+                // Wait for next pass: user stats not yet computed by reputation thread
+                final long waitTimeInMillis = System.currentTimeMillis() - lastTimeUserReputationDoneInMillis;
+                final String waitedMessage = timeString(waitTimeInMillis);
+                Utilities.printit(true, new Date() + ": Inboxer waiting on user reputation. Been waiting for " + waitedMessage);
+                if (waitTimeInMillis > millisToWaitForUserReputationBeforeSendingEmail) {
+                    millisToWaitForUserReputationBeforeSendingEmail = Utilities.getValueAsLong(1.25 * millisToWaitForUserReputationBeforeSendingEmail) + waitTimeInMillis; // delay next email
+                    safeSendEmail("Long wait for user reputation stats", "Been waiting for user reputation to be calculated for " + waitedMessage +
+                            " since last notification.<br/><br/>If this condition continues, inbox construction will be slower than usual.<br/><br/>" +
+                            "<b>This notification will be sent less frequently, but the condition will persist. Time to deploy a prime-time implementation? Getting a faster/bigger machine won't help.</b>");
+                }
+            } else {
+                // error is logged by the reputation thread, which also sends a one-time email notification
+                reputationThread = null;
+            }
         }
+    }
 
+    private static String timeString(long millis) {
+        return new SimpleDateFormat("mm:ss").format(new Date(millis)) + " (minutes:seconds)";
+    }
 
-        final long timeInMillis = System.currentTimeMillis() - startJob;
-        final double millisPerBlah = (blahCount == 0) ? 0 : (timeInMillis * 1.0d) / blahCount;
-        Utilities.printit(true, new Date() + ": Pass " + (passCount++) + " completed in " + (timeInMillis / 1000) + " seconds (" + blahCount + " blahs @" + millisPerBlah + " ms/blah)");
+    private void maybeStartReputationThread() {
+        if (reputationThread == null || reputationThread.isStopped()) {
+            this.reputationThread = new ReputationThread();
+            final Thread thread = new Thread(reputationThread);
+            thread.setDaemon(true);
+            thread.start();
+            millisToWaitForUserReputationBeforeSendingEmail = DEFAULT_MILLIS_TO_WAIT_BEFORE_SENDING_ERROR_EMAIL;
+        }
     }
 
     private synchronized String getResourceUsageReport() {
@@ -230,53 +279,22 @@ public class Main extends Thread {
 
         return b.toString();
     }
+
+    private synchronized String getBriefMemoryReport() {
+        final Runtime runtime = Runtime.getRuntime();
+        NumberFormat format = NumberFormat.getInstance();
+        long maxMemory = runtime.maxMemory();
+        long allocatedMemory = runtime.totalMemory();
+        long freeMemory = runtime.freeMemory();
+
+        StringBuilder b = new StringBuilder();
+        b.append("Allocated: ");
+        b.append(format.format(allocatedMemory / 1024));
+        b.append("KB; ");
+        b.append("Free: ");
+        b.append(format.format((freeMemory + (maxMemory - allocatedMemory)) / 1024));
+        b.append("KB\n");
+
+        return b.toString();
+    }
 }
-
-
-//    private static boolean readConfigFile() {
-//        FileInputStream in = null;
-//        try {
-//            System.out.println("Reading configuration file '" + CONFIGURATION_FILEPATH + "'");
-//            if (!new File(CONFIGURATION_FILEPATH).exists()) {
-//                System.err.println("WARNING: did not find config file named '" + CONFIGURATION_FILEPATH + "'.");
-//                return false;
-//            }
-//            final Properties config = new Properties();
-//            in = new FileInputStream(CONFIGURATION_FILEPATH);
-//            config.load(in);
-//            Main._verbose = Utilities.safeGetBoolean(config.getProperty(VERBOSE_CONFIG_PROPERTY_NAME), Main._verbose);
-//            Main.writeRLogs = Utilities.safeGetBoolean(config.getProperty(WRITE_R_LOG_CONFIG_PROPERTY_NAME), Main.writeRLogs);
-//            String hostnames = config.getProperty(DB_HOSTNAMES);
-//            if (hostnames == null) {
-//                System.err.println("Config file missing " + DB_HOSTNAMES + " property");
-//                System.exit(-1);
-//            }
-//            dbHostnames = Arrays.asList(hostnames.split("\\|"));
-//
-//            memcachedHostname = config.getProperty(MEMCACHED_HOSTNAME);
-//            if (memcachedHostname == null) {
-//                System.err.println("Config file missing or invalid " + MEMCACHED_HOSTNAME + " property");
-//                System.exit(-1);
-//            }
-//
-//            final String recentStrengthCutoffInDays = config.getProperty(RECENT_STRENGTH_CUTOFF_DAYS_CONFIG_PROPERTY_NAME);
-//            Main.recentStrengthCutoffInDays = (recentStrengthCutoffInDays != null) ? new Integer(recentStrengthCutoffInDays.trim()) : 1;
-//
-//        } catch (Exception e) { // ignore
-//            System.err.println("Failed to read configuration file '" + CONFIGURATION_FILEPATH + "'");
-//            e.printStackTrace();
-//            System.exit(-1);
-//        } finally {
-//            if (in != null) {
-//                try {
-//                    in.close();
-//                } catch (IOException e) {
-//                    System.err.println("Failed to read configuration file '" + CONFIGURATION_FILEPATH + "'");
-//                    e.printStackTrace();
-//                    System.exit(-1);
-//                }
-//            }
-//        }
-//
-//        return true;
-//    }

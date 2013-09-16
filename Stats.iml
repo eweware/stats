@@ -47,6 +47,7 @@
     <orderEntry type="library" name="Maven: net.sf.ehcache.internal:ehcache-core:2.7.1" level="project" />
     <orderEntry type="library" name="Maven: org.slf4j:slf4j-api:1.6.6" level="project" />
     <orderEntry type="library" name="Maven: org.terracotta.internal:statistics:1.0.1" level="project" />
+    <orderEntry type="library" name="Maven: javax.mail:mail:1.4.5" level="project" />
   </component>
 </module>
 

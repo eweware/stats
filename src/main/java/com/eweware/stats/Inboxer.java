@@ -24,7 +24,7 @@ public class Inboxer {
     private static final int TIME_TO_IDLE_IN_SECONDS = 60;
     private static final int MAX_BLAHS_PER_INBOX = 100; // desirable number of blahs per inbox
 
-    private static final int MAX_BLAH_SIZE_IN_BYTES = 2048;
+    private static final int MAX_BLAH_SIZE_IN_BYTES = 4096;
 
 //    private final LocalCache<String, String> _nicknameCache = new LocalCache<String, String>("userNickname", NUMBER_OF_CACHE_ENTRIES, TIME_TO_LIVE_IN_SECONDS, TIME_TO_IDLE_IN_SECONDS);
     private final DBCollection _blahsCol;
@@ -102,11 +102,12 @@ public class Inboxer {
         Collections.sort(blahs, new IsStrongerThan());
 
         // Calculate how many inboxes we need and initialize data
-        final Integer numberOfInboxes = Utilities.getValueAsInteger(Math.ceil((blahsInGroupCount * 1.0d) / (MAX_BLAHS_PER_INBOX * 1.0d)), 0);
-        final List<DBCollection> inboxCollections = new ArrayList<DBCollection>(numberOfInboxes);
+        final Integer inboxCount = Utilities.getValueAsInteger(Math.ceil((blahsInGroupCount * 1.0d) / (MAX_BLAHS_PER_INBOX * 1.0d)), 0);
+
+        final List<DBCollection> inboxCollections = new ArrayList<DBCollection>(inboxCount);
         final String inboxDbName = "inboxdb";
-        final boolean useCappedCollections = true; // TODO experiment with this option
-        for (int number = 0; number < numberOfInboxes; number++) {
+        final boolean useCappedCollections = false; // TODO experiment with this option
+        for (int number = 0; number < inboxCount; number++) {
             if (wraparound) {
                 // TODO we assume that if we are wrapping around inbox numbers, the previous collections will have been dropped by an external (cron) job.
                 // If that's not the case, then delete them here.
@@ -116,7 +117,6 @@ public class Inboxer {
             if (collectionExists) {
                 inboxCollections.add(DBCollections.getInstance().getDB(inboxDbName).getCollection(inboxCollectionName));
             } else {
-                final DBCollection inboxCollection;
                 if (useCappedCollections) {
                     final DB db = DBCollections.getInstance().getDB(inboxDbName);
                     final BasicDBObject options = new BasicDBObject("capped", true);
@@ -131,52 +131,50 @@ public class Inboxer {
 
         // Spread out blahs across inboxes
 
-        int blahCount = 0;
-        final int bulkInsertMax = 10;   // TODO vary this to tune performance; set to 0 to do single inserts
-        final boolean bulkInserts = bulkInsertMax > 0;
-        List<List<DBObject>> inboxItemsToInsert = bulkInserts ? makeBulkInsertList(numberOfInboxes, bulkInsertMax) : null;
-        int insertedSoFar = 0;
-        for (DBObject blah : blahs) {
+        final boolean doBulkInserts = true;  // TODO use different bulk sizes to tune performance
+//        System.out.println(doBulkInserts ? "Bulk..." : "Singles...");
+        List<DBObject> inboxItemsToInsert = new ArrayList<DBObject>();
 
-            final int number = blahCount % numberOfInboxes;  // alternate inbox
-
-            blahCount++;
-
-            final BasicDBObject inboxItem = makeInboxItem(groupId, blah);
-
-            // insert inbox item into its inbox db collection
-            if (bulkInserts) {
-                if (insertedSoFar < bulkInsertMax) {
-                    inboxItemsToInsert.get(number).add(inboxItem);
-                    insertedSoFar++;
+        // We fill up the inboxes one at a time. Since blahs are sorted by
+        // strength, the earlier inboxes have inboxes with the greatest strength.
+        // NB: strength is adjusted by recency.
+        // Later inboxes will have older or less strong material.
+        // The most up-to-date inbox items are in the capped "recent" inbox collection
+        int inboxNumber = 0;
+        int insertsInCurrentInbox = 0;
+        for (int blahIndex = 0; blahIndex < blahsInGroupCount; blahIndex++) {
+            if (insertsInCurrentInbox < MAX_BLAHS_PER_INBOX) {
+                final BasicDBObject inboxItem = makeInboxItem(groupId, blahs.get(blahIndex));
+                insertsInCurrentInbox++;
+                if (doBulkInserts) {
+                    inboxItemsToInsert.add(inboxItem);
                 } else {
-                    for (List<DBObject> insertsForInbox : inboxItemsToInsert) {
-                        if (insertsForInbox.size() > 0) {
-                            inboxCollections.get(number).insert(insertsForInbox);
-                        }
-                    }
-                    inboxItemsToInsert = makeBulkInsertList(numberOfInboxes, bulkInsertMax);
-                    insertedSoFar = 0;
+                    inboxCollections.get(inboxNumber).insert(inboxItem);
                 }
             } else {
-                inboxCollections.get(number).insert(inboxItem);
+                if (doBulkInserts) {
+                    for (DBObject item : inboxItemsToInsert) {
+                        inboxCollections.get(inboxNumber).insert(item);
+                    }
+                    inboxItemsToInsert = new ArrayList<DBObject>();
+                }
+                blahIndex--;
+                inboxNumber++;
+                insertsInCurrentInbox = 0;
             }
         }
 
-        // Do any leftover bulk inserts
-        if (bulkInserts && insertedSoFar != 0) {
-            for (int number = 0; number < numberOfInboxes; number++) {
-                final List<DBObject> inboxItems = inboxItemsToInsert.get(0);
-                if (inboxItems.size() > 0) {
-                    inboxCollections.get(number).insert(inboxItems);
-                }
-            }
+        for (DBObject item : inboxItemsToInsert) {
+            inboxCollections.get(inboxCount - 1).insert(item);
         }
+//        for (DBCollection c : inboxCollections) {
+//            System.out.println(c.getName() + ": " + c.count());
+//        }
 
         // Update group with new inbox range
         final BasicDBObject query = new BasicDBObject(BaseDAOConstants.ID, group.get(BaseDAOConstants.ID));
         final BasicDBObject setter = new BasicDBObject(GroupDAOConstants.FIRST_INBOX_NUMBER, (lastInboxNumber == -1) ? 0 : (lastInboxNumber + 1));
-        setter.put(GroupDAOConstants.LAST_INBOX_NUMBER, ((lastInboxNumber + numberOfInboxes)));
+        setter.put(GroupDAOConstants.LAST_INBOX_NUMBER, ((lastInboxNumber + inboxCount)));
         // Update time created and amount of time it took to create it
         final Date lastCreated = (Date) group.get(GroupDAOConstants.LAST_TIME_INBOXES_GENERATED);
         final Date now = new Date();
@@ -186,7 +184,7 @@ public class Inboxer {
         }
         _groupsCol.update(query, new BasicDBObject("$set", setter));      // TODO use this in getInbox in rest
 
-        Utilities.printit(true, "Created " + blahsInGroupCount + " inbox items in group '" + getGroupName(groupId) + "'. " + numberOfInboxes + " new inboxes in range: ["
+        Utilities.printit(true, "Created " + blahsInGroupCount + " inbox items in group '" + getGroupName(groupId) + "'. " + inboxCount + " new inboxes in range: ["
                 + setter.get(GroupDAOConstants.FIRST_INBOX_NUMBER) + "," + setter.get(GroupDAOConstants.LAST_INBOX_NUMBER) + "]");
 
         return blahsInGroupCount;
@@ -244,9 +242,9 @@ public class Inboxer {
         return inboxItem;
     }
 
-    private List<List<DBObject>> makeBulkInsertList(int numberOfInboxes, int bulkInsertMax) {
-        final ArrayList<List<DBObject>> list = new ArrayList<List<DBObject>>(numberOfInboxes);
-        for (int i = 0; i < numberOfInboxes; i++) {
+    private List<List<DBObject>> makeBulkInsertList(int inboxCount, int bulkInsertMax) {
+        final ArrayList<List<DBObject>> list = new ArrayList<List<DBObject>>(inboxCount);
+        for (int i = 0; i < inboxCount; i++) {
             list.add(new ArrayList<DBObject>(bulkInsertMax));
         }
         return list;
