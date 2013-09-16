@@ -6,14 +6,13 @@
     </artifacts-to-build>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ecd9a19d-81b5-460d-99eb-1de3193b00ca" name="Default" comment="BWC-1627; removed artificial delay used for testing messaging">
-      <change type="DELETED" beforePath="$PROJECT_DIR$/scripts/push-to-dev.sh" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/eweware/stats/ReputationThread.java" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/ReputationThread.java" />
+    <list default="true" id="ecd9a19d-81b5-460d-99eb-1de3193b00ca" name="Default" comment="">
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/eweware/stats/Main.java" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/Main.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="stats.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Dummy.txt" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379291197307" ignored="false" />
+    <file path="/Dummy.txt" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379291219773" ignored="false" />
     <file path="/Main.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379289722911" ignored="false" />
     <file path="/BlahSummarizerTest.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1362426983233" ignored="false" />
     <file path="/InboxBuilder.scala" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1366681079315" ignored="false" />
@@ -663,7 +662,7 @@
       <file leaf-file-name="Main.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/eweware/stats/Main.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="31" column="61" selection-start="1104" selection-end="1104" vertical-scroll-proportion="0.3997195">
+            <state line="31" column="65" selection-start="1108" selection-end="1108" vertical-scroll-proportion="0.3997195">
               <folding />
             </state>
           </provider>
@@ -1249,7 +1248,11 @@
       <created>1379289918304</created>
       <updated>1379289918304</updated>
     </task>
-    <option name="localTasksCounter" value="6" />
+    <task id="LOCAL-00006" summary="BWC-1627; removed artificial delay used for testing messaging">
+      <created>1379291228688</created>
+      <updated>1379291228688</updated>
+    </task>
+    <option name="localTasksCounter" value="7" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -1320,7 +1323,7 @@
     <option name="WRAP_WHEN_TYPING_REACHES_RIGHT_MARGIN" value="false" />
     <option name="FORCE_NON_EMPTY_COMMENT" value="false" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="false" />
-    <option name="LAST_COMMIT_MESSAGE" value="BWC-1627" />
+    <option name="LAST_COMMIT_MESSAGE" value="BWC-1627; removed artificial delay used for testing messaging" />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="false" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_FILES_UP_TO_DATE_BEFORE_COMMIT" value="false" />
@@ -1338,6 +1341,7 @@
     <MESSAGE value="Remove old version of inboxer" />
     <MESSAGE value="factorized, comments, fix push-to-dev script" />
     <MESSAGE value="BWC-1627" />
+    <MESSAGE value="BWC-1627; removed artificial delay used for testing messaging" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1462,7 +1466,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/eweware/stats/Main.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="31" column="61" selection-start="1104" selection-end="1104" vertical-scroll-proportion="0.3997195">
+        <state line="31" column="65" selection-start="1108" selection-end="1108" vertical-scroll-proportion="0.3997195">
           <folding />
         </state>
       </provider>
