@@ -6,20 +6,14 @@
     </artifacts-to-build>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="ecd9a19d-81b5-460d-99eb-1de3193b00ca" name="Default" comment="">
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/Mailer.java" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/.idea/libraries/Maven__javax_mail_mail_1_4_5.xml" />
-      <change type="NEW" beforePath="" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/ReputationThread.java" />
-      <change type="DELETED" beforePath="$PROJECT_DIR$/src/main/java/com/eweware/stats/Boxer.java" afterPath="" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/eweware/stats/Inboxer.java" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/Inboxer.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/eweware/stats/Main.java" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/Main.java" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/Stats.iml" afterPath="$PROJECT_DIR$/Stats.iml" />
-      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/pom.xml" afterPath="$PROJECT_DIR$/pom.xml" />
+    <list default="true" id="ecd9a19d-81b5-460d-99eb-1de3193b00ca" name="Default" comment="BWC-1627; removed artificial delay used for testing messaging">
+      <change type="DELETED" beforePath="$PROJECT_DIR$/scripts/push-to-dev.sh" afterPath="" />
+      <change type="MODIFICATION" beforePath="$PROJECT_DIR$/src/main/java/com/eweware/stats/ReputationThread.java" afterPath="$PROJECT_DIR$/src/main/java/com/eweware/stats/ReputationThread.java" />
       <change type="MODIFICATION" beforePath="$PROJECT_DIR$/.idea/workspace.xml" afterPath="$PROJECT_DIR$/.idea/workspace.xml" />
     </list>
     <ignored path="stats.iws" />
     <ignored path=".idea/workspace.xml" />
-    <file path="/Dummy.txt" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379275534145" ignored="false" />
+    <file path="/Dummy.txt" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379291197307" ignored="false" />
     <file path="/Main.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1379289722911" ignored="false" />
     <file path="/BlahSummarizerTest.java" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1362426983233" ignored="false" />
     <file path="/InboxBuilder.scala" changelist="ecd9a19d-81b5-460d-99eb-1de3193b00ca" time="1366681079315" ignored="false" />
@@ -669,7 +663,7 @@
       <file leaf-file-name="Main.java" pinned="false" current="true" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/eweware/stats/Main.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="50" column="81" selection-start="2102" selection-end="2102" vertical-scroll-proportion="0.78512394">
+            <state line="31" column="61" selection-start="1104" selection-end="1104" vertical-scroll-proportion="0.3997195">
               <folding />
             </state>
           </provider>
@@ -699,7 +693,7 @@
       <file leaf-file-name="ReputationThread.java" pinned="false" current="false" current-in-tab="false">
         <entry file="file://$PROJECT_DIR$/src/main/java/com/eweware/stats/ReputationThread.java">
           <provider selected="true" editor-type-id="text-editor">
-            <state line="52" column="54" selection-start="2200" selection-end="2200" vertical-scroll-proportion="-13.846154">
+            <state line="33" column="45" selection-start="1020" selection-end="1020" vertical-scroll-proportion="-19.038462">
               <folding>
                 <element signature="imports" expanded="true" />
               </folding>
@@ -929,10 +923,6 @@
               <option name="myItemId" value="src" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="META-INF" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
           </PATH>
           <PATH>
             <PATH_ELEMENT>
@@ -997,20 +987,6 @@
             </PATH_ELEMENT>
             <PATH_ELEMENT>
               <option name="myItemId" value="main" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-          </PATH>
-          <PATH>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="stats" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.ProjectViewProjectNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="stats" />
-              <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
-            </PATH_ELEMENT>
-            <PATH_ELEMENT>
-              <option name="myItemId" value="scripts" />
               <option name="myItemType" value="com.intellij.ide.projectView.impl.nodes.PsiDirectoryNode" />
             </PATH_ELEMENT>
           </PATH>
@@ -1269,7 +1245,11 @@
       <created>1379091288512</created>
       <updated>1379091288512</updated>
     </task>
-    <option name="localTasksCounter" value="5" />
+    <task id="LOCAL-00005" summary="BWC-1627">
+      <created>1379289918304</created>
+      <updated>1379289918304</updated>
+    </task>
+    <option name="localTasksCounter" value="6" />
     <servers />
   </component>
   <component name="ToolWindowManager">
@@ -1290,7 +1270,7 @@
       <window_info id="Structure" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.23015873" sideWeight="0.46459413" order="2" side_tool="true" content_ui="tabs" />
       <window_info id="Maven Projects" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.33" sideWeight="0.5" order="1" side_tool="false" content_ui="tabs" />
       <window_info id="Commander" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.4" sideWeight="0.5" order="3" side_tool="false" content_ui="tabs" />
-      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.32569557" sideWeight="0.73101777" order="1" side_tool="false" content_ui="combo" />
+      <window_info id="Project" active="false" anchor="left" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.32569557" sideWeight="0.6090469" order="1" side_tool="false" content_ui="combo" />
       <window_info id="Hierarchy" active="false" anchor="right" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.24604474" sideWeight="0.62520194" order="5" side_tool="false" content_ui="combo" />
       <window_info id="Run" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="true" weight="0.39095315" sideWeight="0.65521" order="6" side_tool="false" content_ui="tabs" />
       <window_info id="Cvs" active="false" anchor="bottom" auto_hide="false" internal_type="DOCKED" type="DOCKED" visible="false" weight="0.25" sideWeight="0.5" order="8" side_tool="false" content_ui="tabs" />
@@ -1340,7 +1320,7 @@
     <option name="WRAP_WHEN_TYPING_REACHES_RIGHT_MARGIN" value="false" />
     <option name="FORCE_NON_EMPTY_COMMENT" value="false" />
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="false" />
-    <option name="LAST_COMMIT_MESSAGE" value="factorized, comments, fix push-to-dev script" />
+    <option name="LAST_COMMIT_MESSAGE" value="BWC-1627" />
     <option name="MAKE_NEW_CHANGELIST_ACTIVE" value="false" />
     <option name="OPTIMIZE_IMPORTS_BEFORE_PROJECT_COMMIT" value="false" />
     <option name="CHECK_FILES_UP_TO_DATE_BEFORE_COMMIT" value="false" />
@@ -1357,6 +1337,7 @@
     <MESSAGE value="First checkin" />
     <MESSAGE value="Remove old version of inboxer" />
     <MESSAGE value="factorized, comments, fix push-to-dev script" />
+    <MESSAGE value="BWC-1627" />
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>
@@ -1373,13 +1354,6 @@
     <entry file="file://$PROJECT_DIR$/stats.xml">
       <provider selected="true" editor-type-id="text-editor">
         <state line="125" column="5" selection-start="4759" selection-end="4759" vertical-scroll-proportion="0.31624863">
-          <folding />
-        </state>
-      </provider>
-    </entry>
-    <entry file="file://$PROJECT_DIR$/scripts/push-to-dev.sh">
-      <provider selected="true" editor-type-id="text-editor">
-        <state line="6" column="0" selection-start="221" selection-end="221" vertical-scroll-proportion="0.070866145">
           <folding />
         </state>
       </provider>
@@ -1479,7 +1453,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/eweware/stats/ReputationThread.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="52" column="54" selection-start="2200" selection-end="2200" vertical-scroll-proportion="-13.846154">
+        <state line="33" column="45" selection-start="1020" selection-end="1020" vertical-scroll-proportion="-19.038462">
           <folding>
             <element signature="imports" expanded="true" />
           </folding>
@@ -1488,7 +1462,7 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/src/main/java/com/eweware/stats/Main.java">
       <provider selected="true" editor-type-id="text-editor">
-        <state line="50" column="81" selection-start="2102" selection-end="2102" vertical-scroll-proportion="0.78512394">
+        <state line="31" column="61" selection-start="1104" selection-end="1104" vertical-scroll-proportion="0.3997195">
           <folding />
         </state>
       </provider>

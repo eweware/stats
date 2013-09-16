@@ -31,7 +31,6 @@ public class ReputationThread implements Runnable {
             new UserDescriptiveStats().execute();
             Utilities.printit(true, new Date() + ": UserDescriptiveStats took " + ((System.currentTimeMillis() - lastTime) / 1000) + " seconds");
 
-            Thread.sleep(1000 * 60 * 5);
             setUserReputationDone();
 
             lastTime = System.currentTimeMillis();
