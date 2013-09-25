@@ -89,7 +89,7 @@ public class Inboxer {
             wraparound = true;
         }
 
-        final List<DBObject> blahs = getAllBlahs(groupId);
+        final List<DBObject> blahs = getRelevantBlahs(groupId, .05);
         final int blahsInGroupCount = blahs.size();
 
         // If there are no blahs, there's nothing to do
@@ -140,36 +140,98 @@ public class Inboxer {
         // NB: strength is adjusted by recency.
         // Later inboxes will have older or less strong material.
         // The most up-to-date inbox items are in the capped "recent" inbox collection
-        int inboxNumber = 0;
-        int insertsInCurrentInbox = 0;
-        for (int blahIndex = 0; blahIndex < blahsInGroupCount; blahIndex++) {
-            if (insertsInCurrentInbox < MAX_BLAHS_PER_INBOX) {
-                final BasicDBObject inboxItem = makeInboxItem(groupId, blahs.get(blahIndex));
-                insertsInCurrentInbox++;
-                if (doBulkInserts) {
-                    inboxItemsToInsert.add(inboxItem);
-                } else {
-                    inboxCollections.get(inboxNumber).insert(inboxItem);
-                }
-            } else {
-                if (doBulkInserts) {
-                    for (DBObject item : inboxItemsToInsert) {
-                        inboxCollections.get(inboxNumber).insert(item);
-                    }
-                    inboxItemsToInsert = new ArrayList<DBObject>();
-                }
-                blahIndex--;
-                inboxNumber++;
-                insertsInCurrentInbox = 0;
-            }
-        }
 
-        for (DBObject item : inboxItemsToInsert) {
-            inboxCollections.get(inboxCount - 1).insert(item);
+        if (blahsInGroupCount <= 100) {
+            // just copy them all
+            for (int blahIndex = 0; blahIndex < blahsInGroupCount; blahIndex++) {
+                final BasicDBObject inboxItem = makeInboxItem(groupId, blahs.get(blahIndex));
+                inboxCollections.get(0).insert(inboxItem);
+            }
+        } else {
+            // use proper inbox shuffling
+
+            int numHottest = 5;
+            int numHot = 20;   // 25
+            int numMedium = 40;     // 65
+            int numCool = 20;   // 85
+            int numBad = 15;    // 100
+            int numNew = 0;
+            int minViews = 10;   // to do - should be based on author strength
+            int inboxNumber = 0;
+            int i = 0;
+            List<DBObject> newBlahs = new ArrayList<DBObject>();
+
+            Object  tmp;
+            for (Iterator<DBObject> itr = blahs.iterator();itr.hasNext();) {
+                DBObject element = itr.next();
+                tmp = element.get(InboxBlahDAOConstants.VIEWS);
+                if ((tmp == null) || ((Integer)tmp < minViews)) {
+                    newBlahs.add(element);
+                }
+            }
+            if (newBlahs.size() > 0) {
+                int maxNew = 5;
+                if (maxNew > newBlahs.size()) {
+                    maxNew = newBlahs.size();
+                }
+                numNew = maxNew;
+                numBad -= numNew;
+            }
+
+            List<DBObject> curBlahs;
+            int    curBlahIndex;
+            while (inboxNumber < inboxCount) {
+                curBlahs = new ArrayList(blahs);
+
+                for (i = 0; i < numNew; i++) {
+                    curBlahIndex = (int)(Math.random() * newBlahs.size());
+                    final BasicDBObject inboxItem = makeInboxItem(groupId, blahs.get(curBlahIndex));
+                    inboxCollections.get(inboxNumber).insert(inboxItem);
+                    curBlahs.remove(newBlahs.get(curBlahIndex));
+                    newBlahs.remove(curBlahIndex);  // prevent dupes
+                }
+
+                for (i = 0 ; i < numHottest; i++) {
+                    curBlahIndex = GetHottestBlahIndex(curBlahs.size());
+                    final BasicDBObject inboxItem = makeInboxItem(groupId, blahs.get(curBlahIndex));
+                    inboxCollections.get(inboxNumber).insert(inboxItem);
+                    curBlahs.remove(curBlahIndex);  // prevent dupes
+                }
+
+                for (i = 0 ; i < numHot; i++) {
+                    curBlahIndex = GetHotBlahIndex(curBlahs.size());
+                    final BasicDBObject inboxItem = makeInboxItem(groupId, blahs.get(curBlahIndex));
+                    inboxCollections.get(inboxNumber).insert(inboxItem);
+                    curBlahs.remove(curBlahIndex);  // prevent dupes
+                }
+
+                for (i = 0 ; i < numMedium; i++) {
+                    curBlahIndex = GetMediumBlahIndex(curBlahs.size());
+                    final BasicDBObject inboxItem = makeInboxItem(groupId, blahs.get(curBlahIndex));
+                    inboxCollections.get(inboxNumber).insert(inboxItem);
+                    curBlahs.remove(curBlahIndex);  // prevent dupes
+                }
+
+                for (i = 0 ; i < numCool; i++) {
+                    curBlahIndex = GetCoolBlahIndex(curBlahs.size());
+                    final BasicDBObject inboxItem = makeInboxItem(groupId, blahs.get(curBlahIndex));
+                    inboxCollections.get(inboxNumber).insert(inboxItem);
+                    curBlahs.remove(curBlahIndex);  // prevent dupes
+                }
+
+                for (i = 0 ; i < numBad; i++) {
+                    curBlahIndex = GetBadBlahIndex(curBlahs.size());
+                    final BasicDBObject inboxItem = makeInboxItem(groupId, blahs.get(curBlahIndex));
+                    inboxCollections.get(inboxNumber).insert(inboxItem);
+                    curBlahs.remove(curBlahIndex);  // prevent dupes
+                }
+
+                inboxNumber++;
+
+
+            }
+
         }
-//        for (DBCollection c : inboxCollections) {
-//            System.out.println(c.getName() + ": " + c.count());
-//        }
 
         // Update group with new inbox range
         final BasicDBObject query = new BasicDBObject(BaseDAOConstants.ID, group.get(BaseDAOConstants.ID));
@@ -189,6 +251,35 @@ public class Inboxer {
 
         return blahsInGroupCount;
     }
+
+
+
+    private int GetHottestBlahIndex(int listSize) {
+        int hottestBlahCount = 10;
+        return (int)(Math.random() * hottestBlahCount);
+    }
+
+    private int GetHotBlahIndex(int listSize) {
+        int min = 0, max = (int)Math.floor(listSize * .1);  // 0-10%
+        return min + (int)(Math.random() * (max - min));
+    }
+
+    private int GetMediumBlahIndex(int listSize) {
+        int min = (int)Math.floor(listSize * .1), max = min + (int)Math.floor(listSize * .1);  // 10-20%
+        return min + (int)(Math.random() * (max - min));
+    }
+
+    private int GetCoolBlahIndex(int listSize) {
+        int min = (int)Math.floor(listSize * .2), max = min + (int)Math.floor(listSize * .5);  // 10-20%
+        return min + (int)(Math.random() * (max - min));
+    }
+
+    private int GetBadBlahIndex(int listSize) {
+        int min = (int)Math.floor(listSize * .7), max = min + (int)Math.floor(listSize * .3);  // 10-20%
+        return min + (int)(Math.random() * (max - min));
+    }
+
+
 
     private BasicDBObject makeInboxItem(String groupId, DBObject blah) {
 
@@ -286,6 +377,27 @@ public class Inboxer {
             blahs.add(cursor.next());
         }
         return blahs;
+    }
+
+    private List<DBObject> getRelevantBlahs(String groupId, double minStrength) throws DBException, InterruptedException {
+
+        final BasicDBObject fieldsToReturn = makeBlahFieldsToReturn();
+        BasicDBObject queryObj = new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId).append("S", new BasicDBObject("$gt", minStrength));
+
+        final DBCursor cursor = Utilities.findInDB(3, "finding blahs in a group", _blahsCol, queryObj, fieldsToReturn);
+
+        cursor.addOption(Bytes.QUERYOPTION_SLAVEOK);
+        cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
+
+        final List<DBObject> blahs = new ArrayList<DBObject>();
+        while (cursor.hasNext()) {
+            blahs.add(cursor.next());
+        }
+
+        if (blahs.size() < 100)
+            return getAllBlahs(groupId);
+        else
+            return blahs;
     }
 
     /** Only these fields will be returned: be sure that this is consistent with buildInbox() */
