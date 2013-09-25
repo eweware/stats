@@ -1,13 +1,13 @@
-package main.java.com.eweware.stats;
+package com.eweware.stats;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DB;
 import com.mongodb.DBCollection;
 import com.mongodb.DBObject;
-import main.java.com.eweware.DBException;
-import main.java.com.eweware.service.base.CommonUtilities;
-import main.java.com.eweware.service.base.store.dao.BaseDAOConstants;
-import main.java.com.eweware.service.base.store.dao.InboxBlahDAOConstants;
+import com.eweware.DBException;
+import com.eweware.service.base.CommonUtilities;
+import com.eweware.service.base.store.dao.BaseDAOConstants;
+import com.eweware.service.base.store.dao.InboxBlahDAOConstants;
 import org.bson.types.ObjectId;
 
 import java.util.Date;

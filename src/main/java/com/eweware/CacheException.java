@@ -1,4 +1,4 @@
-package main.java.com.eweware;
+package com.eweware;
 
 /**
  * @author rk@post.harvard.edu

@@ -1,16 +1,16 @@
-package main.java.com.eweware.stats;
+package com.eweware.stats;
 
 import com.mongodb.*;
-import main.java.com.eweware.DBException;
-import main.java.com.eweware.service.base.CommonUtilities;
-import main.java.com.eweware.service.base.i18n.LocaleId;
-import main.java.com.eweware.service.base.payload.AuthorizedState;
-import main.java.com.eweware.service.base.store.dao.BaseDAOConstants;
-import main.java.com.eweware.service.base.store.dao.DemographicsObjectDAOConstants;
-import main.java.com.eweware.service.base.store.dao.GroupDAOConstants;
-import main.java.com.eweware.service.base.store.dao.UserGroupDAOConstants;
-import main.java.com.eweware.service.base.store.dao.schema.UserProfileSchema;
-import main.java.com.eweware.stats.help.Utilities;
+import com.eweware.DBException;
+import com.eweware.service.base.CommonUtilities;
+import com.eweware.service.base.i18n.LocaleId;
+import com.eweware.service.base.payload.AuthorizedState;
+import com.eweware.service.base.store.dao.BaseDAOConstants;
+import com.eweware.service.base.store.dao.DemographicsObjectDAOConstants;
+import com.eweware.service.base.store.dao.GroupDAOConstants;
+import com.eweware.service.base.store.dao.UserGroupDAOConstants;
+import com.eweware.service.base.store.dao.schema.UserProfileSchema;
+import com.eweware.stats.help.Utilities;
 import org.bson.types.ObjectId;
 
 import java.util.Date;

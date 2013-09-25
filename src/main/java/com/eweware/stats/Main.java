@@ -1,7 +1,7 @@
-package main.java.com.eweware.stats;
+package com.eweware.stats;
 
-import main.java.com.eweware.service.base.cache.BlahCache;
-import main.java.com.eweware.stats.help.Utilities;
+import com.eweware.service.base.cache.BlahCache;
+import com.eweware.stats.help.Utilities;
 
 import java.lang.management.OperatingSystemMXBean;
 import java.net.InetAddress;

@@ -1,7 +1,7 @@
-package main.java.com.eweware.service.base.store.dao;
+package com.eweware.service.base.store.dao;
 
-import main.java.com.eweware.service.base.store.dao.schema.type.SchemaDataType;
-import main.java.com.eweware.service.base.store.dao.schema.type.SchemaDataTypeFieldMap;
+import com.eweware.service.base.store.dao.schema.type.SchemaDataType;
+import com.eweware.service.base.store.dao.schema.type.SchemaDataTypeFieldMap;
 
 /**
  * <p>This entity maintains the relationship between a user and a group.</p>
@@ -30,7 +30,7 @@ public interface UserGroupDAOConstants {
     /**
      * <p>The authorization state of the user in relation to the group (e.g., is active in it, suspended).</p>
      *
-     * @see main.java.com.eweware.service.base.payload.AuthorizedState
+     * @see com.eweware.service.base.payload.AuthorizedState
      */
     static final String STATE = "S";
 

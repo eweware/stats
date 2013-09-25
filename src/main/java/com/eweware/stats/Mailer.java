@@ -1,7 +1,7 @@
-package main.java.com.eweware.stats;
+package com.eweware.stats;
 
-import main.java.com.eweware.service.base.error.SystemErrorException;
-import main.java.com.eweware.service.base.mgr.ManagerState;
+import com.eweware.service.base.error.SystemErrorException;
+import com.eweware.service.base.mgr.ManagerState;
 
 import javax.mail.*;
 import javax.mail.internet.InternetAddress;

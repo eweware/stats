@@ -48,7 +48,7 @@
                             <addClasspath>true</addClasspath>
                             <classpathPrefix>lib/</classpathPrefix>
                             <classpathLayoutType>repository</classpathLayoutType>
-                            <mainClass>main.java.com.eweware.stats.Main</mainClass>
+                            <mainClass>com.eweware.stats.Main</mainClass>
                         </manifest>
                     </archive>
                     <descriptorRefs>

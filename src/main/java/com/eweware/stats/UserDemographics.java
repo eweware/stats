@@ -1,14 +1,14 @@
-package main.java.com.eweware.stats;
+package com.eweware.stats;
 
 import com.mongodb.*;
-import main.java.com.eweware.ApplicationException;
-import main.java.com.eweware.DBException;
-import main.java.com.eweware.service.base.i18n.LocaleId;
-import main.java.com.eweware.service.base.store.dao.*;
-import main.java.com.eweware.service.base.store.dao.schema.SchemaSpec;
-import main.java.com.eweware.service.base.store.dao.schema.UserProfileSchema;
-import main.java.com.eweware.service.base.store.dao.schema.type.SchemaDataType;
-import main.java.com.eweware.stats.help.Utilities;
+import com.eweware.ApplicationException;
+import com.eweware.DBException;
+import com.eweware.service.base.i18n.LocaleId;
+import com.eweware.service.base.store.dao.*;
+import com.eweware.service.base.store.dao.schema.SchemaSpec;
+import com.eweware.service.base.store.dao.schema.UserProfileSchema;
+import com.eweware.service.base.store.dao.schema.type.SchemaDataType;
+import com.eweware.stats.help.Utilities;
 import org.bson.types.ObjectId;
 
 import java.util.Date;

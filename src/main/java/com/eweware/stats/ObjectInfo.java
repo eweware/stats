@@ -1,4 +1,4 @@
-package main.java.com.eweware.stats;
+package com.eweware.stats;
 
 import java.util.HashMap;
 import java.util.Map;

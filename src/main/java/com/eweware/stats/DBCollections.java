@@ -1,7 +1,7 @@
-package main.java.com.eweware.stats;
+package com.eweware.stats;
 
 import com.mongodb.*;
-import main.java.com.eweware.DBException;
+import com.eweware.DBException;
 
 import java.util.ArrayList;
 import java.util.List;

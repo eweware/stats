@@ -1,9 +1,9 @@
-package main.java.com.eweware.stats;
+package com.eweware.stats;
 
 import com.mongodb.*;
-import main.java.com.eweware.service.base.store.dao.BaseDAOConstants;
-import main.java.com.eweware.service.base.store.dao.BlahDAOConstants;
-import main.java.com.eweware.stats.help.Utilities;
+import com.eweware.service.base.store.dao.BaseDAOConstants;
+import com.eweware.service.base.store.dao.BlahDAOConstants;
+import com.eweware.stats.help.Utilities;
 
 import java.text.NumberFormat;
 import java.util.*;

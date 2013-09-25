@@ -1,14 +1,14 @@
-package main.java.com.eweware.stats;
+package com.eweware.stats;
 
 import com.mongodb.*;
-import main.java.com.eweware.DBException;
-import main.java.com.eweware.service.base.CommonUtilities;
-import main.java.com.eweware.service.base.error.SystemErrorException;
-import main.java.com.eweware.service.base.store.dao.*;
-import main.java.com.eweware.service.base.store.dao.schema.type.UserProfilePermissions;
-import main.java.com.eweware.service.base.store.impl.mongo.dao.MongoStoreManager;
-import main.java.com.eweware.stats.help.LocalCache;
-import main.java.com.eweware.stats.help.Utilities;
+import com.eweware.DBException;
+import com.eweware.service.base.CommonUtilities;
+import com.eweware.service.base.error.SystemErrorException;
+import com.eweware.service.base.store.dao.*;
+import com.eweware.service.base.store.dao.schema.type.UserProfilePermissions;
+import com.eweware.service.base.store.impl.mongo.dao.MongoStoreManager;
+import com.eweware.stats.help.LocalCache;
+import com.eweware.stats.help.Utilities;
 
 import java.util.*;
 
@@ -89,7 +89,7 @@ public class Inboxer {
             wraparound = true;
         }
 
-        final List<DBObject> blahs = getRelevantBlahs(groupId, .05);
+        final List<DBObject> blahs = getRelevantBlahs(groupId, .05, 30);
         final int blahsInGroupCount = blahs.size();
 
         // If there are no blahs, there's nothing to do
@@ -156,7 +156,7 @@ public class Inboxer {
             int numCool = 20;   // 85
             int numBad = 15;    // 100
             int numNew = 0;
-            int minViews = 10;   // to do - should be based on author strength
+            long  minViews = 10;   // to do - should be based on author strength
             int inboxNumber = 0;
             int i = 0;
             List<DBObject> newBlahs = new ArrayList<DBObject>();
@@ -165,7 +165,7 @@ public class Inboxer {
             for (Iterator<DBObject> itr = blahs.iterator();itr.hasNext();) {
                 DBObject element = itr.next();
                 tmp = element.get(InboxBlahDAOConstants.VIEWS);
-                if ((tmp == null) || ((Integer)tmp < minViews)) {
+                if ((tmp == null) || ((Long)tmp < minViews)) {
                     newBlahs.add(element);
                 }
             }
@@ -179,49 +179,55 @@ public class Inboxer {
             }
 
             List<DBObject> curBlahs;
+
             int    curBlahIndex;
             while (inboxNumber < inboxCount) {
                 curBlahs = new ArrayList(blahs);
 
-                for (i = 0; i < numNew; i++) {
-                    curBlahIndex = (int)(Math.random() * newBlahs.size());
-                    final BasicDBObject inboxItem = makeInboxItem(groupId, blahs.get(curBlahIndex));
-                    inboxCollections.get(inboxNumber).insert(inboxItem);
-                    curBlahs.remove(newBlahs.get(curBlahIndex));
-                    newBlahs.remove(curBlahIndex);  // prevent dupes
+                if (numNew > 0) {
+                    List<DBObject>  newBlahList = new ArrayList<DBObject>(newBlahs);
+
+                    for (i = 0; i < numNew; i++) {
+                        curBlahIndex = (int)(Math.random() * newBlahList.size());
+                        final BasicDBObject inboxItem = makeInboxItem(groupId, newBlahList.get(curBlahIndex));
+                        inboxCollections.get(inboxNumber).insert(inboxItem);
+                        curBlahs.remove(newBlahList.get(curBlahIndex));
+                        newBlahList.remove(curBlahIndex);  // prevent dupes
+                    }
                 }
+
 
                 for (i = 0 ; i < numHottest; i++) {
                     curBlahIndex = GetHottestBlahIndex(curBlahs.size());
-                    final BasicDBObject inboxItem = makeInboxItem(groupId, blahs.get(curBlahIndex));
+                    final BasicDBObject inboxItem = makeInboxItem(groupId, curBlahs.get(curBlahIndex));
                     inboxCollections.get(inboxNumber).insert(inboxItem);
                     curBlahs.remove(curBlahIndex);  // prevent dupes
                 }
 
                 for (i = 0 ; i < numHot; i++) {
                     curBlahIndex = GetHotBlahIndex(curBlahs.size());
-                    final BasicDBObject inboxItem = makeInboxItem(groupId, blahs.get(curBlahIndex));
+                    final BasicDBObject inboxItem = makeInboxItem(groupId, curBlahs.get(curBlahIndex));
                     inboxCollections.get(inboxNumber).insert(inboxItem);
                     curBlahs.remove(curBlahIndex);  // prevent dupes
                 }
 
                 for (i = 0 ; i < numMedium; i++) {
                     curBlahIndex = GetMediumBlahIndex(curBlahs.size());
-                    final BasicDBObject inboxItem = makeInboxItem(groupId, blahs.get(curBlahIndex));
+                    final BasicDBObject inboxItem = makeInboxItem(groupId, curBlahs.get(curBlahIndex));
                     inboxCollections.get(inboxNumber).insert(inboxItem);
                     curBlahs.remove(curBlahIndex);  // prevent dupes
                 }
 
                 for (i = 0 ; i < numCool; i++) {
                     curBlahIndex = GetCoolBlahIndex(curBlahs.size());
-                    final BasicDBObject inboxItem = makeInboxItem(groupId, blahs.get(curBlahIndex));
+                    final BasicDBObject inboxItem = makeInboxItem(groupId, curBlahs.get(curBlahIndex));
                     inboxCollections.get(inboxNumber).insert(inboxItem);
                     curBlahs.remove(curBlahIndex);  // prevent dupes
                 }
 
                 for (i = 0 ; i < numBad; i++) {
                     curBlahIndex = GetBadBlahIndex(curBlahs.size());
-                    final BasicDBObject inboxItem = makeInboxItem(groupId, blahs.get(curBlahIndex));
+                    final BasicDBObject inboxItem = makeInboxItem(groupId, curBlahs.get(curBlahIndex));
                     inboxCollections.get(inboxNumber).insert(inboxItem);
                     curBlahs.remove(curBlahIndex);  // prevent dupes
                 }
@@ -270,12 +276,12 @@ public class Inboxer {
     }
 
     private int GetCoolBlahIndex(int listSize) {
-        int min = (int)Math.floor(listSize * .2), max = min + (int)Math.floor(listSize * .5);  // 10-20%
+        int min = (int)Math.floor(listSize * .2), max = min + (int)Math.floor(listSize * .5);  // 20-70%
         return min + (int)(Math.random() * (max - min));
     }
 
     private int GetBadBlahIndex(int listSize) {
-        int min = (int)Math.floor(listSize * .7), max = min + (int)Math.floor(listSize * .3);  // 10-20%
+        int min = (int)Math.floor(listSize * .7), max = min + (int)Math.floor(listSize * .3);  // 70-100%
         return min + (int)(Math.random() * (max - min));
     }
 
@@ -286,8 +292,14 @@ public class Inboxer {
         final BasicDBObject inboxItem = new BasicDBObject(InboxBlahDAOConstants.BLAH_ID, blah.get(BaseDAOConstants.ID).toString());
 
         // IMPORTANT: to fetch the following fields, include them in makeBlahFieldsToReturn() */
-
-        inboxItem.put(BaseDAOConstants.CREATED, blah.get(BaseDAOConstants.CREATED));
+        Date    createDate = (Date)blah.get(BaseDAOConstants.CREATED);
+        Date    now = new Date();
+        inboxItem.put(BaseDAOConstants.CREATED, createDate);
+        long difference = now.getTime() - createDate.getTime();
+        long newTime = 1000 * 60 * 60 * 18; // 18 hours
+        if (difference < newTime) {
+            inboxItem.put(InboxBlahDAOConstants.BLAH_NEWFLAG, true);
+        }
         inboxItem.put(InboxBlahDAOConstants.BLAH_TEXT, blah.get(BlahDAOConstants.TEXT));
         inboxItem.put(InboxBlahDAOConstants.TYPE, blah.get(BlahDAOConstants.TYPE_ID));
         inboxItem.put(InboxBlahDAOConstants.GROUP_ID, groupId);
@@ -379,7 +391,7 @@ public class Inboxer {
         return blahs;
     }
 
-    private List<DBObject> getRelevantBlahs(String groupId, double minStrength) throws DBException, InterruptedException {
+    private List<DBObject> getRelevantBlahs(String groupId, double minStrength, int numDays) throws DBException, InterruptedException {
 
         final BasicDBObject fieldsToReturn = makeBlahFieldsToReturn();
         BasicDBObject queryObj = new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId).append("S", new BasicDBObject("$gt", minStrength));
@@ -410,6 +422,7 @@ public class Inboxer {
         fieldsToReturn.put(BlahDAOConstants.BADGE_IDS, 1);
         fieldsToReturn.put(BlahDAOConstants.BLAH_STRENGTH, 1);
         fieldsToReturn.put(BaseDAOConstants.CREATED, 1);
+        fieldsToReturn.put(BlahDAOConstants.VIEWS, 1);
         return fieldsToReturn;
     }
 

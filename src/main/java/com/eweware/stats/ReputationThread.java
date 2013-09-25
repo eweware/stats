@@ -1,6 +1,6 @@
-package main.java.com.eweware.stats;
+package com.eweware.stats;
 
-import main.java.com.eweware.stats.help.Utilities;
+import com.eweware.stats.help.Utilities;
 
 import java.util.Date;
 import java.util.logging.Level;

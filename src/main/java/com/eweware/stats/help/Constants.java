@@ -1,9 +1,9 @@
-package main.java.com.eweware.stats.help;
+package com.eweware.stats.help;
 
 
 
-import main.java.com.eweware.service.base.store.dao.GroupDAO;
-import main.java.com.eweware.service.base.store.dao.type.BlahTypeCategoryType;
+import com.eweware.service.base.store.dao.GroupDAO;
+import com.eweware.service.base.store.dao.type.BlahTypeCategoryType;
 
 import java.util.HashMap;
 import java.util.Map;

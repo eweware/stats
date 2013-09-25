@@ -1,4 +1,4 @@
-package main.java.com.eweware.stats.help;
+package com.eweware.stats.help;
 
 import cern.colt.function.DoubleProcedure;
 import cern.colt.list.DoubleArrayList;
@@ -6,11 +6,11 @@ import cern.jet.stat.Descriptive;
 import cern.jet.stat.quantile.DoubleQuantileFinder;
 import cern.jet.stat.quantile.QuantileFinderFactory;
 import com.mongodb.DBObject;
-import main.java.com.eweware.service.base.store.dao.BlahTrackerDAO;
-import main.java.com.eweware.service.base.store.dao.BlahTrackerDAOConstants;
-import main.java.com.eweware.service.base.store.dao.CommentTrackerDAOConstants;
-import main.java.com.eweware.service.base.store.dao.UserTrackerDAOConstants;
-import main.java.com.eweware.stats.DBCollections;
+import com.eweware.service.base.store.dao.BlahTrackerDAO;
+import com.eweware.service.base.store.dao.BlahTrackerDAOConstants;
+import com.eweware.service.base.store.dao.CommentTrackerDAOConstants;
+import com.eweware.service.base.store.dao.UserTrackerDAOConstants;
+import com.eweware.stats.DBCollections;
 
 import java.io.FileWriter;
 import java.io.IOException;

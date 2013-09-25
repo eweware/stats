@@ -1,4 +1,4 @@
-package main.java.com.eweware.stats.help;
+package com.eweware.stats.help;
 
 
 import org.codehaus.jackson.map.ObjectMapper;

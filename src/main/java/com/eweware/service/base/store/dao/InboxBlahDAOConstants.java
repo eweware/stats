@@ -1,7 +1,7 @@
-package main.java.com.eweware.service.base.store.dao;
+package com.eweware.service.base.store.dao;
 
-import main.java.com.eweware.service.base.store.dao.schema.type.SchemaDataType;
-import main.java.com.eweware.service.base.store.dao.schema.type.SchemaDataTypeFieldMap;
+import com.eweware.service.base.store.dao.schema.type.SchemaDataType;
+import com.eweware.service.base.store.dao.schema.type.SchemaDataTypeFieldMap;
 
 /**
  *    <p>Field names and value data types for inbox blah entities. These are fields
@@ -101,11 +101,14 @@ public interface InboxBlahDAOConstants {
      */
     static final String AUTHOR_NICKNAME = "K";
 
+    static final String BLAH_NEWFLAG = "NB";
+
 
     static final SchemaDataTypeFieldMap[] SIMPLE_FIELD_TYPES = new SchemaDataTypeFieldMap[]{
             new SchemaDataTypeFieldMap(SchemaDataType.S, new String[]{BLAH_ID, AUTHOR_ID, TYPE, BLAH_TEXT, GROUP_ID, BADGE_INDICATOR, AUTHOR_NICKNAME}),
             new SchemaDataTypeFieldMap(SchemaDataType.L, new String[]{INBOX_NUMBER, UP_VOTES, DOWN_VOTES, VIEWS, OPENS, COMMENTS}),
             new SchemaDataTypeFieldMap(SchemaDataType.I, new String[]{INBOX_NUMBER}),
+            new SchemaDataTypeFieldMap(SchemaDataType.B, new String[]{BLAH_NEWFLAG}),
             new SchemaDataTypeFieldMap(SchemaDataType.R, new String[]{BLAH_STRENGTH, RECENT_BLAH_STRENGTH}),
             new SchemaDataTypeFieldMap(SchemaDataType.ILS, new String[] {IMAGE_IDS}),
     };

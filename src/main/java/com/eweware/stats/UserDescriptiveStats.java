@@ -1,12 +1,12 @@
-package main.java.com.eweware.stats;
+package com.eweware.stats;
 
 import cern.colt.list.DoubleArrayList;
 import cern.jet.stat.Descriptive;
 import com.mongodb.*;
-import main.java.com.eweware.service.base.CommonUtilities;
-import main.java.com.eweware.service.base.store.dao.*;
-import main.java.com.eweware.service.base.store.impl.mongo.dao.MongoStoreManager;
-import main.java.com.eweware.stats.help.Utilities;
+import com.eweware.service.base.CommonUtilities;
+import com.eweware.service.base.store.dao.*;
+import com.eweware.service.base.store.impl.mongo.dao.MongoStoreManager;
+import com.eweware.stats.help.Utilities;
 import org.bson.types.ObjectId;
 
 import java.util.*;

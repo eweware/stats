@@ -1,16 +1,16 @@
-package main.java.com.eweware.service.base.store.impl.mongo.dao;
+package com.eweware.service.base.store.impl.mongo.dao;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import main.java.com.eweware.service.base.error.SystemErrorException;
-import main.java.com.eweware.service.base.i18n.LocaleId;
-import main.java.com.eweware.service.base.payload.AuthorizedState;
-import main.java.com.eweware.service.base.store.dao.UserGroupDAO;
-import main.java.com.eweware.service.base.store.dao.schema.BaseSchema;
-import main.java.com.eweware.service.base.store.dao.schema.UserGroupSchema;
-import main.java.com.eweware.service.base.store.impl.mongo.MongoFieldTypes;
+import com.eweware.service.base.error.SystemErrorException;
+import com.eweware.service.base.i18n.LocaleId;
+import com.eweware.service.base.payload.AuthorizedState;
+import com.eweware.service.base.store.dao.UserGroupDAO;
+import com.eweware.service.base.store.dao.schema.BaseSchema;
+import com.eweware.service.base.store.dao.schema.UserGroupSchema;
+import com.eweware.service.base.store.impl.mongo.MongoFieldTypes;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -131,7 +131,7 @@ public class UserGroupDAOImpl extends BaseDAOImpl implements UserGroupDAO {
      * @param userId
      * @param state  A state or null if any state.
      * @return List<String> A possibly empty list of group ids matching the description
-     * @throws main.java.com.eweware.service.base.error.SystemErrorException
+     * @throws com.eweware.service.base.error.SystemErrorException
      *
      */
     public static List<String> findUserGroupIds(DBCollection col, String userId, AuthorizedState state) throws SystemErrorException {

@@ -1,21 +1,21 @@
-package main.java.com.eweware.stats.help;
+package com.eweware.stats.help;
 
 import com.mongodb.BasicDBObject;
 import com.mongodb.DBCollection;
 import com.mongodb.DBCursor;
 import com.mongodb.DBObject;
-import main.java.com.eweware.ApplicationException;
-import main.java.com.eweware.DBException;
-import main.java.com.eweware.service.base.error.SystemErrorException;
-import main.java.com.eweware.service.base.store.dao.BaseDAOConstants;
-import main.java.com.eweware.service.base.store.dao.DemographicsObjectDAOConstants;
-import main.java.com.eweware.service.base.store.dao.UserProfileDAOConstants;
-import main.java.com.eweware.service.base.store.dao.schema.SchemaSpec;
-import main.java.com.eweware.service.base.store.dao.schema.UserProfileSchema;
-import main.java.com.eweware.service.base.store.dao.schema.type.SchemaDataType;
-import main.java.com.eweware.stats.DBCollections;
-import main.java.com.eweware.stats.Main;
-import main.java.com.eweware.stats.ObjectInfo;
+import com.eweware.ApplicationException;
+import com.eweware.DBException;
+import com.eweware.service.base.error.SystemErrorException;
+import com.eweware.service.base.store.dao.BaseDAOConstants;
+import com.eweware.service.base.store.dao.DemographicsObjectDAOConstants;
+import com.eweware.service.base.store.dao.UserProfileDAOConstants;
+import com.eweware.service.base.store.dao.schema.SchemaSpec;
+import com.eweware.service.base.store.dao.schema.UserProfileSchema;
+import com.eweware.service.base.store.dao.schema.type.SchemaDataType;
+import com.eweware.stats.DBCollections;
+import com.eweware.stats.Main;
+import com.eweware.stats.ObjectInfo;
 import org.bson.types.ObjectId;
 
 import java.util.*;
