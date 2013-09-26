@@ -391,10 +391,16 @@ public class Inboxer {
         return blahs;
     }
 
-    private List<DBObject> getRelevantBlahs(String groupId, double minStrength, int numDays) throws DBException, InterruptedException {
+    private List<DBObject> getRelevantBlahs(String groupId, double minStrength, long numDays) throws DBException, InterruptedException {
 
         final BasicDBObject fieldsToReturn = makeBlahFieldsToReturn();
-        BasicDBObject queryObj = new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId).append("S", new BasicDBObject("$gt", minStrength));
+        ArrayList orList = new ArrayList();
+        Date    curDate = new Date();
+        Date minDate = new Date(curDate.getTime() - numDays * 24 * 3600 * 1000 );
+        orList.add(new BasicDBObject("S", new BasicDBObject("$gt", minStrength)));
+        orList.add(new BasicDBObject("c", new BasicDBObject("$gt", minDate)));
+
+        BasicDBObject queryObj = new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId).append("S", new BasicDBObject("$gte", 0)).append("$or", orList);
 
         final DBCursor cursor = Utilities.findInDB(3, "finding blahs in a group", _blahsCol, queryObj, fieldsToReturn);
 
