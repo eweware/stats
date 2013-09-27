@@ -379,7 +379,7 @@ public class Inboxer {
 
         final BasicDBObject fieldsToReturn = makeBlahFieldsToReturn();
 
-        final DBCursor cursor = Utilities.findInDB(3, "finding blahs in a group", _blahsCol, new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId), fieldsToReturn);
+        final DBCursor cursor = Utilities.findInDB(3, "finding blahs in a group", _blahsCol, new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId).append("S", new BasicDBObject("$gte", 0)), fieldsToReturn);
 
         cursor.addOption(Bytes.QUERYOPTION_SLAVEOK);
         cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);

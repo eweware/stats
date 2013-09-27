@@ -105,7 +105,8 @@ public class BlahDescriptiveStats {
         final DBCollection blahCollection = DBCollections.getInstance().getBlahsCol();
         final HashMap<String, E> entries = Main._verbose ? new HashMap<String, E>() : null;
 
-        final DBCursor blahs = Utilities.findInDB(3, "finding blah records", blahCollection, null, fieldsToReturn);
+        final BasicDBObject blahQuery = new BasicDBObject("S", new BasicDBObject("$gt", 0));
+        final DBCursor blahs = Utilities.findInDB(3, "finding blah records", blahCollection, blahQuery, fieldsToReturn);
         blahs.addOption(Bytes.QUERYOPTION_SLAVEOK);
         blahs.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
         long blahCount = 0;
@@ -114,7 +115,6 @@ public class BlahDescriptiveStats {
             blahCount++;
 
             final Object blahDBObjectId = blah.get(BaseDAOConstants.ID);
-
             final Long promotions = Utilities.getValueAsLong(blah.get(BlahDAOConstants.PROMOTED_COUNT), 0L);
             final Long demotions = Utilities.getValueAsLong(blah.get(BlahDAOConstants.DEMOTED_COUNT), 0L);
             final Long predictionCorrect = Utilities.getValueAsLong(blah.get(BlahDAOConstants.PREDICTION_RESULT_CORRECT_COUNT), 0L);
@@ -145,7 +145,8 @@ public class BlahDescriptiveStats {
             final double predictionCorrectness = predictionCorrect - predictionIncorrect - (0.67d * predictionUnresolvable);
 
             final double raw = comments + (promotions * 1.2) + (opens * 0.3) + predictionPopularity + predictionCorrectness + (pollVoteTotal * 0.3) + imageWeight + badgeWeight;
-            double strength = getWilsonLowerBound(raw, (demotions * .2));
+            double
+                    strength = getWilsonLowerBound(raw, (demotions * .2));
 
             if (created.after(cutoffDate) && strength < 0.67D) {
                 final Double recentStrength = getRecentStrength(created.getTime());

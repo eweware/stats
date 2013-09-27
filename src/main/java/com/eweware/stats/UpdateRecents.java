@@ -35,7 +35,7 @@ public class UpdateRecents {
                     final Double currentStrength = BlahDescriptiveStats.getRecentStrength(created.getTime());
                     if (currentStrength != null) {
                         final Double lastStrength = (Double) item.get(InboxBlahDAOConstants.BLAH_STRENGTH);
-                        if (currentStrength != lastStrength) {
+                        if ((lastStrength > 0) && (currentStrength != lastStrength)) {
                             criteria.put(BaseDAOConstants.ID, item.get(BaseDAOConstants.ID));
                             inboxcol.update(criteria, new BasicDBObject("$set", new BasicDBObject(InboxBlahDAOConstants.BLAH_STRENGTH, currentStrength)));
                         }
