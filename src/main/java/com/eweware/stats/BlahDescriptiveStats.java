@@ -100,12 +100,17 @@ public class BlahDescriptiveStats {
         fieldsToReturn.put(BlahDAOConstants.COMMENTS, 1);
         fieldsToReturn.put(BlahDAOConstants.IMAGE_IDS, 1);
         fieldsToReturn.put(BlahDAOConstants.BADGE_IDS, 1);
+        fieldsToReturn.put(BlahDAOConstants.BLAH_STRENGTH, 1);
         fieldsToReturn.put(BaseDAOConstants.CREATED, 1);
 
         final DBCollection blahCollection = DBCollections.getInstance().getBlahsCol();
         final HashMap<String, E> entries = Main._verbose ? new HashMap<String, E>() : null;
 
-        final BasicDBObject blahQuery = new BasicDBObject("S", new BasicDBObject("$gt", 0));
+        ArrayList orList = new ArrayList();
+        orList.add(new BasicDBObject("S", new BasicDBObject("$gte", 0)));
+        orList.add(new BasicDBObject("S", new BasicDBObject("$exists", false)));
+
+        final BasicDBObject blahQuery = new BasicDBObject("$or", orList);
         final DBCursor blahs = Utilities.findInDB(3, "finding blah records", blahCollection, blahQuery, fieldsToReturn);
         blahs.addOption(Bytes.QUERYOPTION_SLAVEOK);
         blahs.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
