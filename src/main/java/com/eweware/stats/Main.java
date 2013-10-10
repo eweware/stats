@@ -209,7 +209,15 @@ public class Main {
             new Inboxer().execute();
             Utilities.printit(true, new Date() + ": Inboxer boxing took " + ((System.currentTimeMillis() - lastTime) / 1000) + " seconds");
 
+
             lastTime = System.currentTimeMillis();
+            new Inboxer().execute();
+            Utilities.printit(true, new Date() + ": User similarity took " + ((System.currentTimeMillis() - lastTime) / 1000) + " seconds");
+
+
+            /*
+            lastTime = System.currentTimeMillis();
+
             final long recentCount = new UpdateRecents().execute();
             ms = System.currentTimeMillis() - lastTime;
             Utilities.printit(true, new Date() + ": Inboxer UpdateRecents took " + (ms / 1000) + " seconds (" + (ms / ((recentCount == 0L) ? 1L : recentCount)) + " ms/recent)");
@@ -217,6 +225,7 @@ public class Main {
             final long timeInMillis = System.currentTimeMillis() - startJob;
             final double millisPerBlah = (blahCount == 0) ? 0 : (timeInMillis * 1.0d) / blahCount;
             Utilities.printit(true, new Date() + ": Inboxer pass " + (passCount++) + " done. Runtime " + (timeInMillis / 1000) + " secs (" + blahCount + " blahs @" + millisPerBlah + " ms/blah)");
+            */
 
         } else {
             if (reputationThreadError == null) {
