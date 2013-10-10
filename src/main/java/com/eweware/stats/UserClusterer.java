@@ -10,6 +10,7 @@ import com.eweware.service.base.store.dao.schema.type.UserProfilePermissions;
 import com.eweware.service.base.store.impl.mongo.dao.MongoStoreManager;
 import com.eweware.stats.help.LocalCache;
 import com.eweware.stats.help.Utilities;
+import org.bson.types.ObjectId;
 
 import java.util.*;
 
@@ -18,18 +19,19 @@ public class UserClusterer {
 
     private final DBCollection _userBlahInfoCol;
 
-    private class UserBlahMap {
+    private class BlahScoreMap extends HashMap<String, Long> {
 
-        private final HashMap<String, HashMap<String, Integer>>  _blahMap = new HashMap<String, HashMap<String, Integer>>();
+    }
 
-        public void setUserBlahCount(String userId, String blahId, int vote, int openCount)  {
-            HashMap<String, Integer> curMap = _blahMap.get(userId);
+    private class UserBlahMap extends HashMap<String, BlahScoreMap> {
+        public void setUserBlahCount(String userId, String blahId, long vote, long openCount)  {
+            BlahScoreMap curMap = this.get(userId);
             if (curMap == null) {
-                curMap = new HashMap<String, int>();
-                _blahMap.put(userId, curMap);
+                curMap = new BlahScoreMap();
+                this.put(userId, curMap);
             }
 
-            int newVal = 0;
+            long newVal = 0;
             if (vote < 0)
                 newVal = -10;
             else {
@@ -48,9 +50,15 @@ public class UserClusterer {
         public void addUserRecord(DBObject obj) {
             String userId = (String)obj.get(UserBlahInfoDAOConstants.USER_ID);
             String blahId = (String)obj.get(UserBlahInfoDAOConstants.BLAH_ID);
-            int openCount = (Integer)obj.get(UserBlahInfoDAOConstants.OPENS);
-            int vote = (Integer)obj.get(UserBlahInfoDAOConstants.PROMOTION);
+            Long openCountRef = (Long)obj.get(UserBlahInfoDAOConstants.OPENS);
+            Long voteRef = (Long)obj.get(UserBlahInfoDAOConstants.PROMOTION);
 
+            long openCount = 0;
+            long vote = 0;
+            if (openCountRef != null)
+                openCount = openCountRef.longValue();
+            if (voteRef != null)
+                vote = voteRef.longValue();
             setUserBlahCount(userId, blahId, vote, openCount);
         }
 
@@ -58,11 +66,11 @@ public class UserClusterer {
         public double getUserDistance(String userOneId, String userTwoId) {
             double distance = 50;
 
-            HashMap<String, Integer> userOneMap = _blahMap.get(userOneId);
-            HashMap<String, Integer> userTwoMap = _blahMap.get(userTwoId);
+            BlahScoreMap userOneMap = this.get(userOneId);
+            BlahScoreMap userTwoMap = this.get(userTwoId);
             if ((userOneMap != null)  && (userTwoMap != null)) {
                 if (userTwoMap.size() < userOneMap.size()) {
-                    HashMap<String, Integer> tempMap = userOneMap;
+                    BlahScoreMap tempMap = userOneMap;
                     userOneMap = userTwoMap;
                     userTwoMap = tempMap;
                 }
@@ -73,7 +81,7 @@ public class UserClusterer {
                 while(i.hasNext()) {
                     Map.Entry me = (Map.Entry)i.next();
                     String curBlahId = (String)me.getKey();
-                    Integer curRec = userTwoMap.get(curBlahId);
+                    Long curRec = userTwoMap.get(curBlahId);
                     if (curRec != null) {
                         int curScoreTwo = curRec.intValue();
                         int curScoreOne = (Integer)me.getValue();
@@ -118,6 +126,19 @@ public class UserClusterer {
 
     }
 
+    class GroupUserMap extends HashMap<String, UserBlahMap> {
+
+        public void addUserRecord(String groupId, DBObject obj) {
+            UserBlahMap curMap = this.get(groupId);
+            if (curMap == null) {
+                curMap = new UserBlahMap();
+                this.put(groupId, curMap);
+            }
+
+            curMap.addUserRecord(obj);
+        }
+    }
+
 
 
     public UserClusterer() throws DBException {
@@ -126,14 +147,48 @@ public class UserClusterer {
     }
 
     public long execute() throws DBException, SystemErrorException, InterruptedException {
+        long userCount = 0;
+        GroupUserMap curMap = new GroupUserMap();
+
+        EnsureGroupTypesAdded();
+        final DBCursor groupCursor = Utilities.findInDB(3, "finding all channels", DBCollections.getInstance().getGroupsCol(), null, null);
         final BasicDBObject fieldsToReturn = makeBlahInfoFieldsToReturn();
-        BasicDBObject queryObj = new BasicDBObject(UserBlahInfoDAO.VIEWS, new BasicDBObject("$gt", 0)).append(UserBlahInfoDAO.OPENS, new BasicDBObject("$gte", 0));
-        final DBCursor cursor = Utilities.findInDB(3, "finding all user blah records", _userBlahInfoCol, queryObj, fieldsToReturn);
-        for (DBObject group : cursor) {
-            getUserDistance()
+
+        for (DBObject curGroup : groupCursor) {
+            String curGroupId = curGroup.get(BaseDAOConstants.ID).toString();
+            BasicDBObject queryObj = new BasicDBObject(UserBlahInfoDAOConstants.VIEWS, new BasicDBObject("$gt", 0)).append(UserBlahInfoDAOConstants.OPENS, new BasicDBObject("$gte", 0)).append(UserBlahInfoDAOConstants.ORIGINAL_GROUP_ID, curGroupId);
+            final DBCursor cursor = Utilities.findInDB(3, "finding all user blah records", _userBlahInfoCol, queryObj, fieldsToReturn);
+            for (DBObject userInfo : cursor) {
+                curMap.addUserRecord(curGroupId, userInfo);
+                userCount++;
+            }
         }
-        Utilities.printit(true, "Added total " + addedInboxItemCount + " inbox objects");
-        return addedInboxItemCount;
+
+        // now for each channel we have the opinion of each user for each blah
+
+        Utilities.printit(true, "Computed grid for " + userCount + " users");
+        return userCount;
+    }
+
+    private int EnsureGroupTypesAdded() throws DBException, InterruptedException {
+        DBCollection    blahCollection = DBCollections.getInstance().getBlahsCol();
+        List<String>  blahIdList = _userBlahInfoCol.distinct(UserBlahInfoDAOConstants.BLAH_ID, new BasicDBObject(UserBlahInfoDAOConstants.ORIGINAL_GROUP_ID, new BasicDBObject("$exists", false)));
+
+        int numUpdated = 0;
+        for (String curBlahStr : blahIdList) {
+            ObjectId    blahId = new ObjectId(curBlahStr);
+            DBObject    theBlah = blahCollection.findOne(new BasicDBObject(BaseDAOConstants.ID, blahId), new BasicDBObject(BlahDAOConstants.GROUP_ID, 1));
+            String groupId = theBlah.get(BlahDAOConstants.GROUP_ID).toString();
+
+            final BasicDBObject setters = new BasicDBObject();
+            setters.put(UserBlahInfoDAOConstants.ORIGINAL_GROUP_ID, groupId);
+
+            final DBObject criteria = new BasicDBObject(UserBlahInfoDAOConstants.BLAH_ID, curBlahStr);
+            final DBObject updateObj = new BasicDBObject("$set", setters);
+            WriteResult result = _userBlahInfoCol.update(criteria, updateObj, false, true);
+            numUpdated += result.getN();
+        }
+        return numUpdated;
     }
 
     private BasicDBObject makeBlahInfoFieldsToReturn() {

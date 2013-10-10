@@ -198,7 +198,15 @@ public class Main {
             long startJob = lastTime;
             long blahCount = 0L;
             long ms = 0L;
+            long userCount;
 
+            lastTime = System.currentTimeMillis();
+            userCount = new UserClusterer().execute();
+            ms = System.currentTimeMillis() - lastTime;
+            Utilities.printit(true, new Date() + ": User Clustering took " + (ms / 1000) + " seconds (" + (ms / ((userCount == 0L) ? 1L : userCount)) + " ms/user)");
+
+
+            lastTime = System.currentTimeMillis();
             blahCount = new BlahDescriptiveStats().execute();
             ms = System.currentTimeMillis() - lastTime;
             Utilities.printit(true, new Date() + ": Inboxer BlahDescriptiveStats took " + (ms / 1000) + " seconds (" + (ms / ((blahCount == 0L) ? 1L : blahCount)) + " ms/blah)");
