@@ -178,15 +178,18 @@ public class UserClusterer {
         for (String curBlahStr : blahIdList) {
             ObjectId    blahId = new ObjectId(curBlahStr);
             DBObject    theBlah = blahCollection.findOne(new BasicDBObject(BaseDAOConstants.ID, blahId), new BasicDBObject(BlahDAOConstants.GROUP_ID, 1));
-            String groupId = theBlah.get(BlahDAOConstants.GROUP_ID).toString();
+            if (theBlah != null)
+            {
+                String groupId = theBlah.get(BlahDAOConstants.GROUP_ID).toString();
 
-            final BasicDBObject setters = new BasicDBObject();
-            setters.put(UserBlahInfoDAOConstants.ORIGINAL_GROUP_ID, groupId);
+                final BasicDBObject setters = new BasicDBObject();
+                setters.put(UserBlahInfoDAOConstants.ORIGINAL_GROUP_ID, groupId);
 
-            final DBObject criteria = new BasicDBObject(UserBlahInfoDAOConstants.BLAH_ID, curBlahStr);
-            final DBObject updateObj = new BasicDBObject("$set", setters);
-            WriteResult result = _userBlahInfoCol.update(criteria, updateObj, false, true);
-            numUpdated += result.getN();
+                final DBObject criteria = new BasicDBObject(UserBlahInfoDAOConstants.BLAH_ID, curBlahStr);
+                final DBObject updateObj = new BasicDBObject("$set", setters);
+                WriteResult result = _userBlahInfoCol.update(criteria, updateObj, false, true);
+                numUpdated += result.getN();
+            }
         }
         return numUpdated;
     }
