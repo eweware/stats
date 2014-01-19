@@ -201,10 +201,10 @@ public class Main {
             long userCount;
 
             lastTime = System.currentTimeMillis();
-            userCount = new UserClusterer().execute();
+            //userCount = new UserClusterer().execute();
             ms = System.currentTimeMillis() - lastTime;
-            Utilities.printit(true, new Date() + ": User Clustering took " + (ms / 1000) + " seconds (" + (ms / ((userCount == 0L) ? 1L : userCount)) + " ms/user)");
-
+            //Utilities.printit(true, new Date() + ": User Clustering took " + (ms / 1000) + " seconds (" + (ms / ((userCount == 0L) ? 1L : userCount)) + " ms/user)");
+            Utilities.printit(true, new Date() + ": Skipping user clustering");
 
             lastTime = System.currentTimeMillis();
             blahCount = new BlahDescriptiveStats().execute();
