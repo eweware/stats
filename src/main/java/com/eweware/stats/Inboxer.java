@@ -102,7 +102,9 @@ public class Inboxer {
         Collections.sort(blahs, new IsStrongerThan());
 
         // Calculate how many inboxes we need and initialize data
-        final Integer inboxCount = Utilities.getValueAsInteger(Math.ceil((blahsInGroupCount * 1.0d) / (MAX_BLAHS_PER_INBOX * 1.0d)), 0);
+        Integer inboxCount = Utilities.getValueAsInteger(Math.ceil((blahsInGroupCount * 1.0d) / (MAX_BLAHS_PER_INBOX * 1.0d)), 0);
+        if (inboxCount > 10)
+            inboxCount = 10;
 
         final List<DBCollection> inboxCollections = new ArrayList<DBCollection>(inboxCount);
         final String inboxDbName = "inboxdb";
