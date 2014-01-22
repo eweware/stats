@@ -23,7 +23,7 @@ public class Main {
     private static final Logger logger = Logger.getLogger(Main.class.getName());
 
 
-    private static final int WAIT_BETWEEN_PASSES_IN_MINUTES = 2;
+    private static final int WAIT_BETWEEN_PASSES_IN_MINUTES = 1;
     private static final int WAIT_BETWEEN_PASSES_IN_MILLIS = 1000 * 60 * WAIT_BETWEEN_PASSES_IN_MINUTES;
     private static final int DEFAULT_MILLIS_TO_WAIT_BEFORE_SENDING_ERROR_EMAIL = 1000 * 10;
 
@@ -32,6 +32,7 @@ public class Main {
     private static final String STATUS_EMAIL_RECIPIENTS = "davevr@eweware.com";
 
     public static boolean _verbose;
+    public static String _runconfig;
 
     // Range in days before today where a strength is considered "recent"
     public static int recentStrengthCutoffInDays = 1;
@@ -77,7 +78,12 @@ public class Main {
             if (args.length > 1) {
                 final String verbose = args[1];
                 _verbose = verbose.toLowerCase().equals("true");
+                if (args.length > 2) {
+                _runconfig = args[2].toLowerCase();
+                }
+                else _runconfig = "stats_inbox";
             }
+            else _runconfig = "stats_inbox";
             environment = args[0].toLowerCase();
             if (environment.equals("prod")) {
                 dbHostnames = PROD_DB_HOSTNAMES;
@@ -100,6 +106,7 @@ public class Main {
         System.out.println("DB HOSTNAME(S): " + dbHostnames);
         System.out.println("DB PORT: " + _dbPort);
         System.out.println("VERBOSE: " + _verbose);
+        System.out.println("CONFIG: " + _runconfig);
         System.out.println("****** END CONFIGURATION ******");
     }
 
@@ -187,83 +194,74 @@ public class Main {
     }
 
     private void runPass() throws Exception {
+        lastTimeUserReputationDoneInMillis = System.currentTimeMillis();
+        long lastTime = System.currentTimeMillis();
+        long startJob = lastTime;
+        long blahCount = 0L;
+        long ms = 0L;
+        long userCount;
 
-        // Proceed only if there is no reputation thread running or the user stats have been calculated
-        final String reputationThreadError = (reputationThread == null) ? null : reputationThread.getError();
-        if (reputationThread == null || (reputationThreadError == null && reputationThread.isUserReputationDone())) {
-
-            lastTimeUserReputationDoneInMillis = System.currentTimeMillis();
-
-            long lastTime = System.currentTimeMillis();
-            long startJob = lastTime;
-            long blahCount = 0L;
-            long ms = 0L;
-            long userCount;
+        if (_runconfig.contains("cluster"))
+        {
+            lastTime = System.currentTimeMillis();
+            //new Inboxer().execute();
+            //Utilities.printit(true, new Date() + ": User similarity took " + ((System.currentTimeMillis() - lastTime) / 1000) + " seconds");
 
             lastTime = System.currentTimeMillis();
-            //userCount = new UserClusterer().execute();
+            userCount = new UserClusterer().execute();
             ms = System.currentTimeMillis() - lastTime;
-            //Utilities.printit(true, new Date() + ": User Clustering took " + (ms / 1000) + " seconds (" + (ms / ((userCount == 0L) ? 1L : userCount)) + " ms/user)");
+           Utilities.printit(true, new Date() + ": User Clustering took " + (ms / 1000) + " seconds (" + (ms / ((userCount == 0L) ? 1L : userCount)) + " ms/user)");
+        }
+        else
             Utilities.printit(true, new Date() + ": Skipping user clustering");
 
+        if (_runconfig.contains("stats"))
+        {
+            Utilities.printit(true, new Date() + ": Starting Descriptive Stats");
             lastTime = System.currentTimeMillis();
             blahCount = new BlahDescriptiveStats().execute();
             ms = System.currentTimeMillis() - lastTime;
             Utilities.printit(true, new Date() + ": Inboxer BlahDescriptiveStats took " + (ms / 1000) + " seconds (" + (ms / ((blahCount == 0L) ? 1L : blahCount)) + " ms/blah)");
 
-            maybeStartReputationThread();
+            Utilities.printit(true, new Date() + ": Starting User Reputation Stats");
+            lastTime = System.currentTimeMillis();
+            executeReputation();
+            ms = System.currentTimeMillis() - lastTime;
+            Utilities.printit(true, new Date() + ": User Reputation took " + (ms / 1000) + " seconds");
+        }
+        else
+            Utilities.printit(true, new Date() + ": Skipping user and blah stats");
 
+        if (_runconfig.contains("inbox"))
+        {
+            Utilities.printit(true, new Date() + ": Starting Inboxing");
             lastTime = System.currentTimeMillis();
             new Inboxer().execute();
             Utilities.printit(true, new Date() + ": Inboxer boxing took " + ((System.currentTimeMillis() - lastTime) / 1000) + " seconds");
-
-
-            lastTime = System.currentTimeMillis();
-            new Inboxer().execute();
-            Utilities.printit(true, new Date() + ": User similarity took " + ((System.currentTimeMillis() - lastTime) / 1000) + " seconds");
-
-
-            /*
-            lastTime = System.currentTimeMillis();
-
-            final long recentCount = new UpdateRecents().execute();
-            ms = System.currentTimeMillis() - lastTime;
-            Utilities.printit(true, new Date() + ": Inboxer UpdateRecents took " + (ms / 1000) + " seconds (" + (ms / ((recentCount == 0L) ? 1L : recentCount)) + " ms/recent)");
-
-            final long timeInMillis = System.currentTimeMillis() - startJob;
-            final double millisPerBlah = (blahCount == 0) ? 0 : (timeInMillis * 1.0d) / blahCount;
-            Utilities.printit(true, new Date() + ": Inboxer pass " + (passCount++) + " done. Runtime " + (timeInMillis / 1000) + " secs (" + blahCount + " blahs @" + millisPerBlah + " ms/blah)");
-            */
-
-        } else {
-            if (reputationThreadError == null) {
-                // Wait for next pass: user stats not yet computed by reputation thread
-                final long waitTimeInMillis = System.currentTimeMillis() - lastTimeUserReputationDoneInMillis;
-                final String waitedMessage = timeString(waitTimeInMillis);
-                Utilities.printit(true, new Date() + ": Inboxer waiting on user reputation. Been waiting for " + waitedMessage);
-                if (waitTimeInMillis > millisToWaitForUserReputationBeforeSendingEmail) {
-                    millisToWaitForUserReputationBeforeSendingEmail = Utilities.getValueAsLong(1.25 * millisToWaitForUserReputationBeforeSendingEmail) + waitTimeInMillis; // delay next email
-                    safeSendEmail("Long wait for user reputation stats", "Been waiting for user reputation to be calculated for " + waitedMessage +
-                            " since last notification.<br/><br/>If this condition continues, inbox construction will be slower than usual.<br/><br/>" +
-                            "<b>This notification will be sent less frequently, but the condition will persist. Time to deploy a prime-time implementation? Getting a faster/bigger machine won't help.</b>");
-                }
-            } else {
-                // error is logged by the reputation thread, which also sends a one-time email notification
-                reputationThread = null;
-            }
         }
+        else
+            Utilities.printit(true, new Date() + ": Skipping inboxing");
+
     }
 
     private static String timeString(long millis) {
         return new SimpleDateFormat("mm:ss").format(new Date(millis)) + " (minutes:seconds)";
     }
 
+    private void executeReputation() {
+        if (reputationThread == null) {
+            reputationThread = new ReputationThread();
+        }
+        reputationThread.run();
+
+    }
+
     private void maybeStartReputationThread() {
         if (reputationThread == null || reputationThread.isStopped()) {
             this.reputationThread = new ReputationThread();
-            final Thread thread = new Thread(reputationThread);
-            thread.setDaemon(true);
-            thread.start();
+            //final Thread thread = new Thread(reputationThread);
+            //thread.setDaemon(true);
+            //thread.start();
             millisToWaitForUserReputationBeforeSendingEmail = DEFAULT_MILLIS_TO_WAIT_BEFORE_SENDING_ERROR_EMAIL;
         }
     }

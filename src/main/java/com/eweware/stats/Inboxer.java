@@ -98,6 +98,7 @@ public class Inboxer {
             return 0;
         }
 
+
         // Sort blahs in memory
         Collections.sort(blahs, new IsStrongerThan());
 
@@ -440,7 +441,16 @@ public class Inboxer {
         public int compare(DBObject a, DBObject b) {
             final Double obj1 = (Double) a.get(BlahDAOConstants.BLAH_STRENGTH);
             final Double obj2 = (Double) b.get(BlahDAOConstants.BLAH_STRENGTH);
-            return (obj1 != null & obj2 != null) ? (obj1 < obj2 ? 1 : -1) : (obj1 == null ? -1 : 1);
+            if (obj1 == null)
+            {
+                return 1;
+            }
+            else if  (obj2 == null)
+            {
+                return -1;
+            }
+            else
+                return obj1.compareTo(obj2);
         }
     }
 }
