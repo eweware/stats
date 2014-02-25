@@ -109,9 +109,28 @@ public final class BlahPayload extends BasePayload implements BlahDAOConstants {
         }
     }
 
+    public Boolean getAnonymous() {
+        return (Boolean) get(ANONYMOUS);
+    }
+
+
+    public void setAnonymous(Boolean anon) {
+        put(ANONYMOUS, anon);
+    }
+
+
+    public Boolean getFlagged() {
+        return (Boolean) get(FLAGGEDCONTENT);
+    }
+
+
+    public void SetFlagged(Boolean anon) {
+        put(FLAGGEDCONTENT, anon);
+    }
+
     /**
      * <p>Returns the blah's body. This is additional text
-     * and it may be up to 4000 characters in length.</p>
+     * and it may be up to 1024 characters in length.</p>
      * @return  The blah's body text or null if the blah has no body text.
      */
     public String getBody() {

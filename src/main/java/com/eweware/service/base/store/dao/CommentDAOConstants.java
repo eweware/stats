@@ -16,9 +16,26 @@ public interface CommentDAOConstants {
     static final String BLAH_ID = "B";
 
     /**
+     * <p>The comment's comment ID, if any.</p>
+     */
+    static final String PARENT_ID = "CID";
+
+    /**
      * <p>The comments text. A string.</p>
      */
     static final String TEXT = "T";
+
+    /**
+     * <p>Whether or not this comment is anonymous.
+     * A boolean.</p>
+     */
+    static final String ANONYMOUS = "XX";
+
+    /**
+     * <p>Whether or not this comment is flagged for profanity, etc.
+     * A boolean.</p>
+     */
+    static final String FLAGGEDCONTENT = "XXX";
 
     /**
      * <p>The comment's author's user id. A string.</p>
@@ -27,22 +44,22 @@ public interface CommentDAOConstants {
 
     /**
      * <p>The vote, if any, of the comment on the blah.
-     * An integer.</p>
+     * A long.</p>
      */
     static final String BLAH_VOTE = "V";
 
     /**
-     * <p>The total number of votes on this comment. An integer. <b>TODO: get rid of this: can be inferred from sum of up/down votes</b></p>
+     * <p>The total number of votes on this comment. A long. <b>TODO: get rid of this: can be inferred from sum of up/down votes</b></p>
      */
     static final String COMMENT_VOTES = "C";
 
     /**
-     * <p>The number of up votes for this comment. An integer.</p>
+     * <p>The number of up votes for this comment. A long.</p>
      */
     static final String COMMENT_UP_VOTES = "U";
 
     /**
-     * <p>The number of down votes for this comment. An integer.</p>
+     * <p>The number of down votes for this comment. A long.</p>
      */
     static final String COMMENT_DOWN_VOTES = "D";
 
@@ -52,14 +69,19 @@ public interface CommentDAOConstants {
     static final String COMMENT_STRENGTH = "S";
 
     /**
-     * <p>The number of times this comment has been viewed. An integer.</p>
+     * <p>The number of times this comment has been viewed. A long.</p>
      */
     static final String VIEWS = "W";
 
     /**
-     * <p>The number of times this comment has been opened. An integer.</p>
+     * <p>The number of times this comment has been opened. A long.</p>
      */
     static final String OPENS = "O";
+
+    /**
+     * <p>A set of badges associated with this comment.</p>
+     */
+    static final String BADGE_IDS = "BD";
 
     /**
      * <p>Optional stats entity for this comment. <b>TODO: need better doc for this.</b></p>
@@ -80,7 +102,7 @@ public interface CommentDAOConstants {
 
     static final SchemaDataTypeFieldMap[] SIMPLE_FIELD_TYPES = new SchemaDataTypeFieldMap[]{
             new SchemaDataTypeFieldMap(SchemaDataType.S, new String[]{
-                    BLAH_ID, TEXT, AUTHOR_ID
+                    BLAH_ID, TEXT, AUTHOR_ID, PARENT_ID
             }),
             new SchemaDataTypeFieldMap(SchemaDataType.L, new String[]{
                     BLAH_VOTE, COMMENT_VOTES, COMMENT_UP_VOTES, COMMENT_DOWN_VOTES, VIEWS, OPENS
@@ -88,11 +110,17 @@ public interface CommentDAOConstants {
             new SchemaDataTypeFieldMap(SchemaDataType.R, new String[]{
                     COMMENT_STRENGTH
             }),
+            new SchemaDataTypeFieldMap(SchemaDataType.B, new String[]{
+                    ANONYMOUS
+            }),
+            new SchemaDataTypeFieldMap(SchemaDataType.I, new String[]{
+                    FLAGGEDCONTENT
+            }),
             new SchemaDataTypeFieldMap(SchemaDataType.E, new String[]{
                     STATS
             }),
             new SchemaDataTypeFieldMap(SchemaDataType.ILS, new String[] {
-                    IMAGE_IDS
+                    IMAGE_IDS, BADGE_IDS
             }),
     };
 }

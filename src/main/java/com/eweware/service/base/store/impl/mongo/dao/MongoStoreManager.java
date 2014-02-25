@@ -10,6 +10,7 @@ import com.eweware.service.base.store.dao.*;
 import com.eweware.service.base.type.RunMode;
 import org.bson.types.ObjectId;
 
+import javax.net.SocketFactory;
 import javax.xml.ws.WebServiceException;
 import java.util.*;
 import java.util.logging.Level;
@@ -42,7 +43,7 @@ public final class MongoStoreManager implements StoreManager {
 
     private ManagerState status = ManagerState.UNKNOWN;
     private int mongoDbPort;
-    private Integer connectionsPerHost = 10; // default
+    private Integer connectionsPerHost = 100; // default
     private MongoClient mongo;
     private Map<String, DB> dbNameToDbMap;
 
@@ -59,6 +60,7 @@ public final class MongoStoreManager implements StoreManager {
     private String mediaCollectionName;
     private String blahCollectionName;
     private String blahTypeCollectionName;
+    private String whatsNewCollectionName;
     private String groupCollectionName;
     private String groupTypeCollectionName;
     private String userCollectionName;
@@ -155,6 +157,13 @@ public final class MongoStoreManager implements StoreManager {
         blahCollectionName = name;
     }
 
+    public String getWhatsNewCollectionName() {
+        return whatsNewCollectionName;
+    }
+
+    public void setWhatsNewCollectionName(String name) {
+        whatsNewCollectionName = name;
+    }
     public String getBlahTypeCollectionName() {
         return blahTypeCollectionName;
     }
@@ -347,7 +356,7 @@ public final class MongoStoreManager implements StoreManager {
 
             // Set up connections per host
             if (runMode != RunMode.PROD) {
-                this.connectionsPerHost = 3;
+                this.connectionsPerHost = 10;
                 logger.info("*** MongoDB hostname: " + (runMode == RunMode.QA ? qaMongoDbHostname : devMongoDbHostname) + " port " + this.mongoDbPort);
             } else {
                 logger.info("MongoDB hostnames '" + this.hostnames + "' port '" + this.mongoDbPort + "'");
@@ -365,15 +374,21 @@ public final class MongoStoreManager implements StoreManager {
                 }
             }
             if (serverAddresses.size() == 1) {
+                builder.writeConcern(WriteConcern.SAFE);
                 logger.info("*** Connecting as a standalone hostname " + serverAddresses.get(0) + " at port " + mongoDbPort + " ***");
             } else if (serverAddresses.size() > 0) {
                 builder
                         .readPreference(ReadPreference.primaryPreferred()) // tries to read from primary
-                        .writeConcern(WriteConcern.MAJORITY);      // Writes to secondaries before returning
+                        .writeConcern(WriteConcern.SAFE);      // Writes to secondaries before returning
                 logger.info("*** Connecting to hostnames in replica set: " + serverAddresses + " at port " + mongoDbPort + " ***");
             } else {
                 throw new WebServiceException("Neither using replica nor using standalone DB");
             }
+            builder.autoConnectRetry(true)
+                    .connectTimeout(30000)
+                    .socketKeepAlive(true);
+
+
             this.mongo = new MongoClient(serverAddresses, builder.build());
 
 
@@ -428,6 +443,9 @@ public final class MongoStoreManager implements StoreManager {
 
             checkCollection(collectionNameToCollectionMap, blahTypeCollectionName);
             collectionNameToCollectionMap.put(blahTypeCollectionName, getBlahDb().getCollection(blahTypeCollectionName));
+
+            checkCollection(collectionNameToCollectionMap, whatsNewCollectionName);
+            collectionNameToCollectionMap.put(whatsNewCollectionName, getUserDb().getCollection(whatsNewCollectionName));
 
             checkCollection(collectionNameToCollectionMap, commentCollectionName);
             collectionNameToCollectionMap.put(commentCollectionName, getBlahDb().getCollection(commentCollectionName));
@@ -559,6 +577,12 @@ public final class MongoStoreManager implements StoreManager {
     public UserProfileDAO createUserProfile() {
         return new UserProfileDAOImpl();
     }
+
+    @Override
+    public WhatsNewDAO createWhatsNew(String userId) throws SystemErrorException {
+        return new WhatsNewDAOImpl(userId);
+    }
+
 
     @Override
     public UserProfileDAO createUserProfile(Map<String, Object> map) throws SystemErrorException {

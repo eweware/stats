@@ -44,33 +44,49 @@ public interface BlahDAOConstants {
 
     /**
      * <p>The count of users who have promoted this blah.
-     * An integer.</p>
+     * A long.</p>
      */
     static final String PROMOTED_COUNT = "P";
 
     /**
      * <p>The count of users who have demoted this blah.
-     * An integer.</p>
+     * A Long.</p>
      */
     static final String DEMOTED_COUNT = "D";
 
     /**
      * <p>The number of views of this blah.
-     * An integer.</p>
+     * A Long.</p>
      */
     static final String VIEWS = "V";
 
     /**
      * <p>The number of opens of this blah.
-     * An integer.</p>
+     * A long.</p>
      */
     static final String OPENS = "O";
 
     /**
      * <p>The number of comments on this blah.
-     * An integer.</p>
+     * A long.</p>
      */
     static final String COMMENTS = "C";
+
+
+    /**
+     * <p>Whether or not this blah is anonymous.
+     * A boolean.</p>
+     */
+    static final String ANONYMOUS = "XX";
+
+
+
+    /**
+     * <p>Whether or not this blah is anonymous.
+     * A boolean.</p>
+     */
+    static final String FLAGGEDCONTENT = "XXX";
+
 
     /**
      * <p>The blah's all-time strength.
@@ -144,7 +160,7 @@ public interface BlahDAOConstants {
     /**
      * <p>If this blah is a poll, this is the number
      * of poll options.
-     * An integer.</p>
+     * A long.</p>
      *
      * @see #POLL_OPTIONS_TEXT
      * @see #POLL_OPTION_VOTES
@@ -195,13 +211,18 @@ public interface BlahDAOConstants {
     static final String IMAGE_IDS = "M";
 
     /**
+     * <p>The id of the user who this blah is intended for</p>
+     */
+    static final String TARGET_USER_ID = "TU";
+
+    /**
      * <p>A set of badges associated with this blah.</p>
      */
     static final String BADGE_IDS = "B";
 
     static final SchemaDataTypeFieldMap[] SIMPLE_FIELD_TYPES = new SchemaDataTypeFieldMap[]{
             new SchemaDataTypeFieldMap(SchemaDataType.S, new String[]{
-                    TYPE_ID, TEXT, BODY, GROUP_ID, AUTHOR_ID}),
+                    TYPE_ID, TEXT, BODY, GROUP_ID, AUTHOR_ID, TARGET_USER_ID}),
 
             new SchemaDataTypeFieldMap(SchemaDataType.L, new String[]{
                     PREDICTION_RESULT_CORRECT_COUNT, PREDICTION_RESULT_INCORRECT_COUNT, PREDICTION_RESULT_UNCLEAR_COUNT,
@@ -215,6 +236,12 @@ public interface BlahDAOConstants {
             }),
             new SchemaDataTypeFieldMap(SchemaDataType.E, new String[]{
                     STATS
+            }),
+            new SchemaDataTypeFieldMap(SchemaDataType.B, new String[]{
+                    ANONYMOUS
+            }),
+            new SchemaDataTypeFieldMap(SchemaDataType.I, new String[]{
+                    FLAGGEDCONTENT
             }),
             new SchemaDataTypeFieldMap(SchemaDataType.ILS, new String[]{
                     IMAGE_IDS, BADGE_IDS

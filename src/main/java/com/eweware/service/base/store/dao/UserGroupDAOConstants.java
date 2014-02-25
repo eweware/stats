@@ -34,6 +34,22 @@ public interface UserGroupDAOConstants {
      */
     static final String STATE = "S";
 
+    /**
+     * <p>The number of the first active inbox of the group, an Integer.</p>
+     * <p>Each inbox is a collection whose name is the concatenation
+     * of the group id and the inbox number.</p>
+     */
+    static final String FIRST_INBOX_NUMBER = "F";
+
+    /**
+     * <p>The number of the last active inbox of the group, an Integer.</p>
+     * <p>Each inbox is a collection whose name is the concatenation
+     * of the group id and the inbox number.</p>
+     */
+    static final String LAST_INBOX_NUMBER = "L";
+
+
+
 //    /**
 //     * <p><b>Do not use.</b></p>
 //     * <p>This was used during alpha but will be mostly replaced with badges. But it may make a comeback for some cases.</p>
@@ -41,6 +57,7 @@ public interface UserGroupDAOConstants {
 //    static final String VALIDATION_CODE = "C";
 
     static final SchemaDataTypeFieldMap[] SIMPLE_FIELD_TYPES = new SchemaDataTypeFieldMap[]{
-            new SchemaDataTypeFieldMap(SchemaDataType.S, new String[]{GROUP_ID, GROUP_DISPLAY_NAME, USER_ID, STATE})
+            new SchemaDataTypeFieldMap(SchemaDataType.S, new String[]{GROUP_ID, GROUP_DISPLAY_NAME, USER_ID, STATE}),
+            new SchemaDataTypeFieldMap(SchemaDataType.I, new String[]{FIRST_INBOX_NUMBER, LAST_INBOX_NUMBER})
     };
 }

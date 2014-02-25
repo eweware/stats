@@ -1,5 +1,6 @@
 package com.eweware.service.base.store.dao;
 
+import com.eweware.service.base.store.dao.schema.type.BooleanDataTypeValidator;
 import com.eweware.service.base.store.dao.schema.type.SchemaDataType;
 import com.eweware.service.base.store.dao.schema.type.SchemaDataTypeFieldMap;
 
@@ -40,14 +41,24 @@ public interface UserDAOConstants {
     static final String BADGE_IDS = "B";
 
     /**
+     * <p>Last login time for this user.</p>
+     */
+    static final String LAST_LOGIN = "LL";
+
+
+    /**
      * <p>List of image ids for this user</p>
      */
     static final String IMAGE_IDS = "M";
 
+    static final String IS_ADMIN = "ad";
+
     static final SchemaDataTypeFieldMap[] SIMPLE_FIELD_TYPES = new SchemaDataTypeFieldMap[]{
+            new SchemaDataTypeFieldMap(SchemaDataType.B, new String[]{IS_ADMIN}),
             new SchemaDataTypeFieldMap(SchemaDataType.S, new String[]{USERNAME}),
             new SchemaDataTypeFieldMap(SchemaDataType.R, new String[]{USER_STRENGTH, USER_CONTROVERSY_STRENGTH}),
             new SchemaDataTypeFieldMap(SchemaDataType.E, new String[]{STATS}),
+            new SchemaDataTypeFieldMap(SchemaDataType.DT, new String[]{LAST_LOGIN}),
             new SchemaDataTypeFieldMap(SchemaDataType.ILS, new String[]{BADGE_IDS, IMAGE_IDS}),
     };
 }

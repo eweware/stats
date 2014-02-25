@@ -60,6 +60,52 @@ public final class CommentPayload extends BasePayload implements CommentDAOConst
         put(AUTHOR_ID, authorId);
     }
 
+
+    public String getParentId() {
+        return (String) get(PARENT_ID);
+    }
+
+    public void setParentId(String authorId) {
+        put(PARENT_ID, authorId);
+    }
+
+    public Boolean getAnonymous() {
+        return (Boolean) get(ANONYMOUS);
+    }
+
+
+    public void setAnonymous(Boolean anon) {
+        put(ANONYMOUS, anon);
+    }
+
+
+    public Integer getFlagged() {
+        return (Integer) get(FLAGGEDCONTENT);
+    }
+
+
+    public void SetFlagged(Integer anon) {
+        put(FLAGGEDCONTENT, anon);
+    }
+
+    /**
+     * <p>Returns the list of badge ids associated with this blah.</p>
+     * @return  List of badge ids or null if there are none.
+     */
+    public List<String> getBadgeIds() {
+        return (List<String>) get(BADGE_IDS);
+    }
+
+    /**
+     * <p>Sets the list of badge ids associated with this blah.</p>
+     * @param badgeIds
+     */
+    public void setBadgeIds(List<String> badgeIds) {
+        put(BADGE_IDS, badgeIds);
+    }
+
+
+
     public Long getBlahVote() {
         return CommonUtilities.getValueAsLong(get(BLAH_VOTE), null);
     }

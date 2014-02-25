@@ -34,8 +34,10 @@ public class BlahDAOImpl extends BaseDAOImpl implements BlahDAO {
         BlahDAOImpl.FIELD_TO_TYPE_MAP.put(TYPE_ID, MongoFieldTypes.STRING);
         BlahDAOImpl.FIELD_TO_TYPE_MAP.put(TEXT, MongoFieldTypes.STRING);
         BlahDAOImpl.FIELD_TO_TYPE_MAP.put(BODY, MongoFieldTypes.STRING);
+        BlahDAOImpl.FIELD_TO_TYPE_MAP.put(ANONYMOUS, MongoFieldTypes.BOOLEAN);
         BlahDAOImpl.FIELD_TO_TYPE_MAP.put(GROUP_ID, MongoFieldTypes.STRING);
         BlahDAOImpl.FIELD_TO_TYPE_MAP.put(AUTHOR_ID, MongoFieldTypes.STRING);
+        BlahDAOImpl.FIELD_TO_TYPE_MAP.put(TARGET_USER_ID, MongoFieldTypes.STRING);
         BlahDAOImpl.FIELD_TO_TYPE_MAP.put(PROMOTED_COUNT, MongoFieldTypes.NUMBER);
         BlahDAOImpl.FIELD_TO_TYPE_MAP.put(DEMOTED_COUNT, MongoFieldTypes.NUMBER);
         BlahDAOImpl.FIELD_TO_TYPE_MAP.put(EXPIRATION_DATE, MongoFieldTypes.DATE);
@@ -108,6 +110,16 @@ public class BlahDAOImpl extends BaseDAOImpl implements BlahDAO {
     }
 
     @Override
+    public String getTargetUserId() {
+        return (String) get(TARGET_USER_ID);
+    }
+
+    @Override
+    public void setTargetUserId(String targetUserId) {
+        put(TARGET_USER_ID, targetUserId);
+    }
+
+    @Override
     public String getText() {
         return (String) get(TEXT);
     }
@@ -115,6 +127,26 @@ public class BlahDAOImpl extends BaseDAOImpl implements BlahDAO {
     @Override
     public void setText(String text) {
         put(TEXT, text);
+    }
+
+    @Override
+     public Boolean getAnonymous() {
+        return (Boolean) get(ANONYMOUS);
+    }
+
+    @Override
+    public void setAnonymous(Boolean anon) {
+        put(ANONYMOUS, anon);
+    }
+
+    @Override
+    public Integer getFlagged() {
+        return (Integer) get(FLAGGEDCONTENT);
+    }
+
+    @Override
+    public void setFlagged(Integer anon) {
+        put(FLAGGEDCONTENT, anon);
     }
 
     @Override

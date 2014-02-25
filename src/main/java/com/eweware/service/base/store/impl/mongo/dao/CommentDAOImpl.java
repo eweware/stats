@@ -26,6 +26,7 @@ public class CommentDAOImpl extends BaseDAOImpl implements CommentDAO {
     private static final Map<String, MongoFieldTypes> FIELD_TO_TYPE_MAP = new HashMap<String, MongoFieldTypes>();
     static {   // TODO should be derived from schema
         CommentDAOImpl.FIELD_TO_TYPE_MAP.put(BLAH_ID, MongoFieldTypes.STRING);
+        CommentDAOImpl.FIELD_TO_TYPE_MAP.put(PARENT_ID, MongoFieldTypes.STRING);
         CommentDAOImpl.FIELD_TO_TYPE_MAP.put(TEXT, MongoFieldTypes.STRING);
         CommentDAOImpl.FIELD_TO_TYPE_MAP.put(AUTHOR_ID, MongoFieldTypes.STRING);
         CommentDAOImpl.FIELD_TO_TYPE_MAP.put(BLAH_VOTE, MongoFieldTypes.NUMBER);
@@ -36,6 +37,7 @@ public class CommentDAOImpl extends BaseDAOImpl implements CommentDAO {
         CommentDAOImpl.FIELD_TO_TYPE_MAP.put(VIEWS, MongoFieldTypes.NUMBER);
         CommentDAOImpl.FIELD_TO_TYPE_MAP.put(OPENS, MongoFieldTypes.NUMBER);
         CommentDAOImpl.FIELD_TO_TYPE_MAP.put(IMAGE_IDS, MongoFieldTypes.ARRAY);
+        CommentDAOImpl.FIELD_TO_TYPE_MAP.put(BADGE_IDS, MongoFieldTypes.ARRAY);
         addInheritedFieldToTypeMapItems(FIELD_TO_TYPE_MAP);
     }
 
@@ -91,6 +93,29 @@ public class CommentDAOImpl extends BaseDAOImpl implements CommentDAO {
     }
 
     @Override
+    public Boolean getAnonymous() {
+        return (Boolean) get(ANONYMOUS);
+    }
+
+    @Override
+    public void setAnonymous(Boolean anon) {
+        put(ANONYMOUS, anon);
+    }
+
+
+    @Override
+    public Integer getFlagged() {
+        return (Integer) get(FLAGGEDCONTENT);
+    }
+
+    @Override
+    public void setFlagged(Integer anon) {
+        put(FLAGGEDCONTENT, anon);
+    }
+
+
+
+    @Override
     public List<String> getImageIds() {
         return (List<String>) get(IMAGE_IDS);
     }
@@ -98,6 +123,16 @@ public class CommentDAOImpl extends BaseDAOImpl implements CommentDAO {
     @Override
     public void setImageIds(List<String> imageIds) {
         put(IMAGE_IDS, imageIds);
+    }
+
+    @Override
+    public List<String> getBadgeIds() {
+        return (List<String>) get(BADGE_IDS);
+    }
+
+    @Override
+    public void setBadgeIds(List<String> badgeIds) {
+        put(BADGE_IDS, badgeIds);
     }
 
     @Override
@@ -119,6 +154,17 @@ public class CommentDAOImpl extends BaseDAOImpl implements CommentDAO {
     public void setBlahId(String id) {
         put(BLAH_ID, id);
     }
+
+    @Override
+    public String getParentId() {
+        return (String) get(PARENT_ID);
+    }
+
+    @Override
+    public void setParentId(String id) {
+        put(PARENT_ID, id);
+    }
+
 
     @Override
     public Long getBlahVote() {

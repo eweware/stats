@@ -31,6 +31,8 @@ public class Inboxer {
     private final DBCollection _groupsCol;
 
     private final DBCollection _userProfilesCol;
+    private AggregationOutput _blahActivityList = null;
+
 
 //    // absolute maximum number of inboxes per group
 //    private int absoluteMaxInboxesPerGroup = 10;
@@ -64,12 +66,66 @@ public class Inboxer {
     public long execute() throws DBException, SystemErrorException, InterruptedException {
         final DBCursor cursor = Utilities.findInDB(3, "finding all group records", _groupsCol, null, null);
         long addedInboxItemCount = 0;
+        RefreshActivityList();
+
+
+
         for (DBObject group : cursor) {
             long addedInGroup = buildInbox(group);
             addedInboxItemCount += addedInGroup;
         }
         Utilities.printit(true, "Added total " + addedInboxItemCount + " inbox objects");
         return addedInboxItemCount;
+    }
+
+    private void RefreshActivityList()  throws DBException
+    {
+        _blahActivityList = null;
+
+        DBCollection userCollection = DBCollections.getInstance().getUserBlahInfoCol();
+        BasicDBObject opensObj = new BasicDBObject("O", new BasicDBObject("$exists", true));
+        BasicDBObject commentsObj = new BasicDBObject("C", new BasicDBObject("$exists", true));
+        BasicDBObject votesObj = new BasicDBObject("P", new BasicDBObject("$exists", true));
+        BasicDBList typeOrList = new BasicDBList();
+        typeOrList.add(opensObj);
+        typeOrList.add(commentsObj);
+        typeOrList.add(votesObj);
+        BasicDBObject typeObj = new BasicDBObject("$or", typeOrList);
+
+        long curTime = System.currentTimeMillis();
+        long startTime = curTime - 4 * 3600 * 1000; // 8 hours ago
+        Date startDate = new Date();
+        startDate.setTime(startTime);
+        BasicDBObject createObj = new BasicDBObject("c", new BasicDBObject("$gte", startDate));
+        BasicDBObject updateObj = new BasicDBObject("u", new BasicDBObject("$gte", startDate));
+        BasicDBList timeOrList = new BasicDBList();
+        timeOrList.add(createObj);
+        timeOrList.add(updateObj);
+        BasicDBObject timeObj = new BasicDBObject("$or", timeOrList);
+        BasicDBList matchAndList = new BasicDBList();
+        matchAndList.add(typeObj);
+        matchAndList.add(timeObj);
+
+        BasicDBObject matchObj = new BasicDBObject("$match", new BasicDBObject("$and", matchAndList));
+
+
+        BasicDBObject groupObj = new BasicDBObject("$group", new BasicDBObject("_id", "$B").append("totalOpens", new BasicDBObject("$sum", "$O")).append("totalComments", new BasicDBObject("$sum", "$C")).append("totalVotes", new BasicDBObject("$sum", "$P")));
+
+        BasicDBList projectList = new BasicDBList();
+        projectList.add("$totalOpens");
+        BasicDBList commentScoreList = new BasicDBList();
+        commentScoreList.add("$totalComments");
+        commentScoreList.add(5);
+        BasicDBList voteScoreList = new BasicDBList();
+        voteScoreList.add("$totalVotes");
+        voteScoreList.add(2);
+
+        projectList.add(new BasicDBObject("$multiply", commentScoreList));
+        projectList.add(new BasicDBObject("$multiply", voteScoreList));
+
+        BasicDBObject projectObj = new BasicDBObject("$project", new BasicDBObject("totalScore", new BasicDBObject("$add", projectList)));
+
+        _blahActivityList = userCollection.aggregate(matchObj, groupObj, projectObj);
     }
 
     private String getGroupName(String groupId) throws SystemErrorException, DBException, InterruptedException {
@@ -292,9 +348,13 @@ public class Inboxer {
 
     private BasicDBObject makeInboxItem(String groupId, DBObject blah) {
 
-        final BasicDBObject inboxItem = new BasicDBObject(InboxBlahDAOConstants.BLAH_ID, blah.get(BaseDAOConstants.ID).toString());
+        final String blahId = blah.get(BaseDAOConstants.ID).toString();
+        final BasicDBObject inboxItem = new BasicDBObject(InboxBlahDAOConstants.BLAH_ID, blahId);
 
         // IMPORTANT: to fetch the following fields, include them in makeBlahFieldsToReturn() */
+
+        /*
+        // this is to set that the blah is recent.  However, we can easily do this server-side
         Date    createDate = (Date)blah.get(BaseDAOConstants.CREATED);
         Date    now = new Date();
         inboxItem.put(BaseDAOConstants.CREATED, createDate);
@@ -303,6 +363,8 @@ public class Inboxer {
         if (difference < newTime) {
             inboxItem.put(InboxBlahDAOConstants.BLAH_NEWFLAG, true);
         }
+        */
+
         inboxItem.put(InboxBlahDAOConstants.BLAH_TEXT, blah.get(BlahDAOConstants.TEXT));
         inboxItem.put(InboxBlahDAOConstants.TYPE, blah.get(BlahDAOConstants.TYPE_ID));
         inboxItem.put(InboxBlahDAOConstants.GROUP_ID, groupId);
@@ -310,22 +372,12 @@ public class Inboxer {
         if (tmp != null) {
             inboxItem.put(InboxBlahDAOConstants.AUTHOR_ID, tmp);
         }
-//            tmp = blah.get(BlahDAOConstants.PROMOTED_COUNT);
-//            if (tmp != null) {
-//                inboxItem.put(InboxBlahDAOConstants.UP_VOTES, tmp);
-//            }
-//            tmp = blah.get(BlahDAOConstants.DEMOTED_COUNT);
-//            if (tmp != null) {
-//                inboxItem.put(InboxBlahDAOConstants.DOWN_VOTES, tmp);
-//            }
-//            tmp = blah.get(BlahDAOConstants.OPENS);
-//            if (tmp != null) {
-//                inboxItem.put(InboxBlahDAOConstants.OPENS, tmp);
-//            }
-//            tmp = blah.get(BlahDAOConstants.VIEWS);
-//            if (tmp != null) {
-//                inboxItem.put(InboxBlahDAOConstants.VIEWS, tmp);
-//            }
+
+        boolean blahIsActive = checkIfBlahIsActive(blahId);
+        if (blahIsActive) {
+            inboxItem.put(InboxBlahDAOConstants.RECENTLY_ACTIVE, true);
+        }
+
         tmp = blah.get(BlahDAOConstants.IMAGE_IDS);
         if (tmp != null) {
             inboxItem.put(InboxBlahDAOConstants.IMAGE_IDS, tmp);
@@ -334,18 +386,35 @@ public class Inboxer {
         if (tmp != null) {
             inboxItem.put(InboxBlahDAOConstants.BADGE_INDICATOR, "b");
         }
-//            String nickname = _nicknameCache.get(blahAuthorId);
-//            if (noNickname(nickname)) {
-//                nickname = fetchAndCacheNickname(blahAuthorId);
-//            }
-//            if (!noNickname(nickname)) {
-//                inboxItem.put(InboxBlahDAOConstants.AUTHOR_NICKNAME, nickname);
-//            }
+
         tmp = blah.get(BlahDAOConstants.BLAH_STRENGTH);
         if (tmp != null) {
             inboxItem.put(InboxBlahDAOConstants.BLAH_STRENGTH, tmp);
         }
         return inboxItem;
+    }
+
+    private boolean checkIfBlahIsActive(String blahId)
+    {
+        boolean isActive = false;
+
+        if (_blahActivityList != null)
+        {
+            java.lang.Iterable<DBObject>  resultSet = _blahActivityList.results();
+            Iterator<DBObject> objList = resultSet.iterator();
+
+            while (objList.hasNext()) {
+                DBObject curObj = objList.next();
+                if (curObj.get("_id").toString().equals(blahId)) {
+                    isActive = true;
+                    break;
+                }
+            }
+        }
+
+
+
+        return isActive;
     }
 
     private List<List<DBObject>> makeBulkInsertList(int inboxCount, int bulkInsertMax) {

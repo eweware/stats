@@ -46,6 +46,19 @@ public interface BlahDAO extends BaseDAO, BlahDAOConstants {
     public void setAuthorId(String authorId);
 
     /**
+     * <p>Returns the id of the user this blah is intended for.</p>
+     * @return String   Returns the blah target's id
+     */
+    public String getTargetUserId();
+
+    /**
+     * Sets the blah's author id.
+     *
+     * @param userId The blah's target id
+     */
+    public void setTargetUserId(String userId);
+
+    /**
      * <p>Returns the blah's text (tagline).</p>
      * @return String   Returns the blah's text
      */
@@ -334,6 +347,38 @@ public interface BlahDAO extends BaseDAO, BlahDAOConstants {
      * @param stats The list of tracker daos (the stats)
      */
     public void setStats(List<BlahTrackerDAO> stats);
+
+    /**
+     * Returns whether the blah is anonymous.
+     *
+     * @return Boolean   Returns whether the blah is anonymous
+     */
+    public Boolean getAnonymous();
+
+    /**
+     * Sets whether the blah is anonymous
+     *
+     * @param anon true if the blah is anonymous
+     */
+    public void setAnonymous(Boolean anon);
+
+
+    /**
+     * Returns whether the blah is flagged.
+     *
+     * @return Integer   Returns the flags for this blah
+     */
+    public Integer getFlagged();
+
+    /**
+     * Sets whether the blah is flagged
+     *
+     * @param flagVal = the flags for this blah
+     */
+    public void setFlagged(Integer flagVal);
+
+
+
 
     /**
      * Returns the blah's all-time strength.
