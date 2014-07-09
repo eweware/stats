@@ -11,6 +11,7 @@ import com.eweware.stats.help.LocalCache;
 import com.eweware.stats.help.Utilities;
 
 import java.util.*;
+import java.util.regex.Pattern;
 
 /**
  * @author rk@post.harvard.edu
@@ -78,54 +79,67 @@ public class Inboxer {
         return addedInboxItemCount;
     }
 
+    private String timeString(Date someDate)
+    {
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(someDate);
+        String yearPart = Integer.toString(cal.get(cal.YEAR)).substring(2);
+        String monthPart = Integer.toString(cal.get(cal.MONTH) + 1);
+        if (monthPart.length() == 1)
+            monthPart = "0" + monthPart;
+        String dayPart = Integer.toString(cal.get(cal.DAY_OF_MONTH));
+        if (dayPart.length() == 1)
+            dayPart = "0" + dayPart;
+
+        return yearPart + monthPart + dayPart;
+    }
+
     private void RefreshActivityList()  throws DBException
     {
         _blahActivityList = null;
 
-        DBCollection userCollection = DBCollections.getInstance().getUserBlahInfoCol();
-        BasicDBObject opensObj = new BasicDBObject("O", new BasicDBObject("$exists", true));
-        BasicDBObject commentsObj = new BasicDBObject("C", new BasicDBObject("$exists", true));
-        BasicDBObject votesObj = new BasicDBObject("P", new BasicDBObject("$exists", true));
+        DBCollection blahCol = DBCollections.getInstance().getTrackBlahCol();
+        BasicDBObject upVotesObj = new BasicDBObject("U", new BasicDBObject("$gt", 0));
+        BasicDBObject commentsObj = new BasicDBObject("C", new BasicDBObject("$gt", 0));
+        BasicDBObject pollVotesObj = new BasicDBObject("P", new BasicDBObject("$gt", 0));
+        BasicDBObject downVotesObj = new BasicDBObject("D", new BasicDBObject("$gt", 0));
         BasicDBList typeOrList = new BasicDBList();
-        typeOrList.add(opensObj);
+        typeOrList.add(upVotesObj);
         typeOrList.add(commentsObj);
-        typeOrList.add(votesObj);
-        BasicDBObject typeObj = new BasicDBObject("$or", typeOrList);
+        typeOrList.add(pollVotesObj);
+        typeOrList.add(downVotesObj);
+        BasicDBObject typeOrObj = new BasicDBObject("$or", typeOrList);
+
 
         long curTime = System.currentTimeMillis();
-        long startTime = curTime - 4 * 3600 * 1000; // 8 hours ago
+        Date endDate = new Date();
+        endDate.setTime(curTime);
+        long startTime = curTime - 24 * 3600 * 1000; // 24 hours ago
         Date startDate = new Date();
         startDate.setTime(startTime);
-        BasicDBObject createObj = new BasicDBObject("c", new BasicDBObject("$gte", startDate));
-        BasicDBObject updateObj = new BasicDBObject("u", new BasicDBObject("$gte", startDate));
-        BasicDBList timeOrList = new BasicDBList();
-        timeOrList.add(createObj);
-        timeOrList.add(updateObj);
-        BasicDBObject timeObj = new BasicDBObject("$or", timeOrList);
-        BasicDBList matchAndList = new BasicDBList();
-        matchAndList.add(typeObj);
-        matchAndList.add(timeObj);
+        String regexStr = ".*" + timeString(startDate) + "|.*" + timeString(endDate);
+        Pattern regexPat = Pattern.compile(regexStr);
+        BasicDBObject dateTerm = new BasicDBObject("_id", regexPat);
 
-        BasicDBObject matchObj = new BasicDBObject("$match", new BasicDBObject("$and", matchAndList));
+        BasicDBList typeAndList = new BasicDBList();
+        typeAndList.add(dateTerm);
+        typeAndList.add(typeOrObj);
+        BasicDBObject typeAndObj = new BasicDBObject("$and", typeAndList);
+
+        BasicDBObject matchObj = new BasicDBObject("$match", typeAndObj);
 
 
-        BasicDBObject groupObj = new BasicDBObject("$group", new BasicDBObject("_id", "$B").append("totalOpens", new BasicDBObject("$sum", "$O")).append("totalComments", new BasicDBObject("$sum", "$C")).append("totalVotes", new BasicDBObject("$sum", "$P")));
+        BasicDBObject groupObj = new BasicDBObject("$group", new BasicDBObject("_id", "$I").append("totalComments", new BasicDBObject("$sum", "$C")).append("totalUpVotes", new BasicDBObject("$sum", "$U")).append("totalDownVotes", new BasicDBObject("$sum", "$D")).append("totalPolls", new BasicDBObject("$sum", "$P")));
 
         BasicDBList projectList = new BasicDBList();
-        projectList.add("$totalOpens");
-        BasicDBList commentScoreList = new BasicDBList();
-        commentScoreList.add("$totalComments");
-        commentScoreList.add(5);
-        BasicDBList voteScoreList = new BasicDBList();
-        voteScoreList.add("$totalVotes");
-        voteScoreList.add(2);
+        projectList.add("$totalComments");
+        projectList.add("$totalUpVotes");
+        projectList.add("$totalDownVotes");
+        projectList.add("$totalPolls");
 
-        projectList.add(new BasicDBObject("$multiply", commentScoreList));
-        projectList.add(new BasicDBObject("$multiply", voteScoreList));
+        BasicDBObject projectObj = new BasicDBObject("$project", new BasicDBObject("total", new BasicDBObject("$add", projectList)));
 
-        BasicDBObject projectObj = new BasicDBObject("$project", new BasicDBObject("totalScore", new BasicDBObject("$add", projectList)));
-
-        _blahActivityList = userCollection.aggregate(matchObj, groupObj, projectObj);
+        _blahActivityList = blahCol.aggregate(matchObj, groupObj, projectObj);
     }
 
     private String getGroupName(String groupId) throws SystemErrorException, DBException, InterruptedException {
