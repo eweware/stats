@@ -382,6 +382,7 @@ public class Inboxer {
         inboxItem.put(InboxBlahDAOConstants.BLAH_TEXT, blah.get(BlahDAOConstants.TEXT));
         inboxItem.put(InboxBlahDAOConstants.TYPE, blah.get(BlahDAOConstants.TYPE_ID));
         inboxItem.put(InboxBlahDAOConstants.GROUP_ID, groupId);
+        inboxItem.put(BaseDAOConstants.CREATED, blah.get(BaseDAOConstants.CREATED));
         Object tmp = blah.get(BlahDAOConstants.AUTHOR_ID);
         if (tmp != null) {
             inboxItem.put(InboxBlahDAOConstants.AUTHOR_ID, tmp);
