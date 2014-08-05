@@ -169,17 +169,25 @@ public class UserDescriptiveStats implements UserTrackerDAOConstants {
             Double totalBlahStrength = 0.0;
             Double totalBlahControversialStrength = 0.0;
             for (DBObject blahDAO : blahCursor) {
-                final Double blahStrength = (Double) blahDAO.get(BlahDAOConstants.BLAH_STRENGTH);
-                if (blahStrength != null) {
+                Object strengthObj = blahDAO.get(BlahDAOConstants.BLAH_STRENGTH);
+                Double blahStrength = null;
+
+                if (strengthObj instanceof Double) {
+                    blahStrength = (Double) strengthObj;
+                } else if (strengthObj instanceof Integer)
+                    blahStrength = (Integer)strengthObj * 1.0;
+
+                if ((blahStrength != null) && (blahStrength > 0)) {
                     totalBlahStrength += blahStrength;
-                }
-                final Double upVotes = Utilities.getValueAsDouble(blahDAO.get(BlahDAOConstants.PROMOTED_COUNT), 0D);
-                final Double downVotes = Utilities.getValueAsDouble(blahDAO.get(BlahDAOConstants.DEMOTED_COUNT), 0D);
-                if (upVotes != null && downVotes != null) {
-                    if (upVotes != 0 && downVotes != 0) {
-                        final double ratio = (downVotes > upVotes) ? (upVotes / downVotes) : (downVotes / upVotes);
-                        if (ratio > 0.80) {
-                            totalBlahControversialStrength += 1D;
+
+                    final Double upVotes = Utilities.getValueAsDouble(blahDAO.get(BlahDAOConstants.PROMOTED_COUNT), 0D);
+                    final Double downVotes = Utilities.getValueAsDouble(blahDAO.get(BlahDAOConstants.DEMOTED_COUNT), 0D);
+                    if (upVotes != null && downVotes != null) {
+                        if (upVotes != 0 && downVotes != 0) {
+                            final double ratio = (downVotes > upVotes) ? (upVotes / downVotes) : (downVotes / upVotes);
+                            if (ratio > 0.80) {
+                                totalBlahControversialStrength += 1D;
+                            }
                         }
                     }
                 }
