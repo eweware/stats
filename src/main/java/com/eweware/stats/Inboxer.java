@@ -1,5 +1,6 @@
 package com.eweware.stats;
 
+import com.eweware.service.base.store.dao.schema.type.BooleanDataTypeValidator;
 import com.mongodb.*;
 import com.eweware.DBException;
 import com.eweware.service.base.CommonUtilities;
@@ -72,7 +73,8 @@ public class Inboxer {
 
 
         for (DBObject group : cursor) {
-            long addedInGroup = buildInbox(group);
+            long addedInGroup = buildSafeInbox(group);
+            addedInGroup += buildMatureInbox(group);
             addedInboxItemCount += addedInGroup;
         }
         Utilities.printit(true, "Added total " + addedInboxItemCount + " inbox objects");
@@ -147,16 +149,42 @@ public class Inboxer {
         return (group == null) ? "Unknown Group" : ((String) group.get(GroupDAOConstants.DISPLAY_NAME));
     }
 
-    private long buildInbox(DBObject group) throws SystemErrorException, DBException, InterruptedException {
 
+    // build an inbox of nothing but safe blahs
+    private long buildSafeInbox(DBObject group) throws SystemErrorException, DBException, InterruptedException {
+
+        final String groupId = group.get(BaseDAOConstants.ID).toString();
+        final Integer lin = (Integer) group.get(GroupDAOConstants.LAST_SAFE_INBOX_NUMBER);
+        Integer lastInboxNumber = (lin == null) ? -1 : lin;
+
+        if (lastInboxNumber > 1000000) { // wrap-around
+            lastInboxNumber = -1;
+        }
+
+        final List<DBObject> blahs = getRelevantSafeBlahs(groupId, .05, 30);
+        final int blahsInGroupCount = blahs.size();
+
+        // If there are no blahs, there's nothing to do
+        if (blahsInGroupCount == 0) {
+            System.err.println("No safe blahs in group '" + getGroupName(groupId) + "' id '" + groupId + "'");
+            return 0;
+        }
+
+
+        // Sort blahs in memory
+        Collections.sort(blahs, new IsStrongerThan());
+
+        return intBuildInbox(group, blahs, lastInboxNumber, true);
+    }
+
+    // build an inbox that can contain mature blahs also
+    private long buildMatureInbox(DBObject group) throws SystemErrorException, DBException, InterruptedException {
         final String groupId = group.get(BaseDAOConstants.ID).toString();
         final Integer lin = (Integer) group.get(GroupDAOConstants.LAST_INBOX_NUMBER);
         Integer lastInboxNumber = (lin == null) ? -1 : lin;
 
-        boolean wraparound = false;
         if (lastInboxNumber > 1000000) { // wrap-around
             lastInboxNumber = -1;
-            wraparound = true;
         }
 
         final List<DBObject> blahs = getRelevantBlahs(groupId, .05, 30);
@@ -172,6 +200,18 @@ public class Inboxer {
         // Sort blahs in memory
         Collections.sort(blahs, new IsStrongerThan());
 
+        return intBuildInbox(group, blahs, lastInboxNumber, false);
+    }
+
+
+    private long intBuildInbox(DBObject group, List<DBObject> blahs, Integer lastInboxNumber, Boolean safe) throws SystemErrorException, DBException, InterruptedException {
+
+        final String groupId = group.get(BaseDAOConstants.ID).toString();
+
+
+        final int blahsInGroupCount = blahs.size();
+
+
         // Calculate how many inboxes we need and initialize data
         Integer inboxCount = Utilities.getValueAsInteger(Math.ceil((blahsInGroupCount * 1.0d) / (MAX_BLAHS_PER_INBOX * 1.0d)), 0);
         if (inboxCount > 10)
@@ -181,10 +221,7 @@ public class Inboxer {
         final String inboxDbName = "inboxdb";
         final boolean useCappedCollections = false; // TODO experiment with this option
         for (int number = 0; number < inboxCount; number++) {
-            if (wraparound) {
-                // TODO we assume that if we are wrapping around inbox numbers, the previous collections will have been dropped by an external (cron) job.
-                // If that's not the case, then delete them here.
-            }
+
             final String inboxCollectionName = CommonUtilities.makeInboxCollectionName(groupId, number + lastInboxNumber + 1);
             final boolean collectionExists = DBCollections.getInstance().getDB(inboxDbName).collectionExists(inboxCollectionName);
             if (collectionExists) {
@@ -225,30 +262,57 @@ public class Inboxer {
 
             int numHottest = 5;
             int numHot = 20;   // 25
-            int numMedium = 40;     // 65
-            int numCool = 20;   // 85
-            int numBad = 15;    // 100
+            int numRecent = 30;  //55
+            int numMedium = 50;     // 75
+            int numCool = 15;   // 90
+            int numBad = 10;    // 100
             int numNew = 0;
-            long  minViews = 10;   // to do - should be based on author strength
+            long  minViews = 50;   // to do - should be based on author strength
             int inboxNumber = 0;
             int i = 0;
+
+            // handle new blahs
             List<DBObject> newBlahs = new ArrayList<DBObject>();
 
             Object  tmp;
             for (Iterator<DBObject> itr = blahs.iterator();itr.hasNext();) {
                 DBObject element = itr.next();
-                tmp = element.get(InboxBlahDAOConstants.VIEWS);
+                tmp = element.get(BlahDAOConstants.VIEWS);
                 if ((tmp == null) || ((Long)tmp < minViews)) {
                     newBlahs.add(element);
                 }
             }
             if (newBlahs.size() > 0) {
-                int maxNew = 5;
+                int maxNew = 10; // up to 10 new blahs
                 if (maxNew > newBlahs.size()) {
                     maxNew = newBlahs.size();
                 }
                 numNew = maxNew;
                 numBad -= numNew;
+            }
+
+            // handle recent blahs
+            List<DBObject> recentBlahs = new ArrayList<DBObject>();
+            Calendar currentDate = Calendar.getInstance();
+            currentDate.add(Calendar.MONTH, -1);
+            Date recentDate = currentDate.getTime();
+            Date curDate;
+
+            for (Iterator<DBObject> itr = blahs.iterator();itr.hasNext();) {
+                DBObject element = itr.next();
+                curDate = (Date)element.get(BaseDAOConstants.CREATED);
+                if (curDate.compareTo(recentDate) > 0) {
+                    recentBlahs.add(element);
+                }
+            }
+
+            if (recentBlahs.size() > 0) {
+                int maxRecent = 30; // up to 30 new blahs
+                if (maxRecent > newBlahs.size()) {
+                    maxRecent = newBlahs.size();
+                }
+                numRecent = maxRecent;
+                numMedium -= numRecent;
             }
 
             List<DBObject> curBlahs;
@@ -264,8 +328,18 @@ public class Inboxer {
                         curBlahIndex = (int)(Math.random() * newBlahList.size());
                         final BasicDBObject inboxItem = makeInboxItem(groupId, newBlahList.get(curBlahIndex));
                         inboxCollections.get(inboxNumber).insert(inboxItem);
-                        curBlahs.remove(newBlahList.get(curBlahIndex));
-                        newBlahList.remove(curBlahIndex);  // prevent dupes
+                        curBlahs.remove(newBlahList.remove(curBlahIndex)); // prevent dupes
+                    }
+                }
+
+                if (numRecent > 0) {
+                    List<DBObject>  recentBlahList = new ArrayList<DBObject>(recentBlahs);
+
+                    for (i = 0; i < numNew; i++) {
+                        curBlahIndex = (int)(Math.random() * recentBlahList.size());
+                        final BasicDBObject inboxItem = makeInboxItem(groupId, recentBlahList.get(curBlahIndex));
+                        inboxCollections.get(inboxNumber).insert(inboxItem);
+                        curBlahs.remove(recentBlahList.remove(curBlahIndex));   // prevent dupes
                     }
                 }
 
@@ -283,6 +357,7 @@ public class Inboxer {
                     inboxCollections.get(inboxNumber).insert(inboxItem);
                     curBlahs.remove(curBlahIndex);  // prevent dupes
                 }
+
 
                 for (i = 0 ; i < numMedium; i++) {
                     curBlahIndex = GetMediumBlahIndex(curBlahs.size());
@@ -314,8 +389,14 @@ public class Inboxer {
 
         // Update group with new inbox range
         final BasicDBObject query = new BasicDBObject(BaseDAOConstants.ID, group.get(BaseDAOConstants.ID));
-        final BasicDBObject setter = new BasicDBObject(GroupDAOConstants.FIRST_INBOX_NUMBER, (lastInboxNumber == -1) ? 0 : (lastInboxNumber + 1));
-        setter.put(GroupDAOConstants.LAST_INBOX_NUMBER, ((lastInboxNumber + inboxCount)));
+        BasicDBObject setter;
+        if (safe) {
+            setter = new BasicDBObject(GroupDAOConstants.FIRST_SAFE_INBOX_NUMBER, (lastInboxNumber == -1) ? 0 : (lastInboxNumber + 1));
+            setter.put(GroupDAOConstants.LAST_SAFE_INBOX_NUMBER, ((lastInboxNumber + inboxCount)));
+        } else {
+            setter = new BasicDBObject(GroupDAOConstants.FIRST_INBOX_NUMBER, (lastInboxNumber == -1) ? 0 : (lastInboxNumber + 1));
+            setter.put(GroupDAOConstants.LAST_INBOX_NUMBER, ((lastInboxNumber + inboxCount)));
+        }
         // Update time created and amount of time it took to create it
         final Date lastCreated = (Date) group.get(GroupDAOConstants.LAST_TIME_INBOXES_GENERATED);
         final Date now = new Date();
@@ -325,8 +406,12 @@ public class Inboxer {
         }
         _groupsCol.update(query, new BasicDBObject("$set", setter));      // TODO use this in getInbox in rest
 
-        Utilities.printit(true, "Created " + blahsInGroupCount + " inbox items in group '" + getGroupName(groupId) + "'. " + inboxCount + " new inboxes in range: ["
-                + setter.get(GroupDAOConstants.FIRST_INBOX_NUMBER) + "," + setter.get(GroupDAOConstants.LAST_INBOX_NUMBER) + "]");
+        if (safe)
+            Utilities.printit(true, "Created " + blahsInGroupCount + " inbox items in group '" + getGroupName(groupId) + "'. " + inboxCount + " new inboxes in range: ["
+                    + setter.get(GroupDAOConstants.FIRST_SAFE_INBOX_NUMBER) + "," + setter.get(GroupDAOConstants.LAST_SAFE_INBOX_NUMBER) + "]");
+        else
+            Utilities.printit(true, "Created " + blahsInGroupCount + " inbox items in group '" + getGroupName(groupId) + "'. " + inboxCount + " new inboxes in range: ["
+                    + setter.get(GroupDAOConstants.FIRST_INBOX_NUMBER) + "," + setter.get(GroupDAOConstants.LAST_INBOX_NUMBER) + "]");
 
         return blahsInGroupCount;
     }
@@ -334,7 +419,9 @@ public class Inboxer {
 
 
     private int GetHottestBlahIndex(int listSize) {
-        int hottestBlahCount = 10;
+        int hottestBlahCount = listSize / 100;  // 1% hottest
+        if (hottestBlahCount < 30)
+            hottestBlahCount = 30;  // at least 30 sample size..
         return (int)(Math.random() * hottestBlahCount);
     }
 
@@ -342,6 +429,7 @@ public class Inboxer {
         int min = 0, max = (int)Math.floor(listSize * .1);  // 0-10%
         return min + (int)(Math.random() * (max - min));
     }
+
 
     private int GetMediumBlahIndex(int listSize) {
         int min = (int)Math.floor(listSize * .1), max = min + (int)Math.floor(listSize * .1);  // 10-20%
@@ -478,6 +566,23 @@ public class Inboxer {
         return blahs;
     }
 
+    private List<DBObject> getAllSafeBlahs(String groupId) throws DBException, InterruptedException {
+
+        final BasicDBObject fieldsToReturn = makeBlahFieldsToReturn();
+
+        final DBCursor cursor = Utilities.findInDB(3, "finding blahs in a group", _blahsCol, new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId).append("S", new BasicDBObject("$gte", 0)).append(BlahDAOConstants.FLAGGEDCONTENT, false), fieldsToReturn);
+
+        cursor.addOption(Bytes.QUERYOPTION_SLAVEOK);
+        cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
+
+        final List<DBObject> blahs = new ArrayList<DBObject>();
+        while (cursor.hasNext()) {
+            blahs.add(cursor.next());
+        }
+        return blahs;
+    }
+
+
     private List<DBObject> getRelevantBlahs(String groupId, double minStrength, long numDays) throws DBException, InterruptedException {
 
         final BasicDBObject fieldsToReturn = makeBlahFieldsToReturn();
@@ -505,6 +610,33 @@ public class Inboxer {
             return blahs;
     }
 
+    private List<DBObject> getRelevantSafeBlahs(String groupId, double minStrength, long numDays) throws DBException, InterruptedException {
+
+        final BasicDBObject fieldsToReturn = makeBlahFieldsToReturn();
+        ArrayList orList = new ArrayList();
+        Date    curDate = new Date();
+        Date minDate = new Date(curDate.getTime() - numDays * 24 * 3600 * 1000 );
+        orList.add(new BasicDBObject("S", new BasicDBObject("$gt", minStrength)));
+        orList.add(new BasicDBObject("c", new BasicDBObject("$gt", minDate)));
+
+        BasicDBObject queryObj = new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId).append("S", new BasicDBObject("$gte", 0)).append("$or", orList).append(BlahDAOConstants.FLAGGEDCONTENT, false);
+
+        final DBCursor cursor = Utilities.findInDB(3, "finding safe blahs in a group", _blahsCol, queryObj, fieldsToReturn);
+
+        cursor.addOption(Bytes.QUERYOPTION_SLAVEOK);
+        cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
+
+        final List<DBObject> blahs = new ArrayList<DBObject>();
+        while (cursor.hasNext()) {
+            blahs.add(cursor.next());
+        }
+
+        if (blahs.size() < 100)
+            return getAllSafeBlahs(groupId);
+        else
+            return blahs;
+    }
+
     /** Only these fields will be returned: be sure that this is consistent with buildInbox() */
     private BasicDBObject makeBlahFieldsToReturn() {
         final BasicDBObject fieldsToReturn = new BasicDBObject(BlahDAOConstants.BLAH_STRENGTH, 1);
@@ -516,6 +648,7 @@ public class Inboxer {
         fieldsToReturn.put(BlahDAOConstants.BLAH_STRENGTH, 1);
         fieldsToReturn.put(BaseDAOConstants.CREATED, 1);
         fieldsToReturn.put(BlahDAOConstants.VIEWS, 1);
+        fieldsToReturn.put(BlahDAOConstants.FLAGGEDCONTENT, 1);
         return fieldsToReturn;
     }
 
