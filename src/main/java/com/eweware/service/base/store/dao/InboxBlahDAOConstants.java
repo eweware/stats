@@ -73,6 +73,11 @@ public interface InboxBlahDAOConstants {
     static final String BLAH_STRENGTH = "S";
 
     /**
+     * <p> Whether or not this blah contains flagged content.  A Boolean.</p>
+     */
+    static final String FLAGGEDCONTENT = "XXX";
+
+    /**
      * <p>The blah's recent strength. A float between 0 and 1, inclusive.</p>
      */
     static final String RECENT_BLAH_STRENGTH = "R";
@@ -111,7 +116,7 @@ public interface InboxBlahDAOConstants {
             new SchemaDataTypeFieldMap(SchemaDataType.S, new String[]{BLAH_ID, AUTHOR_ID, TYPE, BLAH_TEXT, GROUP_ID, BADGE_INDICATOR, AUTHOR_NICKNAME}),
             new SchemaDataTypeFieldMap(SchemaDataType.L, new String[]{INBOX_NUMBER, UP_VOTES, DOWN_VOTES, VIEWS, OPENS, COMMENTS}),
             new SchemaDataTypeFieldMap(SchemaDataType.I, new String[]{INBOX_NUMBER}),
-            new SchemaDataTypeFieldMap(SchemaDataType.B, new String[]{RECENTLY_ACTIVE}),
+            new SchemaDataTypeFieldMap(SchemaDataType.B, new String[]{RECENTLY_ACTIVE, FLAGGEDCONTENT}),
             new SchemaDataTypeFieldMap(SchemaDataType.R, new String[]{BLAH_STRENGTH, RECENT_BLAH_STRENGTH}),
             new SchemaDataTypeFieldMap(SchemaDataType.ILS, new String[] {IMAGE_IDS}),
     };

@@ -144,23 +144,5 @@ public final class GroupPayload extends BasePayload implements GroupDAOConstants
         put(INBOX_GENERATION_DURATION, duration);
     }
 
-    /**
-     * <p>Returns the name of a random inbox collection. Looks
-     * only for currently active collections.</p>
-     * <p>For the edge case where there are no inboxes in the group,
-     * it returns the first inbox.</p>
-     * @return  The name of a currently active collection in the group.
-     */
-    public String randomInboxCollectionName() {
-        Integer first = getFirstInboxNumber();
-        if (first == null) first = 0;
-        Integer last = getLastInboxNumber();
-        if (last == null) last = 0;
-        if (first == last) {
-            // if first == 0, we don't update the group's first/last inbox #s: let the inboxer worry about it
-            return CommonUtilities.makeInboxCollectionName(getId(), first);
-        }
-        final int inboxNumber = new Random().nextInt(last - first + 1) + first;
-        return CommonUtilities.makeInboxCollectionName(getId(), inboxNumber);
-    }
+
 }

@@ -208,9 +208,7 @@ public class Inboxer {
 
         final String groupId = group.get(BaseDAOConstants.ID).toString();
 
-
         final int blahsInGroupCount = blahs.size();
-
 
         // Calculate how many inboxes we need and initialize data
         Integer inboxCount = Utilities.getValueAsInteger(Math.ceil((blahsInGroupCount * 1.0d) / (MAX_BLAHS_PER_INBOX * 1.0d)), 0);
@@ -219,37 +217,18 @@ public class Inboxer {
 
         final List<DBCollection> inboxCollections = new ArrayList<DBCollection>(inboxCount);
         final String inboxDbName = "inboxdb";
-        final boolean useCappedCollections = false; // TODO experiment with this option
+
         for (int number = 0; number < inboxCount; number++) {
 
-            final String inboxCollectionName = CommonUtilities.makeInboxCollectionName(groupId, number + lastInboxNumber + 1);
+            final String inboxCollectionName = CommonUtilities.makeInboxCollectionName(groupId, number + lastInboxNumber + 1, safe);
             final boolean collectionExists = DBCollections.getInstance().getDB(inboxDbName).collectionExists(inboxCollectionName);
             if (collectionExists) {
                 inboxCollections.add(DBCollections.getInstance().getDB(inboxDbName).getCollection(inboxCollectionName));
             } else {
-                if (useCappedCollections) {
-                    final DB db = DBCollections.getInstance().getDB(inboxDbName);
-                    final BasicDBObject options = new BasicDBObject("capped", true);
-                    options.put("max", MAX_BLAHS_PER_INBOX);
-                    options.put("size", MAX_BLAHS_PER_INBOX * MAX_BLAH_SIZE_IN_BYTES);
-                    inboxCollections.add(db.createCollection(inboxCollectionName, options));
-                } else {
                     inboxCollections.add(DBCollections.getInstance().getCollection(inboxDbName, inboxCollectionName));
-                }
+
             }
         }
-
-        // Spread out blahs across inboxes
-
-        final boolean doBulkInserts = true;  // TODO use different bulk sizes to tune performance
-//        System.out.println(doBulkInserts ? "Bulk..." : "Singles...");
-        List<DBObject> inboxItemsToInsert = new ArrayList<DBObject>();
-
-        // We fill up the inboxes one at a time. Since blahs are sorted by
-        // strength, the earlier inboxes have inboxes with the greatest strength.
-        // NB: strength is adjusted by recency.
-        // Later inboxes will have older or less strong material.
-        // The most up-to-date inbox items are in the capped "recent" inbox collection
 
         if (blahsInGroupCount <= 100) {
             // just copy them all
@@ -262,7 +241,7 @@ public class Inboxer {
 
             int numHottest = 5;
             int numHot = 20;   // 25
-            int numRecent = 30;  //55
+            int numRecent = 0;  //55
             int numMedium = 50;     // 75
             int numCool = 15;   // 90
             int numBad = 10;    // 100
@@ -308,8 +287,8 @@ public class Inboxer {
 
             if (recentBlahs.size() > 0) {
                 int maxRecent = 30; // up to 30 new blahs
-                if (maxRecent > newBlahs.size()) {
-                    maxRecent = newBlahs.size();
+                if (maxRecent > recentBlahs.size()) {
+                    maxRecent = recentBlahs.size();
                 }
                 numRecent = maxRecent;
                 numMedium -= numRecent;
@@ -335,7 +314,7 @@ public class Inboxer {
                 if (numRecent > 0) {
                     List<DBObject>  recentBlahList = new ArrayList<DBObject>(recentBlahs);
 
-                    for (i = 0; i < numNew; i++) {
+                    for (i = 0; i < numRecent; i++) {
                         curBlahIndex = (int)(Math.random() * recentBlahList.size());
                         final BasicDBObject inboxItem = makeInboxItem(groupId, recentBlahList.get(curBlahIndex));
                         inboxCollections.get(inboxNumber).insert(inboxItem);
@@ -407,7 +386,7 @@ public class Inboxer {
         _groupsCol.update(query, new BasicDBObject("$set", setter));      // TODO use this in getInbox in rest
 
         if (safe)
-            Utilities.printit(true, "Created " + blahsInGroupCount + " inbox items in group '" + getGroupName(groupId) + "'. " + inboxCount + " new inboxes in range: ["
+            Utilities.printit(true, "Created " + blahsInGroupCount + " inbox items in group '" + getGroupName(groupId) + "'. " + inboxCount + " new safe inboxes in range: ["
                     + setter.get(GroupDAOConstants.FIRST_SAFE_INBOX_NUMBER) + "," + setter.get(GroupDAOConstants.LAST_SAFE_INBOX_NUMBER) + "]");
         else
             Utilities.printit(true, "Created " + blahsInGroupCount + " inbox items in group '" + getGroupName(groupId) + "'. " + inboxCount + " new inboxes in range: ["
@@ -468,6 +447,7 @@ public class Inboxer {
         */
 
         inboxItem.put(InboxBlahDAOConstants.BLAH_TEXT, blah.get(BlahDAOConstants.TEXT));
+        inboxItem.put(InboxBlahDAOConstants.FLAGGEDCONTENT, blah.get(BlahDAOConstants.FLAGGEDCONTENT));
         inboxItem.put(InboxBlahDAOConstants.TYPE, blah.get(BlahDAOConstants.TYPE_ID));
         inboxItem.put(InboxBlahDAOConstants.GROUP_ID, groupId);
         inboxItem.put(BaseDAOConstants.CREATED, blah.get(BaseDAOConstants.CREATED));
@@ -569,8 +549,11 @@ public class Inboxer {
     private List<DBObject> getAllSafeBlahs(String groupId) throws DBException, InterruptedException {
 
         final BasicDBObject fieldsToReturn = makeBlahFieldsToReturn();
+        ArrayList safeList = new ArrayList();
+        safeList.add(new BasicDBObject(BlahDAOConstants.FLAGGEDCONTENT, new BasicDBObject("$exists", false)));
+        safeList.add(new BasicDBObject(BlahDAOConstants.FLAGGEDCONTENT, false));
 
-        final DBCursor cursor = Utilities.findInDB(3, "finding blahs in a group", _blahsCol, new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId).append("S", new BasicDBObject("$gte", 0)).append(BlahDAOConstants.FLAGGEDCONTENT, false), fieldsToReturn);
+        final DBCursor cursor = Utilities.findInDB(3, "finding blahs in a group", _blahsCol, new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId).append("S", new BasicDBObject("$gte", 0)).append("$or", safeList), fieldsToReturn);
 
         cursor.addOption(Bytes.QUERYOPTION_SLAVEOK);
         cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
@@ -619,7 +602,12 @@ public class Inboxer {
         orList.add(new BasicDBObject("S", new BasicDBObject("$gt", minStrength)));
         orList.add(new BasicDBObject("c", new BasicDBObject("$gt", minDate)));
 
-        BasicDBObject queryObj = new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId).append("S", new BasicDBObject("$gte", 0)).append("$or", orList).append(BlahDAOConstants.FLAGGEDCONTENT, false);
+        ArrayList safeList = new ArrayList();
+        safeList.add(new BasicDBObject(BlahDAOConstants.FLAGGEDCONTENT, new BasicDBObject("$exists", false)));
+        safeList.add(new BasicDBObject(BlahDAOConstants.FLAGGEDCONTENT, false));
+
+
+        BasicDBObject queryObj = new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId).append("S", new BasicDBObject("$gte", 0)).append("$or", orList).append("$or", safeList);
 
         final DBCursor cursor = Utilities.findInDB(3, "finding safe blahs in a group", _blahsCol, queryObj, fieldsToReturn);
 
