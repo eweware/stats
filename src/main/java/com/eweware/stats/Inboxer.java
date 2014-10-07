@@ -252,15 +252,26 @@ public class Inboxer {
 
             // handle new blahs
             List<DBObject> newBlahs = new ArrayList<DBObject>();
-
+            List<DBObject> recentBlahs = new ArrayList<DBObject>();
+            Calendar currentDate = Calendar.getInstance();
+            currentDate.add(Calendar.MONTH, -1);
+            Date recentDate = currentDate.getTime();
+            Date curDate;
             Object  tmp;
+
             for (Iterator<DBObject> itr = blahs.iterator();itr.hasNext();) {
                 DBObject element = itr.next();
                 tmp = element.get(BlahDAOConstants.VIEWS);
                 if ((tmp == null) || ((Long)tmp < minViews)) {
                     newBlahs.add(element);
+                } else {
+                    curDate = (Date)element.get(BaseDAOConstants.CREATED);
+                    if (curDate.compareTo(recentDate) > 0) {
+                        recentBlahs.add(element);
+                    }
                 }
             }
+
             if (newBlahs.size() > 0) {
                 int maxNew = 10; // up to 10 new blahs
                 if (maxNew > newBlahs.size()) {
@@ -268,21 +279,6 @@ public class Inboxer {
                 }
                 numNew = maxNew;
                 numBad -= numNew;
-            }
-
-            // handle recent blahs
-            List<DBObject> recentBlahs = new ArrayList<DBObject>();
-            Calendar currentDate = Calendar.getInstance();
-            currentDate.add(Calendar.MONTH, -1);
-            Date recentDate = currentDate.getTime();
-            Date curDate;
-
-            for (Iterator<DBObject> itr = blahs.iterator();itr.hasNext();) {
-                DBObject element = itr.next();
-                curDate = (Date)element.get(BaseDAOConstants.CREATED);
-                if (curDate.compareTo(recentDate) > 0) {
-                    recentBlahs.add(element);
-                }
             }
 
             if (recentBlahs.size() > 0) {
