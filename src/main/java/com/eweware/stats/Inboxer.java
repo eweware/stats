@@ -73,8 +73,8 @@ public class Inboxer {
 
 
         for (DBObject group : cursor) {
-            long addedInGroup = buildSafeInbox(group);
-            addedInGroup += buildMatureInbox(group);
+            long addedInGroup = buildInbox(group, true); // safe inbox
+            addedInGroup += buildInbox(group, false); // mature inbox
             addedInboxItemCount += addedInGroup;
         }
         Utilities.printit(true, "Added total " + addedInboxItemCount + " inbox objects");
@@ -151,60 +151,65 @@ public class Inboxer {
 
 
     // build an inbox of nothing but safe blahs
-    private long buildSafeInbox(DBObject group) throws SystemErrorException, DBException, InterruptedException {
-
+    private long buildInbox(DBObject group, boolean safe) throws SystemErrorException, DBException, InterruptedException {
         final String groupId = group.get(BaseDAOConstants.ID).toString();
-        final Integer lin = (Integer) group.get(GroupDAOConstants.LAST_SAFE_INBOX_NUMBER);
-        Integer lastInboxNumber = (lin == null) ? -1 : lin;
 
-        if (lastInboxNumber > 1000000) { // wrap-around
-            lastInboxNumber = -1;
+        long addedInGroup = 0;
+        // TODOTEST
+        //if (!groupId.equals("522ccb78e4b0a35dadfcf73f")) return 0;
+        // get latest generation of cohort info
+        BasicDBObject cohortGenerations = (BasicDBObject) group.get(GroupDAOConstants.COHORT_GENERATIONS);
+        BasicDBObject latestGeneration = null;
+        String latestGenerationId = null;
+        for (String generationId : cohortGenerations.keySet()) {
+            BasicDBObject curGeneration = (BasicDBObject) cohortGenerations.get(generationId);
+            if (latestGeneration == null) {
+                latestGeneration = curGeneration;
+                latestGenerationId = generationId;
+            }
+            else {
+                Date latestDate = (Date) latestGeneration.get(BaseDAOConstants.CREATED);
+                Date curDate = (Date) curGeneration.get(BaseDAOConstants.CREATED);
+                if (curDate.after(latestDate)) {
+                    latestGeneration = curGeneration;
+                    latestGenerationId = generationId;
+                }
+            }
         }
 
-        final List<DBObject> blahs = getRelevantSafeBlahs(groupId, .05, 30);
-        final int blahsInGroupCount = blahs.size();
+        // get the set of cohort info
+        BasicDBObject cohortSet = (BasicDBObject) latestGeneration.get(GroupDAOConstants.COHORT_INFO);
 
-        // If there are no blahs, there's nothing to do
-        if (blahsInGroupCount == 0) {
-            System.err.println("No safe blahs in group '" + getGroupName(groupId) + "' id '" + groupId + "'");
-            return 0;
+        // for each cohort, sort by cohort-strength, and build inbox
+        for (String cohortId : cohortSet.keySet()) {
+            BasicDBObject cohortInboxInfo = (BasicDBObject) cohortSet.get(cohortId);
+            String inboxKeyString = safe ?
+                    GroupDAOConstants.LAST_SAFE_INBOX_NUMBER : GroupDAOConstants.LAST_INBOX_NUMBER;
+            final Integer lin = (Integer) cohortInboxInfo.get(inboxKeyString);
+            Integer lastInboxNumber = (lin == null) ? -1 : lin;
+
+            if (lastInboxNumber > 1000000) { // wrap-around
+                lastInboxNumber = -1;
+            }
+
+            final List<DBObject> blahs = getRelevantBlahs(groupId, cohortId, .05, 30, safe);
+            final int blahsInGroupCount = blahs.size();
+            // If there are no blahs, there's nothing to do
+            if (blahsInGroupCount == 0) {
+                String noBlahMsg = safe ? "No safe blahs in cohort id : " : "No blahs in cohort id : ";
+                System.err.println(noBlahMsg + cohortId + " in group '" + getGroupName(groupId) + "' id : " + groupId);
+                return 0;
+            }
+
+            // Sort blahs in memory, w.r.t. cohort-strength
+            Collections.sort(blahs, new IsStrongerThan(cohortId));
+
+            addedInGroup += intBuildInbox(group, latestGenerationId, cohortId, blahs, lastInboxNumber, safe);
         }
-
-
-        // Sort blahs in memory
-        Collections.sort(blahs, new IsStrongerThan());
-
-        return intBuildInbox(group, blahs, lastInboxNumber, true);
+        return addedInGroup;
     }
 
-    // build an inbox that can contain mature blahs also
-    private long buildMatureInbox(DBObject group) throws SystemErrorException, DBException, InterruptedException {
-        final String groupId = group.get(BaseDAOConstants.ID).toString();
-        final Integer lin = (Integer) group.get(GroupDAOConstants.LAST_INBOX_NUMBER);
-        Integer lastInboxNumber = (lin == null) ? -1 : lin;
-
-        if (lastInboxNumber > 1000000) { // wrap-around
-            lastInboxNumber = -1;
-        }
-
-        final List<DBObject> blahs = getRelevantBlahs(groupId, .05, 30);
-        final int blahsInGroupCount = blahs.size();
-
-        // If there are no blahs, there's nothing to do
-        if (blahsInGroupCount == 0) {
-            System.err.println("No blahs in group '" + getGroupName(groupId) + "' id '" + groupId + "'");
-            return 0;
-        }
-
-
-        // Sort blahs in memory
-        Collections.sort(blahs, new IsStrongerThan());
-
-        return intBuildInbox(group, blahs, lastInboxNumber, false);
-    }
-
-
-    private long intBuildInbox(DBObject group, List<DBObject> blahs, Integer lastInboxNumber, Boolean safe) throws SystemErrorException, DBException, InterruptedException {
+    private long intBuildInbox(DBObject group, String generationId, String cohortId, List<DBObject> blahs, Integer lastInboxNumber, Boolean safe) throws SystemErrorException, DBException, InterruptedException {
 
         final String groupId = group.get(BaseDAOConstants.ID).toString();
 
@@ -220,7 +225,8 @@ public class Inboxer {
 
         for (int number = 0; number < inboxCount; number++) {
 
-            final String inboxCollectionName = CommonUtilities.makeInboxCollectionName(groupId, number + lastInboxNumber + 1, safe);
+            final String inboxCollectionName =
+                    CommonUtilities.makeInboxCollectionName(groupId, cohortId, number + lastInboxNumber + 1, safe);
             final boolean collectionExists = DBCollections.getInstance().getDB(inboxDbName).collectionExists(inboxCollectionName);
             if (collectionExists) {
                 inboxCollections.add(DBCollections.getInstance().getDB(inboxDbName).getCollection(inboxCollectionName));
@@ -365,13 +371,23 @@ public class Inboxer {
         // Update group with new inbox range
         final BasicDBObject query = new BasicDBObject(BaseDAOConstants.ID, group.get(BaseDAOConstants.ID));
         BasicDBObject setter;
+
+        String firstKeyString;
+        String lastKeyString;
+        String keyString = "CHG." + generationId + ".CHI." + cohortId + ".";
         if (safe) {
-            setter = new BasicDBObject(GroupDAOConstants.FIRST_SAFE_INBOX_NUMBER, (lastInboxNumber == -1) ? 0 : (lastInboxNumber + 1));
-            setter.put(GroupDAOConstants.LAST_SAFE_INBOX_NUMBER, ((lastInboxNumber + inboxCount)));
+            firstKeyString = keyString + GroupDAOConstants.FIRST_SAFE_INBOX_NUMBER;
+            lastKeyString = keyString + GroupDAOConstants.LAST_SAFE_INBOX_NUMBER;
         } else {
-            setter = new BasicDBObject(GroupDAOConstants.FIRST_INBOX_NUMBER, (lastInboxNumber == -1) ? 0 : (lastInboxNumber + 1));
-            setter.put(GroupDAOConstants.LAST_INBOX_NUMBER, ((lastInboxNumber + inboxCount)));
+            firstKeyString = keyString + GroupDAOConstants.FIRST_INBOX_NUMBER;
+            lastKeyString = keyString + GroupDAOConstants.LAST_INBOX_NUMBER;
         }
+
+        lastInboxNumber = (lastInboxNumber == -1) ? 0 : (lastInboxNumber + 1);
+        int firstInboxNumber = lastInboxNumber + inboxCount - 1;
+        setter = new BasicDBObject(firstKeyString, lastInboxNumber);
+        setter.put(lastKeyString, firstInboxNumber);
+
         // Update time created and amount of time it took to create it
         final Date lastCreated = (Date) group.get(GroupDAOConstants.LAST_TIME_INBOXES_GENERATED);
         final Date now = new Date();
@@ -381,12 +397,14 @@ public class Inboxer {
         }
         _groupsCol.update(query, new BasicDBObject("$set", setter));      // TODO use this in getInbox in rest
 
-        if (safe)
-            Utilities.printit(true, "Created " + blahsInGroupCount + " inbox items in group '" + getGroupName(groupId) + "'. " + inboxCount + " new safe inboxes in range: ["
-                    + setter.get(GroupDAOConstants.FIRST_SAFE_INBOX_NUMBER) + "," + setter.get(GroupDAOConstants.LAST_SAFE_INBOX_NUMBER) + "]");
-        else
-            Utilities.printit(true, "Created " + blahsInGroupCount + " inbox items in group '" + getGroupName(groupId) + "'. " + inboxCount + " new inboxes in range: ["
-                    + setter.get(GroupDAOConstants.FIRST_INBOX_NUMBER) + "," + setter.get(GroupDAOConstants.LAST_INBOX_NUMBER) + "]");
+        String safeInboxWord = "inboxes";
+        if (safe) safeInboxWord = "safe Inboxes";
+        String msg = "Created " + blahsInGroupCount + " inbox items in group '"
+                + getGroupName(groupId) + "' cohort id : " + cohortId + "  "
+                + inboxCount + " new " + safeInboxWord + " in range: ["
+                + lastInboxNumber + "," + firstInboxNumber + "]";
+
+        Utilities.printit(true, msg);
 
         return blahsInGroupCount;
     }
@@ -466,9 +484,9 @@ public class Inboxer {
             inboxItem.put(InboxBlahDAOConstants.BADGE_INDICATOR, "b");
         }
 
-        tmp = blah.get(BlahDAOConstants.BLAH_STRENGTH);
+        tmp = blah.get(BlahDAOConstants.BLAH_COHORT_STRENGTH); // cohort-strength
         if (tmp != null) {
-            inboxItem.put(InboxBlahDAOConstants.BLAH_STRENGTH, tmp);
+            inboxItem.put(InboxBlahDAOConstants.BLAH_COHORT_STRENGTH, tmp);
         }
         return inboxItem;
     }
@@ -526,11 +544,22 @@ public class Inboxer {
 //        return null;
 //    }
 
-    private List<DBObject> getAllBlahs(String groupId) throws DBException, InterruptedException {
+    private List<DBObject> getAllBlahs(String groupId, boolean safe) throws DBException, InterruptedException {
 
         final BasicDBObject fieldsToReturn = makeBlahFieldsToReturn();
 
-        final DBCursor cursor = Utilities.findInDB(3, "finding blahs in a group", _blahsCol, new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId).append("S", new BasicDBObject("$gte", 0)), fieldsToReturn);
+        BasicDBObject queryObj = new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId).append("S", new BasicDBObject("$gte", 0));
+
+        String findMsg = "finding all blahs in a group";
+        if (safe) {
+            ArrayList safeList = new ArrayList();
+            safeList.add(new BasicDBObject(BlahDAOConstants.FLAGGEDCONTENT, new BasicDBObject("$exists", false)));
+            safeList.add(new BasicDBObject(BlahDAOConstants.FLAGGEDCONTENT, false));
+            queryObj.append("$or", safeList);
+
+            findMsg = "finding all safe blahs in a group";
+        }
+        final DBCursor cursor = Utilities.findInDB(3, findMsg, _blahsCol, queryObj, fieldsToReturn);
 
         cursor.addOption(Bytes.QUERYOPTION_SLAVEOK);
         cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
@@ -542,38 +571,35 @@ public class Inboxer {
         return blahs;
     }
 
-    private List<DBObject> getAllSafeBlahs(String groupId) throws DBException, InterruptedException {
+    private List<DBObject> getRelevantBlahs(String groupId, String cohortId, double minStrength, long numDays, boolean safe) throws DBException, InterruptedException {
 
         final BasicDBObject fieldsToReturn = makeBlahFieldsToReturn();
-        ArrayList safeList = new ArrayList();
-        safeList.add(new BasicDBObject(BlahDAOConstants.FLAGGEDCONTENT, new BasicDBObject("$exists", false)));
-        safeList.add(new BasicDBObject(BlahDAOConstants.FLAGGEDCONTENT, false));
-
-        final DBCursor cursor = Utilities.findInDB(3, "finding blahs in a group", _blahsCol, new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId).append("S", new BasicDBObject("$gte", 0)).append("$or", safeList), fieldsToReturn);
-
-        cursor.addOption(Bytes.QUERYOPTION_SLAVEOK);
-        cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
-
-        final List<DBObject> blahs = new ArrayList<DBObject>();
-        while (cursor.hasNext()) {
-            blahs.add(cursor.next());
-        }
-        return blahs;
-    }
-
-
-    private List<DBObject> getRelevantBlahs(String groupId, double minStrength, long numDays) throws DBException, InterruptedException {
-
-        final BasicDBObject fieldsToReturn = makeBlahFieldsToReturn();
-        ArrayList orList = new ArrayList();
+        ArrayList<BasicDBObject> orList = new ArrayList<BasicDBObject>();
         Date    curDate = new Date();
         Date minDate = new Date(curDate.getTime() - numDays * 24 * 3600 * 1000 );
-        orList.add(new BasicDBObject("S", new BasicDBObject("$gt", minStrength)));
+        orList.add(new BasicDBObject("CHS."+cohortId, new BasicDBObject("$gt", minStrength)));
         orList.add(new BasicDBObject("c", new BasicDBObject("$gt", minDate)));
 
-        BasicDBObject queryObj = new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId).append("S", new BasicDBObject("$gte", 0)).append("$or", orList);
+        BasicDBObject queryObj = new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId).append("S", new BasicDBObject("$gte", 0));
 
-        final DBCursor cursor = Utilities.findInDB(3, "finding blahs in a group", _blahsCol, queryObj, fieldsToReturn);
+        String findMsg;
+        if (safe) {
+            ArrayList<BasicDBObject> safeList = new ArrayList<BasicDBObject>();
+            safeList.add(new BasicDBObject(BlahDAOConstants.FLAGGEDCONTENT, new BasicDBObject("$exists", false)));
+            safeList.add(new BasicDBObject(BlahDAOConstants.FLAGGEDCONTENT, false));
+
+            ArrayList<BasicDBObject> andList = new ArrayList<BasicDBObject>();
+            andList.add(new BasicDBObject("$or", orList));
+            andList.add(new BasicDBObject("$or", safeList));
+
+            queryObj.append("$and", andList);
+            findMsg = "finding safe blahs in a group";
+        } else {
+            queryObj.append("$or", orList);
+            findMsg = "finding blahs in a group";
+        }
+
+        final DBCursor cursor = Utilities.findInDB(3, findMsg, _blahsCol, queryObj, fieldsToReturn);
 
         cursor.addOption(Bytes.QUERYOPTION_SLAVEOK);
         cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
@@ -584,39 +610,7 @@ public class Inboxer {
         }
 
         if (blahs.size() < 100)
-            return getAllBlahs(groupId);
-        else
-            return blahs;
-    }
-
-    private List<DBObject> getRelevantSafeBlahs(String groupId, double minStrength, long numDays) throws DBException, InterruptedException {
-
-        final BasicDBObject fieldsToReturn = makeBlahFieldsToReturn();
-        ArrayList orList = new ArrayList();
-        Date    curDate = new Date();
-        Date minDate = new Date(curDate.getTime() - numDays * 24 * 3600 * 1000 );
-        orList.add(new BasicDBObject("S", new BasicDBObject("$gt", minStrength)));
-        orList.add(new BasicDBObject("c", new BasicDBObject("$gt", minDate)));
-
-        ArrayList safeList = new ArrayList();
-        safeList.add(new BasicDBObject(BlahDAOConstants.FLAGGEDCONTENT, new BasicDBObject("$exists", false)));
-        safeList.add(new BasicDBObject(BlahDAOConstants.FLAGGEDCONTENT, false));
-
-
-        BasicDBObject queryObj = new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId).append("S", new BasicDBObject("$gte", 0)).append("$or", orList).append("$or", safeList);
-
-        final DBCursor cursor = Utilities.findInDB(3, "finding safe blahs in a group", _blahsCol, queryObj, fieldsToReturn);
-
-        cursor.addOption(Bytes.QUERYOPTION_SLAVEOK);
-        cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
-
-        final List<DBObject> blahs = new ArrayList<DBObject>();
-        while (cursor.hasNext()) {
-            blahs.add(cursor.next());
-        }
-
-        if (blahs.size() < 100)
-            return getAllSafeBlahs(groupId);
+            return getAllBlahs(groupId, safe);
         else
             return blahs;
     }
@@ -629,19 +623,26 @@ public class Inboxer {
         fieldsToReturn.put(BlahDAOConstants.AUTHOR_ID, 1);
         fieldsToReturn.put(BlahDAOConstants.IMAGE_IDS, 1);
         fieldsToReturn.put(BlahDAOConstants.BADGE_IDS, 1);
-        fieldsToReturn.put(BlahDAOConstants.BLAH_STRENGTH, 1);
+        //fieldsToReturn.put(BlahDAOConstants.BLAH_STRENGTH, 1); // duplicated
         fieldsToReturn.put(BaseDAOConstants.CREATED, 1);
         fieldsToReturn.put(BlahDAOConstants.VIEWS, 1);
         fieldsToReturn.put(BlahDAOConstants.FLAGGEDCONTENT, 1);
+        fieldsToReturn.put(BlahDAOConstants.BLAH_COHORT_STRENGTH, 1); // cohort-strength
         return fieldsToReturn;
     }
 
 
     private class IsStrongerThan implements Comparator<DBObject> {
+        public IsStrongerThan(String cohortId) {
+            this.cohortId = cohortId;
+        }
+        private String cohortId;
         @Override
         public int compare(DBObject a, DBObject b) {
-            final Double obj1 = (Double) a.get(BlahDAOConstants.BLAH_STRENGTH);
-            final Double obj2 = (Double) b.get(BlahDAOConstants.BLAH_STRENGTH);
+            BasicDBObject cohortStrengthA = (BasicDBObject) a.get(BlahDAOConstants.BLAH_COHORT_STRENGTH);
+            BasicDBObject cohortStrengthB = (BasicDBObject) b.get(BlahDAOConstants.BLAH_COHORT_STRENGTH);
+            final Double obj1 = (Double) cohortStrengthA.get(cohortId);
+            final Double obj2 = (Double) cohortStrengthB.get(cohortId);
             if (obj1 == null)
             {
                 return 1;

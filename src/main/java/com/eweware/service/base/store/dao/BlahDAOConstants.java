@@ -220,6 +220,11 @@ public interface BlahDAOConstants {
      */
     static final String BADGE_IDS = "B";
 
+    /**
+     * <p>A sub-document of the blah's all-time cohort-strength, a Document</p>
+     */
+    static final String BLAH_COHORT_STRENGTH = "CHS";
+
     static final SchemaDataTypeFieldMap[] SIMPLE_FIELD_TYPES = new SchemaDataTypeFieldMap[]{
             new SchemaDataTypeFieldMap(SchemaDataType.S, new String[]{
                     TYPE_ID, TEXT, BODY, GROUP_ID, AUTHOR_ID, TARGET_USER_ID}),

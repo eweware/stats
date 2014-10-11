@@ -111,6 +111,10 @@ public interface InboxBlahDAOConstants {
      */
     static final String RECENTLY_ACTIVE = "RR";
 
+    /**
+     * <p>A sub-document of the blah's all-time cohort-strength, a Document</p>
+     */
+    static final String BLAH_COHORT_STRENGTH = "CHS";
 
     static final SchemaDataTypeFieldMap[] SIMPLE_FIELD_TYPES = new SchemaDataTypeFieldMap[]{
             new SchemaDataTypeFieldMap(SchemaDataType.S, new String[]{BLAH_ID, AUTHOR_ID, TYPE, BLAH_TEXT, GROUP_ID, BADGE_INDICATOR, AUTHOR_NICKNAME}),

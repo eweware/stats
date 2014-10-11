@@ -84,28 +84,32 @@ public interface GroupDAOConstants {
     static final String STATE = "S";
 
     /**
-     * <p>The number of the first active inbox of the group, an Integer.</p>
+     * <p><del>The number of the first active inbox of the group, an Integer.</del></p>
+     * <p>The number of the first active inbox of the cohort of the group, an Integer.</p>
      * <p>Each inbox is a collection whose name is the concatenation
      * of the group id and the inbox number.</p>
      */
     static final String FIRST_INBOX_NUMBER = "F";
 
     /**
-     * <p>The number of the last active inbox of the group, an Integer.</p>
+     * <p><del>The number of the last active inbox of the group, an Integer.</del></p>
+     * <p>The number of the last active inbox of the cohort of the group, an Integer.</p>
      * <p>Each inbox is a collection whose name is the concatenation
      * of the group id and the inbox number.</p>
      */
     static final String LAST_INBOX_NUMBER = "L";
 
     /**
-     * <p>The number of the first active inbox of the group, an Integer.</p>
+     * <p><del>The number of the first active inbox of the group, an Integer.</del></p>
+     * <p>The number of the first active inbox of the cohort of the group, an Integer.</p>
      * <p>Each inbox is a collection whose name is the concatenation
      * of the group id and the inbox number.</p>
      */
     static final String FIRST_SAFE_INBOX_NUMBER = "FS";
 
     /**
-     * <p>The number of the last active inbox of the group, an Integer.</p>
+     * <p><del></del>The number of the last active inbox of the group, an Integer.</del></p>
+     * <p>The number of the last active inbox of the cohort of the group, an Integer.</p>
      * <p>Each inbox is a collection whose name is the concatenation
      * of the group id and the inbox number.</p>
      */
@@ -124,6 +128,15 @@ public interface GroupDAOConstants {
      */
     static final String INBOX_GENERATION_DURATION = "I";
 
+    /**
+     * <p>The document of the set of cohort generations, a Document</p>
+     */
+    static final String COHORT_GENERATIONS = "CHG";
+
+    /**
+     * <p>The document for cohorts info in one generation, a Document</p>
+     */
+    static final String COHORT_INFO = "CHI";
 
 
     static final SchemaDataTypeFieldMap[] SIMPLE_FIELD_TYPES = new SchemaDataTypeFieldMap[]{

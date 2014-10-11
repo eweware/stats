@@ -29,7 +29,7 @@ public class Main {
 
     /* Comma-separated list of email recipients.
     Receives errors and startup/stop messages */
-    private static final String STATUS_EMAIL_RECIPIENTS = "davevr@eweware.com";
+    private static final String STATUS_EMAIL_RECIPIENTS = "kongweihan@users.noreply.github.com";
 
     public static boolean _verbose;
     public static String _runconfig;
