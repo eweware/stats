@@ -48,7 +48,10 @@ public interface UserGroupDAOConstants {
      */
     static final String LAST_INBOX_NUMBER = "L";
 
-
+    /**
+     * <p>The cohort ID list of this user in this group, an array of String.</p>
+     */
+    static final String COHORT = "CH";
 
 //    /**
 //     * <p><b>Do not use.</b></p>

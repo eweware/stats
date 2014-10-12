@@ -56,8 +56,8 @@ public class DBCollections {
     private final DBCollection userAccountsCol;
     private final DBCollection userProfilesCol;
     private final DBCollection groupsCol;
-    private final DBCollection groupTypescol;
-    private final DBCollection userGroupscol;
+    private final DBCollection groupTypesCol;
+    private final DBCollection userGroupsCol;
     private final DBCollection inboxStateCol;
     private final DBCollection blahsCol;
     private final DBCollection blahTypesCol;
@@ -104,11 +104,11 @@ public class DBCollections {
     }
 
     public DBCollection getGroupTypesCol() {
-        return groupTypescol;
+        return groupTypesCol;
     }
 
     public DBCollection getUserGroupsCol() {
-        return userGroupscol;
+        return userGroupsCol;
     }
 
     public DBCollection getInboxStateCol() {
@@ -211,8 +211,8 @@ public class DBCollections {
             userAccountsCol = userdb.getCollection(USER_ACCOUNTS_COLLECTION);
             userProfilesCol = userdb.getCollection(USERPROFILES_COLLECTION);
             groupsCol = userdb.getCollection(GROUPS_COLLECTION);
-            groupTypescol = userdb.getCollection(GROUP_TYPES_COLLECTION);
-            userGroupscol = userdb.getCollection(USERGROUPS_COLLECTION);
+            groupTypesCol = userdb.getCollection(GROUP_TYPES_COLLECTION);
+            userGroupsCol = userdb.getCollection(USERGROUPS_COLLECTION);
             userBlahInfoCol = userdb.getCollection(USER_BLAH_INFO_COLLECTION);
             userCommentInfoCol = userdb.getCollection(USER_COMMENT_INFO_COLLECTION);
 

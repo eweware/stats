@@ -10,6 +10,7 @@ import com.eweware.service.base.store.dao.schema.type.UserProfilePermissions;
 import com.eweware.service.base.store.impl.mongo.dao.MongoStoreManager;
 import com.eweware.stats.help.LocalCache;
 import com.eweware.stats.help.Utilities;
+import org.bson.types.ObjectId;
 
 import java.util.*;
 import java.util.regex.Pattern;
@@ -31,8 +32,9 @@ public class Inboxer {
 //    private final LocalCache<String, String> _nicknameCache = new LocalCache<String, String>("userNickname", NUMBER_OF_CACHE_ENTRIES, TIME_TO_LIVE_IN_SECONDS, TIME_TO_IDLE_IN_SECONDS);
     private final DBCollection _blahsCol;
     private final DBCollection _groupsCol;
-
     private final DBCollection _userProfilesCol;
+    private final DBCollection _userGroupsCol;
+
     private AggregationOutput _blahActivityList = null;
 
 
@@ -63,6 +65,7 @@ public class Inboxer {
         _blahsCol = DBCollections.getInstance().getBlahsCol();
         _groupsCol = DBCollections.getInstance().getGroupsCol();
         _userProfilesCol = DBCollections.getInstance().getUserProfilesCol();
+        _userGroupsCol = DBCollections.getInstance().getUserGroupsCol();
     }
 
     public long execute() throws DBException, SystemErrorException, InterruptedException {
@@ -70,12 +73,57 @@ public class Inboxer {
         long addedInboxItemCount = 0;
         RefreshActivityList();
 
-
-
         for (DBObject group : cursor) {
-            long addedInGroup = buildInbox(group, true); // safe inbox
-            addedInGroup += buildInbox(group, false); // mature inbox
+            final String groupId = group.get(BaseDAOConstants.ID).toString();
+
+            // get latest generation of cohort info
+            BasicDBObject cohortGens = (BasicDBObject) group.get(GroupDAOConstants.COHORT_GENERATIONS);
+            BasicDBObject latestGen = null;
+            String latestGenId = null;
+            for (String genId : cohortGens.keySet()) {
+                BasicDBObject curGen = (BasicDBObject) cohortGens.get(genId);
+                if (latestGen == null) {
+                    latestGen = curGen;
+                    latestGenId = genId;
+                }
+                else {
+                    Date latestDate = (Date) latestGen.get(BaseDAOConstants.CREATED);
+                    Date curDate = (Date) curGen.get(BaseDAOConstants.CREATED);
+                    if (curDate.after(latestDate)) {
+                        latestGen = curGen;
+                        latestGenId = genId;
+                    }
+                }
+            }
+
+            // get the cohort info sub-document of the latest generation
+            BasicDBObject cohortInfoDoc = (BasicDBObject) latestGen.get(GroupDAOConstants.COHORT_INFO);
+
+            // build inboxes
+            long addedInGroup = buildInbox(group, cohortInfoDoc, latestGenId, true); // safe inbox
+            addedInGroup += buildInbox(group, cohortInfoDoc, latestGenId, false); // mature inbox
             addedInboxItemCount += addedInGroup;
+
+            // if this is a new generation of cohorts for this group
+            String curGenId = (String) group.get(GroupDAOConstants.CURRENT_GENERATION_ID);
+            if (curGenId == null || !curGenId.equals(latestGenId)) {
+                // update group's current cohort generationId
+                _groupsCol.update(new BasicDBObject(BaseDAOConstants.ID, new ObjectId(groupId)), new BasicDBObject("$set", new BasicDBObject(GroupDAOConstants.CURRENT_GENERATION_ID, latestGenId)));
+                // update users' cohort info
+                BasicDBObject setter = new BasicDBObject();
+                List<String> cohortIdList = new ArrayList<String>();
+                for (String cohortId : cohortInfoDoc.keySet()) {
+                    cohortIdList.add(cohortId);
+                }
+                setter.put("$set", new BasicDBObject(UserGroupDAOConstants.COHORT, cohortIdList));
+                WriteResult wr = _userGroupsCol.update(new BasicDBObject(UserGroupDAOConstants.GROUP_ID, groupId), setter, false, true);
+
+                Utilities.printit(true, "\tNew cohort generation, " + wr.getN() + " users cohort info were updated.");
+            }
+
+
+
+
         }
         Utilities.printit(true, "Added total " + addedInboxItemCount + " inbox objects");
         return addedInboxItemCount;
@@ -151,38 +199,16 @@ public class Inboxer {
 
 
     // build an inbox of nothing but safe blahs
-    private long buildInbox(DBObject group, boolean safe) throws SystemErrorException, DBException, InterruptedException {
+    private long buildInbox(DBObject group, DBObject cohortInfoDoc, String latestGenId, boolean safe) throws SystemErrorException, DBException, InterruptedException {
         final String groupId = group.get(BaseDAOConstants.ID).toString();
 
         long addedInGroup = 0;
         // TODOTEST
         //if (!groupId.equals("522ccb78e4b0a35dadfcf73f")) return 0;
-        // get latest generation of cohort info
-        BasicDBObject cohortGenerations = (BasicDBObject) group.get(GroupDAOConstants.COHORT_GENERATIONS);
-        BasicDBObject latestGeneration = null;
-        String latestGenerationId = null;
-        for (String generationId : cohortGenerations.keySet()) {
-            BasicDBObject curGeneration = (BasicDBObject) cohortGenerations.get(generationId);
-            if (latestGeneration == null) {
-                latestGeneration = curGeneration;
-                latestGenerationId = generationId;
-            }
-            else {
-                Date latestDate = (Date) latestGeneration.get(BaseDAOConstants.CREATED);
-                Date curDate = (Date) curGeneration.get(BaseDAOConstants.CREATED);
-                if (curDate.after(latestDate)) {
-                    latestGeneration = curGeneration;
-                    latestGenerationId = generationId;
-                }
-            }
-        }
-
-        // get the set of cohort info
-        BasicDBObject cohortSet = (BasicDBObject) latestGeneration.get(GroupDAOConstants.COHORT_INFO);
 
         // for each cohort, sort by cohort-strength, and build inbox
-        for (String cohortId : cohortSet.keySet()) {
-            BasicDBObject cohortInboxInfo = (BasicDBObject) cohortSet.get(cohortId);
+        for (String cohortId : cohortInfoDoc.keySet()) {
+            BasicDBObject cohortInboxInfo = (BasicDBObject) cohortInfoDoc.get(cohortId);
             String inboxKeyString = safe ?
                     GroupDAOConstants.LAST_SAFE_INBOX_NUMBER : GroupDAOConstants.LAST_INBOX_NUMBER;
             final Integer lin = (Integer) cohortInboxInfo.get(inboxKeyString);
@@ -204,7 +230,7 @@ public class Inboxer {
             // Sort blahs in memory, w.r.t. cohort-strength
             Collections.sort(blahs, new IsStrongerThan(cohortId));
 
-            addedInGroup += intBuildInbox(group, latestGenerationId, cohortId, blahs, lastInboxNumber, safe);
+            addedInGroup += intBuildInbox(group, latestGenId, cohortId, blahs, lastInboxNumber, safe);
         }
         return addedInGroup;
     }

@@ -138,6 +138,11 @@ public interface GroupDAOConstants {
      */
     static final String COHORT_INFO = "CHI";
 
+    /**
+     * <p>The current cohort generation ID, a String</p>
+     */
+    static final String CURRENT_GENERATION_ID = "CG";
+
 
     static final SchemaDataTypeFieldMap[] SIMPLE_FIELD_TYPES = new SchemaDataTypeFieldMap[]{
         new SchemaDataTypeFieldMap(SchemaDataType.S, new String[]{
