@@ -129,19 +129,15 @@ public interface GroupDAOConstants {
     static final String INBOX_GENERATION_DURATION = "I";
 
     /**
-     * <p>The document of the set of cohort generations, a Document</p>
-     */
-    static final String COHORT_GENERATIONS = "CHG";
-
-    /**
-     * <p>The document for cohorts info in one generation, a Document</p>
-     */
-    static final String COHORT_INFO = "CHI";
-
-    /**
-     * <p>The current cohort generation ID, a String</p>
+     * <p>The current cohort generation ID, a ObjectId</p>
      */
     static final String CURRENT_GENERATION_ID = "CG";
+
+    /**
+     * <p>The next cohort generation ID, a ObjectId</p>
+     */
+
+    static final String NEXT_GENERATION_ID = "NG";
 
 
     static final SchemaDataTypeFieldMap[] SIMPLE_FIELD_TYPES = new SchemaDataTypeFieldMap[]{

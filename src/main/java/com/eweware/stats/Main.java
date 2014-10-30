@@ -201,43 +201,43 @@ public class Main {
         long ms = 0L;
         long userCount;
 
-        if (_runconfig.contains("cluster"))
-        {
-            lastTime = System.currentTimeMillis();
-            //new Inboxer().execute();
-            //Utilities.printit(true, new Date() + ": User similarity took " + ((System.currentTimeMillis() - lastTime) / 1000) + " seconds");
-
-            lastTime = System.currentTimeMillis();
-            userCount = new UserClusterer().execute();
-            ms = System.currentTimeMillis() - lastTime;
-           Utilities.printit(true, new Date() + ": User Clustering took " + (ms / 1000) + " seconds (" + (ms / ((userCount == 0L) ? 1L : userCount)) + " ms/user)");
-        }
-        else
-            Utilities.printit(true, new Date() + ": Skipping user clustering");
-
-        if (_runconfig.contains("stats"))
-        {
-            Utilities.printit(true, new Date() + ": Starting Descriptive Stats");
-            lastTime = System.currentTimeMillis();
-            blahCount = new BlahDescriptiveStats().execute();
-            ms = System.currentTimeMillis() - lastTime;
-            Utilities.printit(true, new Date() + ": Inboxer BlahDescriptiveStats took " + (ms / 1000) + " seconds (" + (ms / ((blahCount == 0L) ? 1L : blahCount)) + " ms/blah)");
-
-            Utilities.printit(true, new Date() + ": Starting User Reputation Stats");
-            lastTime = System.currentTimeMillis();
-            executeReputation();
-            ms = System.currentTimeMillis() - lastTime;
-            Utilities.printit(true, new Date() + ": User Reputation took " + (ms / 1000) + " seconds");
-        }
-        else
-            Utilities.printit(true, new Date() + ": Skipping user and blah stats");
+//        if (_runconfig.contains("cluster"))
+//        {
+//            lastTime = System.currentTimeMillis();
+//            //new Inboxer().execute();
+//            //Utilities.printit(true, new Date() + ": User similarity took " + ((System.currentTimeMillis() - lastTime) / 1000) + " seconds");
+//
+//            lastTime = System.currentTimeMillis();
+//            userCount = new UserClusterer().execute();
+//            ms = System.currentTimeMillis() - lastTime;
+//           Utilities.printit(true, new Date() + ": User Clustering took " + (ms / 1000) + " seconds (" + (ms / ((userCount == 0L) ? 1L : userCount)) + " ms/user)");
+//        }
+//        else
+//            Utilities.printit(true, new Date() + ": Skipping user clustering");
+//
+//        if (_runconfig.contains("stats"))
+//        {
+//            Utilities.printit(true, new Date() + ": Starting Descriptive Stats");
+//            lastTime = System.currentTimeMillis();
+//            blahCount = new BlahDescriptiveStats().execute();
+//            ms = System.currentTimeMillis() - lastTime;
+//            Utilities.printit(true, new Date() + ": Inboxer BlahDescriptiveStats took " + (ms / 1000) + " seconds (" + (ms / ((blahCount == 0L) ? 1L : blahCount)) + " ms/blah)");
+//
+//            Utilities.printit(true, new Date() + ": Starting User Reputation Stats");
+//            lastTime = System.currentTimeMillis();
+//            executeReputation();
+//            ms = System.currentTimeMillis() - lastTime;
+//            Utilities.printit(true, new Date() + ": User Reputation took " + (ms / 1000) + " seconds");
+//        }
+//        else
+//            Utilities.printit(true, new Date() + ": Skipping user and blah stats");
 
         if (_runconfig.contains("inbox"))
         {
-            Utilities.printit(true, new Date() + ": Starting Inboxing");
-            lastTime = System.currentTimeMillis();
+//            Utilities.printit(true, new Date() + ": Starting Inboxing");
+//            lastTime = System.currentTimeMillis();
             new Inboxer().execute();
-            Utilities.printit(true, new Date() + ": Inboxer boxing took " + ((System.currentTimeMillis() - lastTime) / 1000) + " seconds");
+//            Utilities.printit(true, new Date() + ": Inboxer boxing took " + ((System.currentTimeMillis() - lastTime) / 1000) + " seconds");
         }
         else
             Utilities.printit(true, new Date() + ": Skipping inboxing");

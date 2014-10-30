@@ -1,15 +1,18 @@
 package com.eweware.stats;
 
-import com.eweware.service.base.store.dao.schema.type.BooleanDataTypeValidator;
+import com.microsoft.azure.storage.CloudStorageAccount;
+import com.microsoft.azure.storage.OperationContext;
+import com.microsoft.azure.storage.queue.CloudQueue;
+import com.microsoft.azure.storage.queue.CloudQueueClient;
+import com.microsoft.azure.storage.queue.CloudQueueMessage;
 import com.mongodb.*;
 import com.eweware.DBException;
 import com.eweware.service.base.CommonUtilities;
 import com.eweware.service.base.error.SystemErrorException;
 import com.eweware.service.base.store.dao.*;
-import com.eweware.service.base.store.dao.schema.type.UserProfilePermissions;
 import com.eweware.service.base.store.impl.mongo.dao.MongoStoreManager;
-import com.eweware.stats.help.LocalCache;
 import com.eweware.stats.help.Utilities;
+import com.mongodb.util.JSON;
 import org.bson.types.ObjectId;
 
 import java.util.*;
@@ -34,6 +37,10 @@ public class Inboxer {
     private final DBCollection _groupsCol;
     private final DBCollection _userProfilesCol;
     private final DBCollection _userGroupsCol;
+
+    private final DBCollection _generationInfoCol;
+    private final DBCollection _userGroupInfoCol;
+    private final DBCollection _blahInfoCol;
 
     private AggregationOutput _blahActivityList = null;
 
@@ -61,72 +68,194 @@ public class Inboxer {
 //    private double fractionOlder = .10;
 //
 
+
+    public static final String STORAGE_CONNECTION_STRING =
+            "DefaultEndpointsProtocol=http;" +
+                    "AccountName=weihanstorage;" + "AccountKey=PKz1eXkKlu07u4SpfyxfCvO1BH4yZCnuXhrQbebIaOdmUfGGD6qV8r+lycj7sNXSwtVTHpo/nJBlHVa4oavNgg==";
+
+    public static final String INBOX_TASK_QUEUE = "inboxtaskqueue";
+
+    private CloudQueueClient queueClient;
+    private CloudQueue inboxTaskQueue;
+
+    int visibilityTimoutSeconds = 60 / 2;
+    long noTaskWaitMillis = 1000 * 60;
+
+    public static final int GENERATE_INBOX = 0;
+    public static final int GENERATE_INBOX_NEW_CLUSTER = 1;
+
     public Inboxer() throws DBException {
         _blahsCol = DBCollections.getInstance().getBlahsCol();
         _groupsCol = DBCollections.getInstance().getGroupsCol();
         _userProfilesCol = DBCollections.getInstance().getUserProfilesCol();
         _userGroupsCol = DBCollections.getInstance().getUserGroupsCol();
+
+        _generationInfoCol = DBCollections.getInstance().getGenerationInfoCol();
+        _userGroupInfoCol = DBCollections.getInstance().getUserGroupInfoCol();
+        _blahInfoCol = DBCollections.getInstance().getBlahInfoCol();
     }
 
-    public long execute() throws DBException, SystemErrorException, InterruptedException {
-        final DBCursor cursor = Utilities.findInDB(3, "finding all group records", _groupsCol, null, null);
-        long addedInboxItemCount = 0;
-        RefreshActivityList();
+    public void execute() throws DBException, SystemErrorException, InterruptedException {
 
-        for (DBObject group : cursor) {
-            final String groupId = group.get(BaseDAOConstants.ID).toString();
+        try {
+            initializeQueue();
 
-            // get latest generation of cohort info
-            BasicDBObject cohortGens = (BasicDBObject) group.get(GroupDAOConstants.COHORT_GENERATIONS);
-            BasicDBObject latestGen = null;
-            String latestGenId = null;
-            for (String genId : cohortGens.keySet()) {
-                BasicDBObject curGen = (BasicDBObject) cohortGens.get(genId);
-                if (latestGen == null) {
-                    latestGen = curGen;
-                    latestGenId = genId;
-                }
-                else {
-                    Date latestDate = (Date) latestGen.get(BaseDAOConstants.CREATED);
-                    Date curDate = (Date) curGen.get(BaseDAOConstants.CREATED);
-                    if (curDate.after(latestDate)) {
-                        latestGen = curGen;
-                        latestGenId = genId;
+            // continuously get task to work on
+            while (true) {
+                CloudQueueMessage message = inboxTaskQueue.retrieveMessage(visibilityTimoutSeconds, null, new OperationContext());
+                if (message != null) {
+                    // Process the message within certain time, and then delete the message.
+                    BasicDBObject task = (BasicDBObject) JSON.parse(message.getMessageContentAsString());
+                    try {
+                        processTask(task);
+                        inboxTaskQueue.deleteMessage(message);
+                    }
+                    catch (TaskException e) {
+                        // there is something wrong about the task
+                        if (e.type == TaskExceptionType.SKIP) {
+                            System.out.println(e.getMessage() + ", task skipped");
+                            inboxTaskQueue.deleteMessage(message);
+                        }
+                        else if (e.type == TaskExceptionType.RECOMPUTE) {
+                            System.out.println(e.getMessage() + ", task put back to queue");
+                            inboxTaskQueue.updateMessage(message, 0);
+                        }
+                        else
+                            e.printStackTrace();
+                    }
+                    catch (Exception e) {
+                        e.printStackTrace();
                     }
                 }
-            }
-
-            // get the cohort info sub-document of the latest generation
-            BasicDBObject cohortInfoDoc = (BasicDBObject) latestGen.get(GroupDAOConstants.COHORT_INFO);
-
-            // build inboxes
-            long addedInGroup = buildInbox(group, cohortInfoDoc, latestGenId, true); // safe inbox
-            addedInGroup += buildInbox(group, cohortInfoDoc, latestGenId, false); // mature inbox
-            addedInboxItemCount += addedInGroup;
-
-            // if this is a new generation of cohorts for this group
-            String curGenId = (String) group.get(GroupDAOConstants.CURRENT_GENERATION_ID);
-            if (curGenId == null || !curGenId.equals(latestGenId)) {
-                // update group's current cohort generationId
-                _groupsCol.update(new BasicDBObject(BaseDAOConstants.ID, new ObjectId(groupId)), new BasicDBObject("$set", new BasicDBObject(GroupDAOConstants.CURRENT_GENERATION_ID, latestGenId)));
-                // update users' cohort info
-                BasicDBObject setter = new BasicDBObject();
-                List<String> cohortIdList = new ArrayList<String>();
-                for (String cohortId : cohortInfoDoc.keySet()) {
-                    cohortIdList.add(cohortId);
+                else {
+                    System.out.println("No more tasks, rest for " + noTaskWaitMillis + " milliseconds.");
+                    Thread.sleep(noTaskWaitMillis);
                 }
-                setter.put("$set", new BasicDBObject(UserGroupDAOConstants.COHORT, cohortIdList));
-                WriteResult wr = _userGroupsCol.update(new BasicDBObject(UserGroupDAOConstants.GROUP_ID, groupId), setter, false, true);
-
-                Utilities.printit(true, "\tNew cohort generation, " + wr.getN() + " users cohort info were updated.");
             }
-
-
-
-
         }
-        Utilities.printit(true, "Added total " + addedInboxItemCount + " inbox objects");
-        return addedInboxItemCount;
+        catch (Exception e) {
+            System.out.println("Error in initializing Azure queue");
+            e.printStackTrace();
+        }
+
+
+    }
+
+    private void initializeQueue() throws Exception {
+        System.out.print("Initializing Azure Storage Queue service... ");
+
+        // Retrieve storage account from connection-string.
+        CloudStorageAccount storageAccount =
+                CloudStorageAccount.parse(STORAGE_CONNECTION_STRING);
+
+        // Create the queue client.
+        queueClient = storageAccount.createCloudQueueClient();
+
+        // Retrieve a reference to a queue.
+        inboxTaskQueue = queueClient.getQueueReference(INBOX_TASK_QUEUE);
+
+        // Create the queue if it doesn't already exist.
+        inboxTaskQueue.createIfNotExists();
+
+        System.out.println("done");
+    }
+
+    private boolean processTask(BasicDBObject task) throws TaskException, DBException, InterruptedException, SystemErrorException {
+
+        //final DBCursor cursor = Utilities.findInDB(3, "finding all group records", _groupsCol, null, null);
+        long addedInboxItemCount = 0;
+
+        RefreshActivityList();
+
+        final String groupId = task.getString("G");
+        BasicDBObject group = (BasicDBObject) _groupsCol.findOne(new BasicDBObject("_id", new ObjectId(groupId)));
+        if (group == null) throw new TaskException("Error : groupd not exist id : " + groupId, TaskExceptionType.SKIP);
+
+        final Integer taskType = (Integer) task.get("T");
+        String genId;
+        if (taskType == null) {
+            throw new TaskException("Error : task type not exist : " + taskType, TaskExceptionType.SKIP);
+        }
+        else if (taskType == GENERATE_INBOX) {
+            // if for existing generation, get current generation ID, otherwise get next generation ID
+            genId = group.getObjectId("CG").toString();
+        }
+        else if (taskType == GENERATE_INBOX_NEW_CLUSTER) {
+            genId = group.getObjectId("NG").toString();
+        }
+        else {
+            throw new TaskException("Error : task type not exist : " + taskType, TaskExceptionType.SKIP);
+        }
+
+        // get the cohort info sub-document of the latest generation
+        BasicDBObject generation = (BasicDBObject)_generationInfoCol.findOne(new BasicDBObject("_id", new ObjectId(genId)));
+        BasicDBObject cohortInfoDoc = (BasicDBObject) generation.get("CHI");
+
+        // build inboxes
+        long addedInGroup = buildInbox(group, cohortInfoDoc, genId, false); // unsafe inbox
+//            addedInGroup += buildInbox(group, cohortInfoDoc, genId, true); // safe inbox
+        addedInboxItemCount += addedInGroup;
+
+        // if this is a new generation of cohorts for this group
+        if (taskType == GENERATE_INBOX_NEW_CLUSTER) {
+            updateNewClusterInfo(groupId, genId);
+        }
+
+            Utilities.printit(true, "Added total " + addedInboxItemCount + " inbox objects");
+            return true;
+
+    }
+
+    private enum TaskExceptionType {
+        RECOMPUTE, SKIP
+    }
+
+    private class TaskException extends Exception {
+        private TaskExceptionType type;
+        private TaskException(String msg, TaskExceptionType type) {
+            super(msg);
+            this.type = type;
+        }
+    }
+
+    private List<String> getUserList(String groupId) {
+        BasicDBObject query = new BasicDBObject("G", new ObjectId(groupId));
+        DBCursor cursor = _userGroupInfoCol.find(query);
+        List<String> userIdList = new ArrayList<String>();
+        while (cursor.hasNext()) {
+            BasicDBObject userGroupInfo = (BasicDBObject) cursor.next();
+            userIdList.add(userGroupInfo.getObjectId("U").toString());
+        }
+        cursor.close();
+        return userIdList;
+    }
+
+    private void updateNewClusterInfo(String groupId, String nextGenId) {
+
+        // update users' cohort info
+        // get user list for this group
+        List<String> userIdList = getUserList(groupId);
+        // for each user, get next cohort and replace current cohort
+        for (String userId : userIdList) {
+            BasicDBObject query = new BasicDBObject("U", new ObjectId(userId));
+            query.append("G", new ObjectId(groupId));
+
+            BasicDBObject userGroupInfo = (BasicDBObject) _userGroupInfoCol.findOne(query);
+            List<ObjectId> cohortList = (List<ObjectId>) userGroupInfo.get("CHN");
+
+            BasicDBObject values = new BasicDBObject("CH", cohortList);
+            values.append("CHN", new ArrayList<ObjectId>());
+            BasicDBObject setter = new BasicDBObject("$set", values);
+            _userGroupInfoCol.update(query, setter);
+        }
+
+        Utilities.printit(true, "\tNew cohort generation, " + userIdList.size() + " users cohort info were updated.");
+
+        // update group's current generation ID
+        BasicDBObject values = new BasicDBObject("CG", new ObjectId(nextGenId));
+        values.append("NG", null);
+        BasicDBObject setter = new BasicDBObject("$set", values);
+        _groupsCol.update(new BasicDBObject("_id", new ObjectId(groupId)), setter);
     }
 
     private String timeString(Date someDate)
@@ -199,20 +328,18 @@ public class Inboxer {
 
 
     // build an inbox of nothing but safe blahs
-    private long buildInbox(DBObject group, DBObject cohortInfoDoc, String latestGenId, boolean safe) throws SystemErrorException, DBException, InterruptedException {
+    private long buildInbox(DBObject group, DBObject cohortInfoDoc, String currentGenId, boolean safe) throws SystemErrorException, DBException, InterruptedException {
         final String groupId = group.get(BaseDAOConstants.ID).toString();
 
         long addedInGroup = 0;
-        // TODOTEST
+        // TEST
         //if (!groupId.equals("522ccb78e4b0a35dadfcf73f")) return 0;
 
         // for each cohort, sort by cohort-strength, and build inbox
         for (String cohortId : cohortInfoDoc.keySet()) {
             BasicDBObject cohortInboxInfo = (BasicDBObject) cohortInfoDoc.get(cohortId);
-            String inboxKeyString = safe ?
-                    GroupDAOConstants.LAST_SAFE_INBOX_NUMBER : GroupDAOConstants.LAST_INBOX_NUMBER;
-            final Integer lin = (Integer) cohortInboxInfo.get(inboxKeyString);
-            Integer lastInboxNumber = (lin == null) ? -1 : lin;
+            String inboxKeyString = safe ? "LS" : "L";
+            int lastInboxNumber = cohortInboxInfo.getInt(inboxKeyString, -1);
 
             if (lastInboxNumber > 1000000) { // wrap-around
                 lastInboxNumber = -1;
@@ -230,7 +357,7 @@ public class Inboxer {
             // Sort blahs in memory, w.r.t. cohort-strength
             Collections.sort(blahs, new IsStrongerThan(cohortId));
 
-            addedInGroup += intBuildInbox(group, latestGenId, cohortId, blahs, lastInboxNumber, safe);
+            addedInGroup += intBuildInbox(group, currentGenId, cohortId, blahs, lastInboxNumber, safe);
         }
         return addedInGroup;
     }
@@ -395,18 +522,18 @@ public class Inboxer {
         }
 
         // Update group with new inbox range
-        final BasicDBObject query = new BasicDBObject(BaseDAOConstants.ID, group.get(BaseDAOConstants.ID));
+        final BasicDBObject query = new BasicDBObject("_id", new ObjectId(generationId));
         BasicDBObject setter;
 
         String firstKeyString;
         String lastKeyString;
-        String keyString = "CHG." + generationId + ".CHI." + cohortId + ".";
+        String keyString = "CHI." + cohortId + ".";
         if (safe) {
-            firstKeyString = keyString + GroupDAOConstants.FIRST_SAFE_INBOX_NUMBER;
-            lastKeyString = keyString + GroupDAOConstants.LAST_SAFE_INBOX_NUMBER;
+            firstKeyString = keyString + "F";
+            lastKeyString = keyString + "L";
         } else {
-            firstKeyString = keyString + GroupDAOConstants.FIRST_INBOX_NUMBER;
-            lastKeyString = keyString + GroupDAOConstants.LAST_INBOX_NUMBER;
+            firstKeyString = keyString + "FS";
+            lastKeyString = keyString + "LS";
         }
 
         lastInboxNumber = (lastInboxNumber == -1) ? 0 : (lastInboxNumber + 1);
@@ -414,6 +541,7 @@ public class Inboxer {
         setter = new BasicDBObject(firstKeyString, lastInboxNumber);
         setter.put(lastKeyString, firstInboxNumber);
 
+        /*
         // Update time created and amount of time it took to create it
         final Date lastCreated = (Date) group.get(GroupDAOConstants.LAST_TIME_INBOXES_GENERATED);
         final Date now = new Date();
@@ -421,7 +549,9 @@ public class Inboxer {
         if (lastCreated != null) {
             setter.put(GroupDAOConstants.INBOX_GENERATION_DURATION, now.getTime() - lastCreated.getTime());
         }
-        _groupsCol.update(query, new BasicDBObject("$set", setter));      // TODO use this in getInbox in rest
+        */
+
+        _generationInfoCol.update(query, new BasicDBObject("$set", setter));      // TODO use this in getInbox in rest
 
         String safeInboxWord = "inboxes";
         if (safe) safeInboxWord = "safe Inboxes";
@@ -535,8 +665,6 @@ public class Inboxer {
             }
         }
 
-
-
         return isActive;
     }
 
@@ -585,7 +713,7 @@ public class Inboxer {
 
             findMsg = "finding all safe blahs in a group";
         }
-        final DBCursor cursor = Utilities.findInDB(3, findMsg, _blahsCol, queryObj, fieldsToReturn);
+        final DBCursor cursor = Utilities.findInDB(3, findMsg, _blahInfoCol, queryObj, fieldsToReturn);
 
         cursor.addOption(Bytes.QUERYOPTION_SLAVEOK);
         cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
@@ -597,16 +725,18 @@ public class Inboxer {
         return blahs;
     }
 
+    // minStrength: have minimal strength to be "relevant" in this cohort
+    // numDays: created within numDays days to be "relevant"
     private List<DBObject> getRelevantBlahs(String groupId, String cohortId, double minStrength, long numDays, boolean safe) throws DBException, InterruptedException {
 
         final BasicDBObject fieldsToReturn = makeBlahFieldsToReturn();
         ArrayList<BasicDBObject> orList = new ArrayList<BasicDBObject>();
-        Date    curDate = new Date();
+        Date curDate = new Date();
         Date minDate = new Date(curDate.getTime() - numDays * 24 * 3600 * 1000 );
-        orList.add(new BasicDBObject("CHS."+cohortId, new BasicDBObject("$gt", minStrength)));
+        orList.add(new BasicDBObject("S."+cohortId, new BasicDBObject("$gt", minStrength)));
         orList.add(new BasicDBObject("c", new BasicDBObject("$gt", minDate)));
 
-        BasicDBObject queryObj = new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId).append("S", new BasicDBObject("$gte", 0));
+        BasicDBObject queryObj = new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId);
 
         String findMsg;
         if (safe) {
@@ -625,7 +755,7 @@ public class Inboxer {
             findMsg = "finding blahs in a group";
         }
 
-        final DBCursor cursor = Utilities.findInDB(3, findMsg, _blahsCol, queryObj, fieldsToReturn);
+        final DBCursor cursor = Utilities.findInDB(3, findMsg, _blahInfoCol, queryObj, fieldsToReturn);
 
         cursor.addOption(Bytes.QUERYOPTION_SLAVEOK);
         cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
@@ -634,6 +764,7 @@ public class Inboxer {
         while (cursor.hasNext()) {
             blahs.add(cursor.next());
         }
+        cursor.close();
 
         if (blahs.size() < 100)
             return getAllBlahs(groupId, safe);
@@ -644,16 +775,16 @@ public class Inboxer {
     /** Only these fields will be returned: be sure that this is consistent with buildInbox() */
     private BasicDBObject makeBlahFieldsToReturn() {
         final BasicDBObject fieldsToReturn = new BasicDBObject(BlahDAOConstants.BLAH_STRENGTH, 1);
-        fieldsToReturn.put(BlahDAOConstants.TEXT, 1);
-        fieldsToReturn.put(BlahDAOConstants.TYPE_ID, 1);
-        fieldsToReturn.put(BlahDAOConstants.AUTHOR_ID, 1);
-        fieldsToReturn.put(BlahDAOConstants.IMAGE_IDS, 1);
-        fieldsToReturn.put(BlahDAOConstants.BADGE_IDS, 1);
+        fieldsToReturn.put("T", 1);
+        fieldsToReturn.put("Y", 1);
+        fieldsToReturn.put("A", 1);
+        fieldsToReturn.put("M", 1);
+        fieldsToReturn.put("B", 1);
         //fieldsToReturn.put(BlahDAOConstants.BLAH_STRENGTH, 1); // duplicated
-        fieldsToReturn.put(BaseDAOConstants.CREATED, 1);
-        fieldsToReturn.put(BlahDAOConstants.VIEWS, 1);
-        fieldsToReturn.put(BlahDAOConstants.FLAGGEDCONTENT, 1);
-        fieldsToReturn.put(BlahDAOConstants.BLAH_COHORT_STRENGTH, 1); // cohort-strength
+        fieldsToReturn.put("c", 1);
+//        fieldsToReturn.put("V", 1);
+        fieldsToReturn.put("XXX", 1);
+//        fieldsToReturn.put(BlahDAOConstants.BLAH_COHORT_STRENGTH, 1); // cohort-strength
         return fieldsToReturn;
     }
 
@@ -665,8 +796,8 @@ public class Inboxer {
         private String cohortId;
         @Override
         public int compare(DBObject a, DBObject b) {
-            BasicDBObject cohortStrengthA = (BasicDBObject) a.get(BlahDAOConstants.BLAH_COHORT_STRENGTH);
-            BasicDBObject cohortStrengthB = (BasicDBObject) b.get(BlahDAOConstants.BLAH_COHORT_STRENGTH);
+            BasicDBObject cohortStrengthA = (BasicDBObject) a.get("S");
+            BasicDBObject cohortStrengthB = (BasicDBObject) b.get("S");
             final Double obj1 = (Double) cohortStrengthA.get(cohortId);
             final Double obj2 = (Double) cohortStrengthB.get(cohortId);
             if (obj1 == null)

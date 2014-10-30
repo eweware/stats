@@ -19,6 +19,7 @@ public class DBCollections {
     private static final String BLAHDB = "blahdb";
     private static final String TRACKERDB = "trackerdb";
     private static final String BADGEDB = "badgedb";
+    private static final String INFODB = "infodb";
     private static final String USERS_COLLECTION = "users";
     private static final String BADGE_AUTHORITIES_COLLECTION = "badgeauthorities";
     private static final String BADGE_APP_COLLECTION = "app";
@@ -42,6 +43,10 @@ public class DBCollections {
     private static final String DEMOGRAPHICS_COLLECTION = "demographics";
     private static final String MEDIA_COLLECTION = "media";
 
+    private static final String GENERATION_INFO_COLLECTION = "generationInfo";
+    private static final String USER_GROUP_INFO_COLLECTION = "userGroupInfo";
+    private static final String BLAH_INFO_COLLECTION = "blahInfo";
+
     private final MongoClient mongoClient;
 
     public final DB sysdb;
@@ -49,6 +54,7 @@ public class DBCollections {
     public final DB blahdb;
     public final DB trackerdb;
     public final DB badgedb;
+    public final DB infodb;
     private final DBCollection usersCol;
     private final DBCollection badgeAuthoritiesCol;
     private final DBCollection badgeAppCol;
@@ -69,6 +75,9 @@ public class DBCollections {
     private final DBCollection trackerCol;
     private final DBCollection userBlahInfoCol;
     private final DBCollection userCommentInfoCol;
+    private final DBCollection generationInfoCol;
+    private final DBCollection userGroupInfoCol;
+    private final DBCollection blahInfoCol;
 
 
     public MongoClient getMongoClient() {
@@ -155,6 +164,12 @@ public class DBCollections {
         return userCommentInfoCol;
     }
 
+    public DBCollection getGenerationInfoCol() { return generationInfoCol; }
+
+    public DBCollection getUserGroupInfoCol() { return userGroupInfoCol; }
+
+    public DBCollection getBlahInfoCol() { return blahInfoCol; }
+
     public DB getDB(String dbName) {
         return mongoClient.getDB(dbName);
     }
@@ -203,6 +218,7 @@ public class DBCollections {
             blahdb = mongoClient.getDB(BLAHDB);
             trackerdb = mongoClient.getDB(TRACKERDB);
             badgedb = mongoClient.getDB(BADGEDB);
+            infodb = mongoClient.getDB(INFODB);
 
             usersCol = userdb.getCollection(USERS_COLLECTION);
             badgeAuthoritiesCol = userdb.getCollection(BADGE_AUTHORITIES_COLLECTION);
@@ -226,6 +242,11 @@ public class DBCollections {
             trackCommentCol = trackerdb.getCollection(TRACKCOMMENT_COLLECTION);
             trackUserCol = trackerdb.getCollection(TRACKUSER_COLLECTION);
             trackerCol = trackerdb.getCollection(TRACKER_COLLECTION);
+
+            generationInfoCol = infodb.getCollection(GENERATION_INFO_COLLECTION);
+            userGroupInfoCol = infodb.getCollection(USER_GROUP_INFO_COLLECTION);
+            blahInfoCol = infodb.getCollection(BLAH_INFO_COLLECTION);
+
         } catch (Exception e) {
             throw new DBException("Failed to initialize mongo", e);
         }
