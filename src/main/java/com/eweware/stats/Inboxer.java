@@ -16,7 +16,6 @@ import com.mongodb.util.JSON;
 import org.bson.types.ObjectId;
 
 import java.util.*;
-import java.util.regex.Pattern;
 
 /**
  * @author rk@post.harvard.edu
@@ -69,17 +68,17 @@ public class Inboxer {
 //
 
 
-    public static final String STORAGE_CONNECTION_STRING =
-            "DefaultEndpointsProtocol=http;" +
-                    "AccountName=weihanstorage;" + "AccountKey=PKz1eXkKlu07u4SpfyxfCvO1BH4yZCnuXhrQbebIaOdmUfGGD6qV8r+lycj7sNXSwtVTHpo/nJBlHVa4oavNgg==";
+    public static final String AZURE_ACCOUNT_NAME = "weihanstorage";
+    public static final String AZURE_ACCOUNT_KEY = "PKz1eXkKlu07u4SpfyxfCvO1BH4yZCnuXhrQbebIaOdmUfGGD6qV8r+lycj7sNXSwtVTHpo/nJBlHVa4oavNgg==";
 
+    public static final String STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=http;AccountName=" + AZURE_ACCOUNT_NAME + ";AccountKey=" + AZURE_ACCOUNT_KEY;
     public static final String INBOX_TASK_QUEUE = "inboxtaskqueue";
 
     private CloudQueueClient queueClient;
     private CloudQueue inboxTaskQueue;
 
-    int visibilityTimoutSeconds = 60 / 2;
-    long noTaskWaitMillis = 1000 * 60;
+    int VISIBLE_TIMEOUT_SEC = 180;
+    long NO_TASK_WAIT_MILLIS = 1000 * 10;
 
     public static final int GENERATE_INBOX = 0;
     public static final int GENERATE_INBOX_NEW_CLUSTER = 1;
@@ -102,7 +101,7 @@ public class Inboxer {
 
             // continuously get task to work on
             while (true) {
-                CloudQueueMessage message = inboxTaskQueue.retrieveMessage(visibilityTimoutSeconds, null, new OperationContext());
+                CloudQueueMessage message = inboxTaskQueue.retrieveMessage(VISIBLE_TIMEOUT_SEC, null, new OperationContext());
                 if (message != null) {
                     // Process the message within certain time, and then delete the message.
                     BasicDBObject task = (BasicDBObject) JSON.parse(message.getMessageContentAsString());
@@ -128,8 +127,8 @@ public class Inboxer {
                     }
                 }
                 else {
-                    System.out.println("No more tasks, rest for " + noTaskWaitMillis + " milliseconds.");
-                    Thread.sleep(noTaskWaitMillis);
+                    System.out.println("No more tasks, rest for " + NO_TASK_WAIT_MILLIS + " milliseconds.");
+                    Thread.sleep(NO_TASK_WAIT_MILLIS);
                 }
             }
         }
@@ -244,7 +243,7 @@ public class Inboxer {
             List<ObjectId> cohortList = (List<ObjectId>) userGroupInfo.get("CHN");
 
             BasicDBObject values = new BasicDBObject("CH", cohortList);
-            values.append("CHN", new ArrayList<ObjectId>());
+            values.append("CHN", null);
             BasicDBObject setter = new BasicDBObject("$set", values);
             _userGroupInfoCol.update(query, setter);
         }
@@ -275,8 +274,11 @@ public class Inboxer {
 
     private void RefreshActivityList()  throws DBException
     {
+        // TODO check blahstats to see whether the blah is recently active
+        // for now, mark all as inactive
         _blahActivityList = null;
-
+        return;
+/*
         DBCollection blahCol = DBCollections.getInstance().getTrackBlahCol();
         BasicDBObject upVotesObj = new BasicDBObject("U", new BasicDBObject("$gt", 0));
         BasicDBObject commentsObj = new BasicDBObject("C", new BasicDBObject("$gt", 0));
@@ -319,6 +321,7 @@ public class Inboxer {
         BasicDBObject projectObj = new BasicDBObject("$project", new BasicDBObject("total", new BasicDBObject("$add", projectList)));
 
         _blahActivityList = blahCol.aggregate(matchObj, groupObj, projectObj);
+        */
     }
 
     private String getGroupName(String groupId) throws SystemErrorException, DBException, InterruptedException {
@@ -339,13 +342,13 @@ public class Inboxer {
         for (String cohortId : cohortInfoDoc.keySet()) {
             BasicDBObject cohortInboxInfo = (BasicDBObject) cohortInfoDoc.get(cohortId);
             String inboxKeyString = safe ? "LS" : "L";
-            int lastInboxNumber = cohortInboxInfo.getInt(inboxKeyString, -1);
+            long lastInboxNumber = cohortInboxInfo.getInt(inboxKeyString, -1);
 
             if (lastInboxNumber > 1000000) { // wrap-around
                 lastInboxNumber = -1;
             }
 
-            final List<DBObject> blahs = getRelevantBlahs(groupId, cohortId, .05, 30, safe);
+            final List<DBObject> blahs = getRelevantBlahs(groupId, cohortId, 0.05, 3000, safe);
             final int blahsInGroupCount = blahs.size();
             // If there are no blahs, there's nothing to do
             if (blahsInGroupCount == 0) {
@@ -355,14 +358,16 @@ public class Inboxer {
             }
 
             // Sort blahs in memory, w.r.t. cohort-strength
-            Collections.sort(blahs, new IsStrongerThan(cohortId));
+            // from weak to strong
+            Collections.sort(blahs, Collections.reverseOrder(new IsStrongerThan(cohortId)));
+
 
             addedInGroup += intBuildInbox(group, currentGenId, cohortId, blahs, lastInboxNumber, safe);
         }
         return addedInGroup;
     }
 
-    private long intBuildInbox(DBObject group, String generationId, String cohortId, List<DBObject> blahs, Integer lastInboxNumber, Boolean safe) throws SystemErrorException, DBException, InterruptedException {
+    private long intBuildInbox(DBObject group, String generationId, String cohortId, List<DBObject> blahs, long lastInboxNumber, Boolean safe) throws SystemErrorException, DBException, InterruptedException {
 
         final String groupId = group.get(BaseDAOConstants.ID).toString();
 
@@ -529,15 +534,15 @@ public class Inboxer {
         String lastKeyString;
         String keyString = "CHI." + cohortId + ".";
         if (safe) {
-            firstKeyString = keyString + "F";
-            lastKeyString = keyString + "L";
-        } else {
             firstKeyString = keyString + "FS";
             lastKeyString = keyString + "LS";
+        } else {
+            firstKeyString = keyString + "F";
+            lastKeyString = keyString + "L";
         }
 
         lastInboxNumber = (lastInboxNumber == -1) ? 0 : (lastInboxNumber + 1);
-        int firstInboxNumber = lastInboxNumber + inboxCount - 1;
+        long firstInboxNumber = lastInboxNumber + inboxCount - 1;
         setter = new BasicDBObject(firstKeyString, lastInboxNumber);
         setter.put(lastKeyString, firstInboxNumber);
 
@@ -725,6 +730,7 @@ public class Inboxer {
         return blahs;
     }
 
+    // "relevant" blah has strong strength or was recently created
     // minStrength: have minimal strength to be "relevant" in this cohort
     // numDays: created within numDays days to be "relevant"
     private List<DBObject> getRelevantBlahs(String groupId, String cohortId, double minStrength, long numDays, boolean safe) throws DBException, InterruptedException {
@@ -733,10 +739,11 @@ public class Inboxer {
         ArrayList<BasicDBObject> orList = new ArrayList<BasicDBObject>();
         Date curDate = new Date();
         Date minDate = new Date(curDate.getTime() - numDays * 24 * 3600 * 1000 );
+        // get blah's cohort-strength
         orList.add(new BasicDBObject("S."+cohortId, new BasicDBObject("$gt", minStrength)));
         orList.add(new BasicDBObject("c", new BasicDBObject("$gt", minDate)));
 
-        BasicDBObject queryObj = new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId);
+        BasicDBObject queryObj = new BasicDBObject(BlahDAOConstants.GROUP_ID, new ObjectId(groupId));
 
         String findMsg;
         if (safe) {
