@@ -348,7 +348,7 @@ public class Inboxer {
                 lastInboxNumber = -1;
             }
 
-            final List<DBObject> blahs = getRelevantBlahs(groupId, cohortId, 0.05, 3000, safe);
+            final List<DBObject> blahs = getRelevantBlahs(groupId, cohortId, 0.05, 30, safe);
             final int blahsInGroupCount = blahs.size();
             // If there are no blahs, there's nothing to do
             if (blahsInGroupCount == 0) {
