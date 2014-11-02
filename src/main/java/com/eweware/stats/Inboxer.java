@@ -15,6 +15,9 @@ import com.eweware.stats.help.Utilities;
 import com.mongodb.util.JSON;
 import org.bson.types.ObjectId;
 
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.*;
 
 /**
@@ -77,13 +80,18 @@ public class Inboxer {
     private CloudQueueClient queueClient;
     private CloudQueue inboxTaskQueue;
 
-    int VISIBLE_TIMEOUT_SEC = 180;
-    long NO_TASK_WAIT_MILLIS = 1000 * 10;
+    private int QUEUE_VISIBLE_TIMEOUT_SECONDS;
+    private long NO_TASK_WAIT_MILLIS;
+
+    private double RELEVANT_BLAH_MIN_STRENGTH;
+    private int RECENT_BLAH_DAYS;
 
     public static final int GENERATE_INBOX = 0;
     public static final int GENERATE_INBOX_NEW_CLUSTER = 1;
 
-    public Inboxer() throws DBException {
+    private String environment;
+
+    public Inboxer(String env) throws DBException {
         _blahsCol = DBCollections.getInstance().getBlahsCol();
         _groupsCol = DBCollections.getInstance().getGroupsCol();
         _userProfilesCol = DBCollections.getInstance().getUserProfilesCol();
@@ -92,16 +100,20 @@ public class Inboxer {
         _generationInfoCol = DBCollections.getInstance().getGenerationInfoCol();
         _userGroupInfoCol = DBCollections.getInstance().getUserGroupInfoCol();
         _blahInfoCol = DBCollections.getInstance().getBlahInfoCol();
+
+        environment = env;
     }
 
     public void execute() throws DBException, SystemErrorException, InterruptedException {
 
         try {
+            getProperties();
+
             initializeQueue();
 
             // continuously get task to work on
             while (true) {
-                CloudQueueMessage message = inboxTaskQueue.retrieveMessage(VISIBLE_TIMEOUT_SEC, null, new OperationContext());
+                CloudQueueMessage message = inboxTaskQueue.retrieveMessage(QUEUE_VISIBLE_TIMEOUT_SECONDS, null, new OperationContext());
                 if (message != null) {
                     // Process the message within certain time, and then delete the message.
                     BasicDBObject task = (BasicDBObject) JSON.parse(message.getMessageContentAsString());
@@ -136,8 +148,6 @@ public class Inboxer {
             System.out.println("Error in initializing Azure queue");
             e.printStackTrace();
         }
-
-
     }
 
     private void initializeQueue() throws Exception {
@@ -157,6 +167,30 @@ public class Inboxer {
         inboxTaskQueue.createIfNotExists();
 
         System.out.println("done");
+    }
+
+    private void getProperties() throws IOException {
+        System.out.println("Load service properties");
+        Properties prop = new Properties();
+        String propFileName;
+
+        if (environment.equals("dev")) propFileName = "./dev.properties";
+        else if (environment.equals("qa")) propFileName = "./qa.properties";
+        else propFileName = "./prod.properties";
+
+        FileInputStream is = new FileInputStream(propFileName);
+
+        if (is == null) {
+            throw new FileNotFoundException("property file '" + propFileName + "' not found");
+        }
+        prop.load(is);
+
+        // InboxWorker
+        QUEUE_VISIBLE_TIMEOUT_SECONDS = Integer.parseInt(prop.getProperty("iw.queue_visible_timeout_seconds", "30"));
+        NO_TASK_WAIT_MILLIS = Long.parseLong(prop.getProperty("iw.no_task_wait_millis", "100000"));
+        RELEVANT_BLAH_MIN_STRENGTH = Double.parseDouble(prop.getProperty("iw.relevant_blah_min_strength", "0.05"));
+        RECENT_BLAH_DAYS = Integer.parseInt(prop.getProperty("iw.recent_blah_days", "30"));
+
     }
 
     private boolean processTask(BasicDBObject task) throws TaskException, DBException, InterruptedException, SystemErrorException {
@@ -348,7 +382,7 @@ public class Inboxer {
                 lastInboxNumber = -1;
             }
 
-            final List<DBObject> blahs = getRelevantBlahs(groupId, cohortId, 0.05, 30, safe);
+            final List<DBObject> blahs = getRelevantBlahs(groupId, cohortId, RELEVANT_BLAH_MIN_STRENGTH, RECENT_BLAH_DAYS, safe);
             final int blahsInGroupCount = blahs.size();
             // If there are no blahs, there's nothing to do
             if (blahsInGroupCount == 0) {

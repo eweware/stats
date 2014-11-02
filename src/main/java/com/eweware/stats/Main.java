@@ -236,7 +236,7 @@ public class Main {
         {
 //            Utilities.printit(true, new Date() + ": Starting Inboxing");
 //            lastTime = System.currentTimeMillis();
-            new Inboxer().execute();
+            new Inboxer(environment).execute();
 //            Utilities.printit(true, new Date() + ": Inboxer boxing took " + ((System.currentTimeMillis() - lastTime) / 1000) + " seconds");
         }
         else
