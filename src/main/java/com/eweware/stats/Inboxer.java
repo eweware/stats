@@ -71,11 +71,19 @@ public class Inboxer {
 //
 
 
-    public static final String AZURE_ACCOUNT_NAME = "weihanstorage";
-    public static final String AZURE_ACCOUNT_KEY = "PKz1eXkKlu07u4SpfyxfCvO1BH4yZCnuXhrQbebIaOdmUfGGD6qV8r+lycj7sNXSwtVTHpo/nJBlHVa4oavNgg==";
+    public static final String DEV_ACCOUNT_NAME = "weihanstorage";
+    public static final String DEV_ACCOUNT_KEY = "PKz1eXkKlu07u4SpfyxfCvO1BH4yZCnuXhrQbebIaOdmUfGGD6qV8r+lycj7sNXSwtVTHpo/nJBlHVa4oavNgg==";
 
-    public static final String STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=http;AccountName=" + AZURE_ACCOUNT_NAME + ";AccountKey=" + AZURE_ACCOUNT_KEY;
-    public static final String INBOX_TASK_QUEUE = "inboxtaskqueue";
+    public static final String QA_ACCOUNT_NAME = "heardqueueqa";
+    public static final String QA_ACCOUNT_KEY = "dr3XhxQEKlwqSGPe9+YJiwCUZ2v7izLOR31xED66joJcyUWJoDU9A1Hl0HzlXa/WsLorEYEpscNU06p0TYGcjA==";
+
+    public static final String PROD_ACCOUNT_NAME = "";
+    public static final String PROD_ACCOUNT_KEY = "";
+
+
+    public static String STORAGE_CONNECTION_STRING;
+
+    public static final String INBOX_TASK_QUEUE = "inboxtasks";
 
     private CloudQueueClient queueClient;
     private CloudQueue inboxTaskQueue;
@@ -109,6 +117,19 @@ public class Inboxer {
         try {
             getProperties();
 
+            if (environment.equals("dev")) {
+                STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=http;AccountName=" + DEV_ACCOUNT_NAME + ";AccountKey=" + DEV_ACCOUNT_KEY;
+            }
+            else if (environment.equals("qa")) {
+                STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=http;AccountName=" + QA_ACCOUNT_NAME + ";AccountKey=" + QA_ACCOUNT_KEY;
+            }
+            else if (environment.equals("prod")) {
+                STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=http;AccountName=" + PROD_ACCOUNT_NAME + ";AccountKey=" + PROD_ACCOUNT_KEY;
+            }
+            else {
+                STORAGE_CONNECTION_STRING = "DefaultEndpointsProtocol=http;AccountName=" + DEV_ACCOUNT_NAME + ";AccountKey=" + DEV_ACCOUNT_KEY;
+            }
+
             initializeQueue();
 
             // continuously get task to work on
@@ -139,7 +160,7 @@ public class Inboxer {
                     }
                 }
                 else {
-                    System.out.println("No more tasks, rest for " + NO_TASK_WAIT_MILLIS + " milliseconds.");
+                    System.out.println("[InboxWorker] no tasks, sleep for " + NO_TASK_WAIT_MILLIS + " milliseconds.");
                     Thread.sleep(NO_TASK_WAIT_MILLIS);
                 }
             }
@@ -194,6 +215,7 @@ public class Inboxer {
     }
 
     private boolean processTask(BasicDBObject task) throws TaskException, DBException, InterruptedException, SystemErrorException {
+        System.out.println();
 
         //final DBCursor cursor = Utilities.findInDB(3, "finding all group records", _groupsCol, null, null);
         long addedInboxItemCount = 0;
@@ -205,20 +227,7 @@ public class Inboxer {
         if (group == null) throw new TaskException("Error : groupd not exist id : " + groupId, TaskExceptionType.SKIP);
 
         final Integer taskType = (Integer) task.get("T");
-        String genId;
-        if (taskType == null) {
-            throw new TaskException("Error : task type not exist : " + taskType, TaskExceptionType.SKIP);
-        }
-        else if (taskType == GENERATE_INBOX) {
-            // if for existing generation, get current generation ID, otherwise get next generation ID
-            genId = group.getObjectId("CG").toString();
-        }
-        else if (taskType == GENERATE_INBOX_NEW_CLUSTER) {
-            genId = group.getObjectId("NG").toString();
-        }
-        else {
-            throw new TaskException("Error : task type not exist : " + taskType, TaskExceptionType.SKIP);
-        }
+        String genId = task.getString("GEN");
 
         // get the cohort info sub-document of the latest generation
         BasicDBObject generation = (BasicDBObject)_generationInfoCol.findOne(new BasicDBObject("_id", new ObjectId(genId)));
@@ -234,9 +243,9 @@ public class Inboxer {
             updateNewClusterInfo(groupId, genId);
         }
 
-            Utilities.printit(true, "Added total " + addedInboxItemCount + " inbox objects");
-            return true;
-
+        Utilities.printit(true, "Added total " + addedInboxItemCount + " inbox objects");
+        System.out.println();
+        return true;
     }
 
     private enum TaskExceptionType {
@@ -263,30 +272,29 @@ public class Inboxer {
         return userIdList;
     }
 
-    private void updateNewClusterInfo(String groupId, String nextGenId) {
+    private void updateNewClusterInfo(String groupId, String nextGenId) throws InterruptedException, DBException, SystemErrorException {
 
-        // update users' cohort info
-        // get user list for this group
-        List<String> userIdList = getUserList(groupId);
-        // for each user, get next cohort and replace current cohort
-        for (String userId : userIdList) {
-            BasicDBObject query = new BasicDBObject("U", new ObjectId(userId));
-            query.append("G", new ObjectId(groupId));
+//        // update users' cohort info
+//        // get user list for this group
+//        List<String> userIdList = getUserList(groupId);
+//        // for each user, get next cohort and replace current cohort
+//        for (String userId : userIdList) {
+//            BasicDBObject query = new BasicDBObject("U", new ObjectId(userId));
+//            query.append("G", new ObjectId(groupId));
+//
+//            BasicDBObject userGroupInfo = (BasicDBObject) _userGroupInfoCol.findOne(query);
+//            List<ObjectId> cohortList = (List<ObjectId>) userGroupInfo.get("CHN");
+//
+//            BasicDBObject values = new BasicDBObject("CH", cohortList);
+//            values.append("CHN", null);
+//            BasicDBObject setter = new BasicDBObject("$set", values);
+//            _userGroupInfoCol.update(query, setter);
+//        }
 
-            BasicDBObject userGroupInfo = (BasicDBObject) _userGroupInfoCol.findOne(query);
-            List<ObjectId> cohortList = (List<ObjectId>) userGroupInfo.get("CHN");
-
-            BasicDBObject values = new BasicDBObject("CH", cohortList);
-            values.append("CHN", null);
-            BasicDBObject setter = new BasicDBObject("$set", values);
-            _userGroupInfoCol.update(query, setter);
-        }
-
-        Utilities.printit(true, "\tNew cohort generation, " + userIdList.size() + " users cohort info were updated.");
+        Utilities.printit(true, "\tNew cohort generation <" + nextGenId + "> for group '" + getGroupName(groupId) + "' info is updated.");
 
         // update group's current generation ID
         BasicDBObject values = new BasicDBObject("CG", new ObjectId(nextGenId));
-        values.append("NG", null);
         BasicDBObject setter = new BasicDBObject("$set", values);
         _groupsCol.update(new BasicDBObject("_id", new ObjectId(groupId)), setter);
     }
