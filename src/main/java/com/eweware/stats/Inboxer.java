@@ -43,6 +43,7 @@ public class Inboxer {
     private final DBCollection _generationInfoCol;
     private final DBCollection _userGroupInfoCol;
     private final DBCollection _blahInfoCol;
+    private final DBCollection _cohortInfoCol;
 
     private AggregationOutput _blahActivityList = null;
 
@@ -71,8 +72,8 @@ public class Inboxer {
 //
 
 
-    public static final String DEV_ACCOUNT_NAME = "weihanstorage";
-    public static final String DEV_ACCOUNT_KEY = "PKz1eXkKlu07u4SpfyxfCvO1BH4yZCnuXhrQbebIaOdmUfGGD6qV8r+lycj7sNXSwtVTHpo/nJBlHVa4oavNgg==";
+    public static final String DEV_ACCOUNT_NAME = "heardqueueqa";
+    public static final String DEV_ACCOUNT_KEY = "dr3XhxQEKlwqSGPe9+YJiwCUZ2v7izLOR31xED66joJcyUWJoDU9A1Hl0HzlXa/WsLorEYEpscNU06p0TYGcjA==";
 
     public static final String QA_ACCOUNT_NAME = "heardqueueqa";
     public static final String QA_ACCOUNT_KEY = "dr3XhxQEKlwqSGPe9+YJiwCUZ2v7izLOR31xED66joJcyUWJoDU9A1Hl0HzlXa/WsLorEYEpscNU06p0TYGcjA==";
@@ -108,6 +109,7 @@ public class Inboxer {
         _generationInfoCol = DBCollections.getInstance().getGenerationInfoCol();
         _userGroupInfoCol = DBCollections.getInstance().getUserGroupInfoCol();
         _blahInfoCol = DBCollections.getInstance().getBlahInfoCol();
+        _cohortInfoCol = DBCollections.getInstance().getCohortInfoCol();
 
         environment = env;
     }
@@ -229,13 +231,13 @@ public class Inboxer {
         final Integer taskType = (Integer) task.get("T");
         String genId = task.getString("GEN");
 
-        // get the cohort info sub-document of the latest generation
+        // get the cohort list sub-document of this generation
         BasicDBObject generation = (BasicDBObject)_generationInfoCol.findOne(new BasicDBObject("_id", new ObjectId(genId)));
-        BasicDBObject cohortInfoDoc = (BasicDBObject) generation.get("CHI");
+        List<ObjectId> cohortList = (List<ObjectId>) generation.get("CH");
 
         // build inboxes
-        long addedInGroup = buildInbox(group, cohortInfoDoc, genId, false); // unsafe inbox
-//            addedInGroup += buildInbox(group, cohortInfoDoc, genId, true); // safe inbox
+        long addedInGroup = buildInbox(group, cohortList, genId, false); // unsafe inbox
+        addedInGroup += buildInbox(group, cohortList, genId, true); // safe inbox
         addedInboxItemCount += addedInGroup;
 
         // if this is a new generation of cohorts for this group
@@ -373,7 +375,7 @@ public class Inboxer {
 
 
     // build an inbox of nothing but safe blahs
-    private long buildInbox(DBObject group, DBObject cohortInfoDoc, String currentGenId, boolean safe) throws SystemErrorException, DBException, InterruptedException {
+    private long buildInbox(DBObject group, List<ObjectId> cohortList, String currentGenId, boolean safe) throws SystemErrorException, DBException, InterruptedException {
         final String groupId = group.get(BaseDAOConstants.ID).toString();
 
         long addedInGroup = 0;
@@ -381,30 +383,33 @@ public class Inboxer {
         //if (!groupId.equals("522ccb78e4b0a35dadfcf73f")) return 0;
 
         // for each cohort, sort by cohort-strength, and build inbox
-        for (String cohortId : cohortInfoDoc.keySet()) {
-            BasicDBObject cohortInboxInfo = (BasicDBObject) cohortInfoDoc.get(cohortId);
+        for (ObjectId cohortIdObj : cohortList) {
             String inboxKeyString = safe ? "LS" : "L";
-            long lastInboxNumber = cohortInboxInfo.getInt(inboxKeyString, -1);
+
+//            BasicDBObject cohortInboxInfo = (BasicDBObject) cohortInfoDoc.get(cohortId);
+            BasicDBObject cohort = (BasicDBObject) _cohortInfoCol.findOne(new BasicDBObject("_id", cohortIdObj));
+
+            long lastInboxNumber = cohort.getLong(inboxKeyString, -1);
 
             if (lastInboxNumber > 1000000) { // wrap-around
                 lastInboxNumber = -1;
             }
 
-            final List<DBObject> blahs = getRelevantBlahs(groupId, cohortId, RELEVANT_BLAH_MIN_STRENGTH, RECENT_BLAH_DAYS, safe);
+            final List<DBObject> blahs = getRelevantBlahs(groupId, cohortIdObj.toString(), RELEVANT_BLAH_MIN_STRENGTH, RECENT_BLAH_DAYS, safe);
             final int blahsInGroupCount = blahs.size();
             // If there are no blahs, there's nothing to do
             if (blahsInGroupCount == 0) {
                 String noBlahMsg = safe ? "No safe blahs in cohort id : " : "No blahs in cohort id : ";
-                System.err.println(noBlahMsg + cohortId + " in group '" + getGroupName(groupId) + "' id : " + groupId);
+                System.err.println(noBlahMsg + cohortIdObj.toString() + " in group '" + getGroupName(groupId) + "' id : " + groupId);
                 return 0;
             }
 
             // Sort blahs in memory, w.r.t. cohort-strength
             // from weak to strong
-            Collections.sort(blahs, Collections.reverseOrder(new IsStrongerThan(cohortId)));
+            Collections.sort(blahs, Collections.reverseOrder(new IsStrongerThan(cohortIdObj.toString())));
 
 
-            addedInGroup += intBuildInbox(group, currentGenId, cohortId, blahs, lastInboxNumber, safe);
+            addedInGroup += intBuildInbox(group, currentGenId, cohortIdObj.toString(), blahs, lastInboxNumber, safe);
         }
         return addedInGroup;
     }
@@ -569,18 +574,17 @@ public class Inboxer {
         }
 
         // Update group with new inbox range
-        final BasicDBObject query = new BasicDBObject("_id", new ObjectId(generationId));
+        final BasicDBObject query = new BasicDBObject("_id", new ObjectId(cohortId));
         BasicDBObject setter;
 
         String firstKeyString;
         String lastKeyString;
-        String keyString = "CHI." + cohortId + ".";
         if (safe) {
-            firstKeyString = keyString + "FS";
-            lastKeyString = keyString + "LS";
+            firstKeyString = "FS";
+            lastKeyString = "LS";
         } else {
-            firstKeyString = keyString + "F";
-            lastKeyString = keyString + "L";
+            firstKeyString ="F";
+            lastKeyString = "L";
         }
 
         lastInboxNumber = (lastInboxNumber == -1) ? 0 : (lastInboxNumber + 1);
@@ -598,7 +602,7 @@ public class Inboxer {
         }
         */
 
-        _generationInfoCol.update(query, new BasicDBObject("$set", setter));      // TODO use this in getInbox in rest
+        _cohortInfoCol.update(query, new BasicDBObject("$set", setter));
 
         String safeInboxWord = "inboxes";
         if (safe) safeInboxWord = "safe Inboxes";

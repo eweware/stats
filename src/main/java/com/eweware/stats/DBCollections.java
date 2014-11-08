@@ -46,6 +46,7 @@ public class DBCollections {
     private static final String GENERATION_INFO_COLLECTION = "generationInfo";
     private static final String USER_GROUP_INFO_COLLECTION = "userGroupInfo";
     private static final String BLAH_INFO_COLLECTION = "blahInfo";
+    public static final String COHORT_INFO_COLLECTION = "cohortInfo";
 
     private final MongoClient mongoClient;
 
@@ -78,6 +79,7 @@ public class DBCollections {
     private final DBCollection generationInfoCol;
     private final DBCollection userGroupInfoCol;
     private final DBCollection blahInfoCol;
+    private final DBCollection cohortInfoCol;
 
 
     public MongoClient getMongoClient() {
@@ -170,6 +172,8 @@ public class DBCollections {
 
     public DBCollection getBlahInfoCol() { return blahInfoCol; }
 
+    public DBCollection getCohortInfoCol() { return cohortInfoCol; }
+
     public DB getDB(String dbName) {
         return mongoClient.getDB(dbName);
     }
@@ -246,6 +250,7 @@ public class DBCollections {
             generationInfoCol = infodb.getCollection(GENERATION_INFO_COLLECTION);
             userGroupInfoCol = infodb.getCollection(USER_GROUP_INFO_COLLECTION);
             blahInfoCol = infodb.getCollection(BLAH_INFO_COLLECTION);
+            cohortInfoCol = infodb.getCollection(COHORT_INFO_COLLECTION);
 
         } catch (Exception e) {
             throw new DBException("Failed to initialize mongo", e);
