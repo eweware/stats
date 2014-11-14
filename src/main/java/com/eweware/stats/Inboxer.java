@@ -235,6 +235,9 @@ public class Inboxer {
         BasicDBObject generation = (BasicDBObject)_generationInfoCol.findOne(new BasicDBObject("_id", new ObjectId(genId)));
         List<ObjectId> cohortList = (List<ObjectId>) generation.get("CH");
 
+        // add default cohort to list
+        cohortList.add(generation.getObjectId("D"));
+
         // build inboxes
         long addedInGroup = buildInbox(group, cohortList, genId, false); // unsafe inbox
         addedInGroup += buildInbox(group, cohortList, genId, true); // safe inbox
