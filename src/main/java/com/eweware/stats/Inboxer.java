@@ -11,8 +11,14 @@ import com.eweware.service.base.store.impl.mongo.dao.MongoStoreManager;
 import com.eweware.stats.help.LocalCache;
 import com.eweware.stats.help.Utilities;
 
+import javax.imageio.ImageIO;
+import java.awt.image.BufferedImage;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.*;
 import java.util.regex.Pattern;
+
+import com.google.appengine.tools.cloudstorage.*;
 
 /**
  * @author rk@post.harvard.edu
@@ -428,19 +434,7 @@ public class Inboxer {
         final String blahId = blah.get(BaseDAOConstants.ID).toString();
         final BasicDBObject inboxItem = new BasicDBObject(InboxBlahDAOConstants.BLAH_ID, blahId);
 
-        // IMPORTANT: to fetch the following fields, include them in makeBlahFieldsToReturn() */
 
-        /*
-        // this is to set that the blah is recent.  However, we can easily do this server-side
-        Date    createDate = (Date)blah.get(BaseDAOConstants.CREATED);
-        Date    now = new Date();
-        inboxItem.put(BaseDAOConstants.CREATED, createDate);
-        long difference = now.getTime() - createDate.getTime();
-        long newTime = 1000 * 60 * 60 * 18; // 18 hours
-        if (difference < newTime) {
-            inboxItem.put(InboxBlahDAOConstants.BLAH_NEWFLAG, true);
-        }
-        */
 
         inboxItem.put(InboxBlahDAOConstants.BLAH_TEXT, blah.get(BlahDAOConstants.TEXT));
         inboxItem.put(InboxBlahDAOConstants.FLAGGEDCONTENT, blah.get(BlahDAOConstants.FLAGGEDCONTENT));
@@ -460,6 +454,13 @@ public class Inboxer {
         tmp = blah.get(BlahDAOConstants.IMAGE_IDS);
         if (tmp != null) {
             inboxItem.put(InboxBlahDAOConstants.IMAGE_IDS, tmp);
+            tmp = blah.get(BlahDAOConstants.GOOGLE_IMAGE_IDS);
+            if (tmp == null)
+            {
+                tmp = GenerateGoogleImageIDs(blah);
+            }
+            inboxItem.put(InboxBlahDAOConstants.GOOGLE_IMAGE_IDS, tmp);
+
         }
         tmp = blah.get(BlahDAOConstants.BADGE_IDS);
         if (tmp != null) {
@@ -471,6 +472,30 @@ public class Inboxer {
             inboxItem.put(InboxBlahDAOConstants.BLAH_STRENGTH, tmp);
         }
         return inboxItem;
+    }
+
+
+    private Object GenerateGoogleImageIDs(DBObject blah)
+    {
+        List<String>    imageList = new ArrayList<String>();
+        String baseURL = "https://s3-us-west-2.amazonaws.com/blahguaimages/image/";
+        List<String>    originalImageList = (List<String>)blah.get(BlahDAOConstants.IMAGE_IDS);
+        String imageIdStr = originalImageList.get(0);
+        String imageURLString = baseURL + imageIdStr + "-D.jpg";
+
+        try {
+            URL imageURL = new URL(imageURLString);
+            BufferedImage img = ImageIO.read(imageURL);
+
+
+
+        }
+        catch (Exception exp)
+        {
+
+
+        }
+        return null;
     }
 
     private boolean checkIfBlahIsActive(String blahId)

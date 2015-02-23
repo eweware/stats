@@ -95,6 +95,8 @@ public interface InboxBlahDAOConstants {
      */
     static final String IMAGE_IDS = "M";
 
+    static final String GOOGLE_IMAGE_IDS = "GM";
+
     /**
      * <p>Indicates badges associated with this blah.</p>
      * <p>'b' := has badges</p>
@@ -118,6 +120,6 @@ public interface InboxBlahDAOConstants {
             new SchemaDataTypeFieldMap(SchemaDataType.I, new String[]{INBOX_NUMBER}),
             new SchemaDataTypeFieldMap(SchemaDataType.B, new String[]{RECENTLY_ACTIVE, FLAGGEDCONTENT}),
             new SchemaDataTypeFieldMap(SchemaDataType.R, new String[]{BLAH_STRENGTH, RECENT_BLAH_STRENGTH}),
-            new SchemaDataTypeFieldMap(SchemaDataType.ILS, new String[] {IMAGE_IDS}),
+            new SchemaDataTypeFieldMap(SchemaDataType.ILS, new String[] {IMAGE_IDS, GOOGLE_IMAGE_IDS}),
     };
 }

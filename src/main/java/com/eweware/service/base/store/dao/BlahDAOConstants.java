@@ -211,6 +211,20 @@ public interface BlahDAOConstants {
     static final String IMAGE_IDS = "M";
 
     /**
+     * <p>An optional array of image ids for the blah. The semantics
+     * of the array are currently not well-defined, subject to
+     * experimentation. The image id points to the metadata for
+     * the image, stored in a media record. Image data itself is
+     * stored in S3.
+     * An array of string.</p>
+     *
+     * @see MediaDAOConstants
+     * @see MediaDAO
+     */
+    static final String GOOGLE_IMAGE_IDS = "GM";
+
+
+    /**
      * <p>The id of the user who this blah is intended for</p>
      */
     static final String TARGET_USER_ID = "TU";
@@ -244,7 +258,7 @@ public interface BlahDAOConstants {
                     FLAGGEDCONTENT
             }),
             new SchemaDataTypeFieldMap(SchemaDataType.ILS, new String[]{
-                    IMAGE_IDS, BADGE_IDS
+                    IMAGE_IDS, BADGE_IDS, GOOGLE_IMAGE_IDS
             }),
             new SchemaDataTypeFieldMap(SchemaDataType.DT, new String[]{EXPIRATION_DATE}),
             new SchemaDataTypeFieldMap(SchemaDataType.E, new FieldDescriptor[]{
