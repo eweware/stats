@@ -31,26 +31,6 @@ public class BlahDescriptiveStats {
         }
     }
 
-//    public static void main(String[] a) {
-//        final int boostTimeWindow = 1000 * 60 * 60 * 24 * 2; // two days
-//        final int numberOfBuckets = boostTimeWindow / (1000 * 60 * 60);
-//        Date now = new Date();
-//        Date dayAgo = Utilities.getDateBeforeInDays(1);
-//        Date dayCreated = dayAgo;
-//        double buckets[] = new double[numberOfBuckets];
-//        final double increment = 1d / new Double(numberOfBuckets);
-//        double strength = 0L;
-//        for (int i = numberOfBuckets - 1; i >= 0; i--) {
-//            buckets[i] = strength;
-//            strength += increment;
-//        }
-//        while (dayCreated.before(now)) {
-//            final int bucket = Math.round(((System.currentTimeMillis() - dayCreated.getTime()) / boostTimeWindow)) - 1; // 48 segments (each 1/2 hr long)
-//            System.out.println(dayCreated + " => " + buckets[bucket]);
-//            dayCreated = new Date(dayCreated.getTime() + boostTimeWindow);
-//        }
-//    }
-
     private static double[] buckets;
 
 
@@ -85,6 +65,8 @@ public class BlahDescriptiveStats {
     public long execute() throws Exception {
 
         final Date cutoffDate = Utilities.getDateBeforeInDays(Main.recentStrengthCutoffInDays);
+        final Date halflifeDate = Utilities.getDateBeforeInDays(30);
+        final Date dropDeadDate = Utilities.getDateBeforeInDays(60);
 
         final DBObject fieldsToReturn = new BasicDBObject(BaseDAOConstants.ID, 1);
         fieldsToReturn.put(BlahDAOConstants.PROMOTED_COUNT, 1);
@@ -150,17 +132,21 @@ public class BlahDescriptiveStats {
             final double predictionCorrectness = predictionCorrect - predictionIncorrect - (0.67d * predictionUnresolvable);
 
             final double raw = comments + (promotions * 1.2) + (opens * 0.3) + predictionPopularity + predictionCorrectness + (pollVoteTotal * 0.3) + imageWeight + badgeWeight;
-            double
-                    strength = getWilsonLowerBound(raw, (demotions * .2));
+            double strength = getWilsonLowerBound(raw, (demotions * .2));
 
-            if (created.after(cutoffDate) && strength < 0.67D) {
-                final Double recentStrength = getRecentStrength(created.getTime());
-                if (recentStrength != null) {
-                    strength = recentStrength;
+            if (created.after(cutoffDate)) {
+                if (strength < 0.67D) {
+                    final Double recentStrength = getRecentStrength(created.getTime());
+                    if (recentStrength != null) {
+                        strength = recentStrength;
+                    }
                 }
-            }
+            } else if (created.before(halflifeDate)) {
+                strength /= 4;
+                if (created.before(dropDeadDate))
+                    strength = 0D;   // TODO:  should be the date since last activity
 
-//            final double strength = Utilities.toThreeDecimalDouble(lowerBound);
+            }
 
 
             final BasicDBObject setters = new BasicDBObject();
