@@ -621,7 +621,7 @@ public class Inboxer {
         Date    curDate = new Date();
         Date minDate = new Date(curDate.getTime() - numDays * 24 * 3600 * 1000 );
         orList.add(new BasicDBObject("S", new BasicDBObject("$gt", minStrength)));
-        orList.add(new BasicDBObject("c", new BasicDBObject("$gt", minDate)));
+        orList.add(new BasicDBObject("c", new BasicDBObject("$gt", minDate))); 
 
         ArrayList safeList = new ArrayList();
         safeList.add(new BasicDBObject(BlahDAOConstants.FLAGGEDCONTENT, new BasicDBObject("$exists", false)));
