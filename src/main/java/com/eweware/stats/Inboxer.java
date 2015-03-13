@@ -19,6 +19,7 @@ import java.util.*;
 import java.util.regex.Pattern;
 
 import com.google.appengine.tools.cloudstorage.*;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 
 /**
  * @author rk@post.harvard.edu
@@ -79,9 +80,14 @@ public class Inboxer {
 
 
         for (DBObject group : cursor) {
-            long addedInGroup = buildSafeInbox(group);
-            addedInGroup += buildMatureInbox(group);
-            addedInboxItemCount += addedInGroup;
+            Boolean inactive = (Boolean)group.get("IN");
+
+            if (inactive == null || inactive != true) {
+                long addedInGroup = buildSafeInbox(group);
+                addedInGroup += buildMatureInbox(group);
+                addedInboxItemCount += addedInGroup;
+            }
+
         }
         Utilities.printit(true, "Added total " + addedInboxItemCount + " inbox objects");
         return addedInboxItemCount;
@@ -167,7 +173,7 @@ public class Inboxer {
             lastInboxNumber = -1;
         }
 
-        final List<DBObject> blahs = getRelevantSafeBlahs(groupId, .05, 30);
+        final List<DBObject> blahs = getRelevantSafeBlahs(groupId, .05, 30, -1);
         final int blahsInGroupCount = blahs.size();
 
         // If there are no blahs, there's nothing to do
@@ -193,7 +199,7 @@ public class Inboxer {
             lastInboxNumber = -1;
         }
 
-        final List<DBObject> blahs = getRelevantBlahs(groupId, .05, 30);
+        final List<DBObject> blahs = getRelevantBlahs(groupId, .05, 30, -1);
         final int blahsInGroupCount = blahs.size();
 
         // If there are no blahs, there's nothing to do
@@ -533,29 +539,27 @@ public class Inboxer {
         return (nickname == null || nickname.equals(USER_HAS_NO_NICKNAME));
     }
 
-    // TODO verify that nicknames are evicted from cache after TTL so that we get a refresh
-//    private String fetchAndCacheNickname(String blahAuthorId) throws InterruptedException, DBException, SystemErrorException {
-//        _nicknameCache.evict(); // TODO ?? do it here ?? is it necessary?
-//        final DBObject userProfileDAO = Utilities.findOneInDB(3, "finding a user profile record", _userProfilesCol, new BasicDBObject(BaseDAOConstants.ID, MongoStoreManager.makeObjectId(blahAuthorId)), null);
-//        if (userProfileDAO != null) {
-//            final Integer perms = (Integer) userProfileDAO.get(UserProfileDAOConstants.USER_PROFILE_NICKNAME_PERMISSIONS);
-//            if (perms != null && perms.intValue() == UserProfilePermissions.PUBLIC.getCode()) {
-//                String nickname = (String) userProfileDAO.get(UserProfileDAOConstants.USER_PROFILE_NICKNAME);
-//                if (nickname != null) {
-//                    _nicknameCache.put(blahAuthorId, nickname);
-//                    return nickname;
-//                }
-//            }
-//        }
-//        _nicknameCache.put(blahAuthorId, USER_HAS_NO_NICKNAME); // mark to prevent excessive DB queries
-//        return null;
-//    }
+
 
     private List<DBObject> getAllBlahs(String groupId) throws DBException, InterruptedException {
 
         final BasicDBObject fieldsToReturn = makeBlahFieldsToReturn();
+        Date    curDate = new Date();
+        Calendar cal = new GregorianCalendar();
+        cal.setTime(curDate);
+        cal.add(Calendar.DAY_OF_MONTH, -60);
+        Date minDate = cal.getTime();
+        ArrayList andList = new ArrayList();
+        andList.add(new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId));
+        andList.add(new BasicDBObject("S", new BasicDBObject("$gte", 0)));
 
-        final DBCursor cursor = Utilities.findInDB(3, "finding blahs in a group", _blahsCol, new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId).append("S", new BasicDBObject("$gte", 0)), fieldsToReturn);
+        if (countAllBlahs(groupId) > 100)
+            andList.add(new BasicDBObject("c", new BasicDBObject("$gt", minDate)));
+
+        BasicDBObject queryObj = new BasicDBObject("$and", andList);
+
+        DBCursor cursor = Utilities.findInDB(3, "finding blahs in a group", _blahsCol, queryObj, fieldsToReturn);
+
 
         cursor.addOption(Bytes.QUERYOPTION_SLAVEOK);
         cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
@@ -565,16 +569,41 @@ public class Inboxer {
             blahs.add(cursor.next());
         }
         return blahs;
+    }
+
+    private long countAllBlahs(String groupId) throws DBException, InterruptedException {
+
+        final long theCount = Utilities.getCountFromDB(3, "finding blahs in a group", _blahsCol,  new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId).append("S", new BasicDBObject("$gte", 0)));
+
+        return theCount;
     }
 
     private List<DBObject> getAllSafeBlahs(String groupId) throws DBException, InterruptedException {
 
         final BasicDBObject fieldsToReturn = makeBlahFieldsToReturn();
+
+        Date    curDate = new Date();
+        Calendar cal = new GregorianCalendar();
+        cal.setTime(curDate);
+        cal.add(Calendar.DAY_OF_MONTH, -60);
+        Date minDate = cal.getTime();
         ArrayList safeList = new ArrayList();
         safeList.add(new BasicDBObject(BlahDAOConstants.FLAGGEDCONTENT, new BasicDBObject("$exists", false)));
         safeList.add(new BasicDBObject(BlahDAOConstants.FLAGGEDCONTENT, false));
 
-        final DBCursor cursor = Utilities.findInDB(3, "finding blahs in a group", _blahsCol, new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId).append("S", new BasicDBObject("$gte", 0)).append("$or", safeList), fieldsToReturn);
+        ArrayList andList = new ArrayList();
+        andList.add(new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId));
+        andList.add(new BasicDBObject("S", new BasicDBObject("$gt", 0)));
+        if (countAllSafeBlahs(groupId) > 100)
+            andList.add(new BasicDBObject("c", new BasicDBObject("$gt", minDate)));
+
+        andList.add(new BasicDBObject("$or", safeList));
+
+
+
+        BasicDBObject queryObj = new BasicDBObject("$and", andList);
+
+        final DBCursor cursor = Utilities.findInDB(3, "finding safe blahs in a group", _blahsCol, queryObj, fieldsToReturn);
 
         cursor.addOption(Bytes.QUERYOPTION_SLAVEOK);
         cursor.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
@@ -586,17 +615,34 @@ public class Inboxer {
         return blahs;
     }
 
+    private long countAllSafeBlahs(String groupId) throws DBException, InterruptedException {
 
-    private List<DBObject> getRelevantBlahs(String groupId, double minStrength, long numDays) throws DBException, InterruptedException {
+        ArrayList safeList = new ArrayList();
+        safeList.add(new BasicDBObject(BlahDAOConstants.FLAGGEDCONTENT, new BasicDBObject("$exists", false)));
+        safeList.add(new BasicDBObject(BlahDAOConstants.FLAGGEDCONTENT, false));
+
+        final long theCount = Utilities.getCountFromDB(3, "finding blahs in a group", _blahsCol, new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId).append("S", new BasicDBObject("$gte", 0)).append("$or", safeList));
+
+        return theCount;
+    }
+
+
+    private List<DBObject> getRelevantBlahs(String groupId, double minStrength, int numDays, long maxSize) throws DBException, InterruptedException {
 
         final BasicDBObject fieldsToReturn = makeBlahFieldsToReturn();
         ArrayList orList = new ArrayList();
         Date    curDate = new Date();
-        Date minDate = new Date(curDate.getTime() - numDays * 24 * 3600 * 1000 );
-        orList.add(new BasicDBObject("S", new BasicDBObject("$gt", minStrength)));
-        orList.add(new BasicDBObject("c", new BasicDBObject("$gt", minDate)));
+        Calendar cal = new GregorianCalendar();
+        cal.setTime(curDate);
+        cal.add(Calendar.DAY_OF_MONTH, -numDays);
+        Date minDate = cal.getTime();
+        ArrayList andList = new ArrayList();
+        andList.add(new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId));
+        andList.add(new BasicDBObject("S", new BasicDBObject("$gt", minStrength)));
+        andList.add(new BasicDBObject("c", new BasicDBObject("$gt", minDate)));
 
-        BasicDBObject queryObj = new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId).append("S", new BasicDBObject("$gte", 0)).append("$or", orList);
+        BasicDBObject queryObj = new BasicDBObject("$and", andList);
+
 
         final DBCursor cursor = Utilities.findInDB(3, "finding blahs in a group", _blahsCol, queryObj, fieldsToReturn);
 
@@ -608,27 +654,36 @@ public class Inboxer {
             blahs.add(cursor.next());
         }
 
-        if (blahs.size() < 100)
-            return getAllBlahs(groupId);
+        if (blahs.size() < 100) {
+             return getAllBlahs(groupId);
+        }
         else
             return blahs;
     }
 
-    private List<DBObject> getRelevantSafeBlahs(String groupId, double minStrength, long numDays) throws DBException, InterruptedException {
+    private List<DBObject> getRelevantSafeBlahs(String groupId, double minStrength, int numDays, long maxSize) throws DBException, InterruptedException {
 
         final BasicDBObject fieldsToReturn = makeBlahFieldsToReturn();
-        ArrayList orList = new ArrayList();
         Date    curDate = new Date();
-        Date minDate = new Date(curDate.getTime() - numDays * 24 * 3600 * 1000 );
-        orList.add(new BasicDBObject("S", new BasicDBObject("$gt", minStrength)));
-        orList.add(new BasicDBObject("c", new BasicDBObject("$gt", minDate))); 
+
+        Calendar cal = new GregorianCalendar();
+        cal.setTime(curDate);
+        cal.add(Calendar.DAY_OF_MONTH, -numDays);
+        Date minDate = cal.getTime();
 
         ArrayList safeList = new ArrayList();
         safeList.add(new BasicDBObject(BlahDAOConstants.FLAGGEDCONTENT, new BasicDBObject("$exists", false)));
         safeList.add(new BasicDBObject(BlahDAOConstants.FLAGGEDCONTENT, false));
 
+        ArrayList andList = new ArrayList();
+        andList.add(new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId));
+        andList.add(new BasicDBObject("S", new BasicDBObject("$gt", minStrength)));
+        andList.add(new BasicDBObject("c", new BasicDBObject("$gt", minDate)));
+        andList.add(new BasicDBObject("$or", safeList));
 
-        BasicDBObject queryObj = new BasicDBObject(BlahDAOConstants.GROUP_ID, groupId).append("S", new BasicDBObject("$gte", 0)).append("$or", orList).append("$or", safeList);
+
+
+        BasicDBObject queryObj = new BasicDBObject("$and", andList);
 
         final DBCursor cursor = Utilities.findInDB(3, "finding safe blahs in a group", _blahsCol, queryObj, fieldsToReturn);
 
@@ -640,8 +695,9 @@ public class Inboxer {
             blahs.add(cursor.next());
         }
 
-        if (blahs.size() < 100)
+        if (blahs.size() < 100) {
             return getAllSafeBlahs(groupId);
+        }
         else
             return blahs;
     }

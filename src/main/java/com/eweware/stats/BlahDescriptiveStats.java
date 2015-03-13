@@ -98,69 +98,78 @@ public class BlahDescriptiveStats {
         blahs.addOption(Bytes.QUERYOPTION_NOTIMEOUT);
         long blahCount = 0;
         for (DBObject blah : blahs) {
-
-            blahCount++;
-
-            final Object blahDBObjectId = blah.get(BaseDAOConstants.ID);
-            final Long promotions = Utilities.getValueAsLong(blah.get(BlahDAOConstants.PROMOTED_COUNT), 0L);
-            final Long demotions = Utilities.getValueAsLong(blah.get(BlahDAOConstants.DEMOTED_COUNT), 0L);
-            final Long predictionCorrect = Utilities.getValueAsLong(blah.get(BlahDAOConstants.PREDICTION_RESULT_CORRECT_COUNT), 0L);
-            final Long predictionIncorrect = Utilities.getValueAsLong(blah.get(BlahDAOConstants.PREDICTION_RESULT_INCORRECT_COUNT), 0L);
-            final Long predictionUnresolvable = Utilities.getValueAsLong(blah.get(BlahDAOConstants.PREDICTION_RESULT_UNCLEAR_COUNT), 0L);
-            final Long predictionAgree = Utilities.getValueAsLong(blah.get(BlahDAOConstants.PREDICTION_USER_AGREE_COUNT), 0L);
-            final Long predictionDisagree = Utilities.getValueAsLong(blah.get(BlahDAOConstants.PREDICTION_USER_DISAGREE_COUNT), 0L);
-            final Long predictionUnclear = Utilities.getValueAsLong(blah.get(BlahDAOConstants.PREDICTION_USER_UNCLEAR_COUNT), 0L);
-            final List<String> imageIds = (List<String>) blah.get(BlahDAOConstants.IMAGE_IDS);
-            final double imageWeight = (imageIds != null && imageIds.size() > 0)?1.0D:0.0D;
-            final List<String> badgeIds = (List<String>) blah.get(BlahDAOConstants.BADGE_IDS);
-            final double badgeWeight = (badgeIds != null && badgeIds.size() > 0)?0.3D:0.0D;
-            final List<Long> pollVotes = (List<Long>) blah.get(BlahDAOConstants.POLL_OPTION_VOTES);
-            Long pollVoteTotal = 0L;
-            if (pollVotes != null) {
-                for (Long v : pollVotes) {
-                    if (v != null) pollVoteTotal += v;
-                }
-            }
-            final Long opens = Utilities.getValueAsLong(blah.get(BlahDAOConstants.OPENS), 0L);
-            final Long comments = Utilities.getValueAsLong(blah.get(BlahDAOConstants.COMMENTS), 0L);
             final Date created = (Date) blah.get(BaseDAOConstants.CREATED);
+            if (created.after(dropDeadDate)) {
+                blahCount++;
 
-            // Prediction weights:
-            //   If many of people agree and disagree (minus those who think it's unclear) makes it popular
-            final double predictionPopularity = predictionAgree + predictionDisagree - (0.67d * predictionUnclear);
-            //   The correct count minus those who think it's incorrect and minus a proportion of those who think it's unresolvable
-            final double predictionCorrectness = predictionCorrect - predictionIncorrect - (0.67d * predictionUnresolvable);
+                final Object blahDBObjectId = blah.get(BaseDAOConstants.ID);
 
-            final double raw = comments + (promotions * 1.2) + (opens * 0.3) + predictionPopularity + predictionCorrectness + (pollVoteTotal * 0.3) + imageWeight + badgeWeight;
-            double strength = getWilsonLowerBound(raw, (demotions * .2));
-
-            if (created.after(cutoffDate)) {
-                if (strength < 0.67D) {
-                    final Double recentStrength = getRecentStrength(created.getTime());
-                    if (recentStrength != null) {
-                        strength = recentStrength;
+                final Long promotions = Utilities.getValueAsLong(blah.get(BlahDAOConstants.PROMOTED_COUNT), 0L);
+                final Long demotions = Utilities.getValueAsLong(blah.get(BlahDAOConstants.DEMOTED_COUNT), 0L);
+                final Long predictionCorrect = Utilities.getValueAsLong(blah.get(BlahDAOConstants.PREDICTION_RESULT_CORRECT_COUNT), 0L);
+                final Long predictionIncorrect = Utilities.getValueAsLong(blah.get(BlahDAOConstants.PREDICTION_RESULT_INCORRECT_COUNT), 0L);
+                final Long predictionUnresolvable = Utilities.getValueAsLong(blah.get(BlahDAOConstants.PREDICTION_RESULT_UNCLEAR_COUNT), 0L);
+                final Long predictionAgree = Utilities.getValueAsLong(blah.get(BlahDAOConstants.PREDICTION_USER_AGREE_COUNT), 0L);
+                final Long predictionDisagree = Utilities.getValueAsLong(blah.get(BlahDAOConstants.PREDICTION_USER_DISAGREE_COUNT), 0L);
+                final Long predictionUnclear = Utilities.getValueAsLong(blah.get(BlahDAOConstants.PREDICTION_USER_UNCLEAR_COUNT), 0L);
+                final List<String> imageIds = (List<String>) blah.get(BlahDAOConstants.IMAGE_IDS);
+                final double imageWeight = (imageIds != null && imageIds.size() > 0)?1.0D:0.0D;
+                final List<String> badgeIds = (List<String>) blah.get(BlahDAOConstants.BADGE_IDS);
+                final double badgeWeight = (badgeIds != null && badgeIds.size() > 0)?0.3D:0.0D;
+                final List<Long> pollVotes = (List<Long>) blah.get(BlahDAOConstants.POLL_OPTION_VOTES);
+                Long pollVoteTotal = 0L;
+                if (pollVotes != null) {
+                    for (Long v : pollVotes) {
+                        if (v != null) pollVoteTotal += v;
                     }
                 }
-            } else if (created.before(halflifeDate)) {
-                strength /= 4;
-                if (created.before(dropDeadDate))
-                    strength = 0D;   // TODO:  should be the date since last activity
-
-            }
+                final Long opens = Utilities.getValueAsLong(blah.get(BlahDAOConstants.OPENS), 0L);
+                final Long comments = Utilities.getValueAsLong(blah.get(BlahDAOConstants.COMMENTS), 0L);
 
 
-            final BasicDBObject setters = new BasicDBObject();
+                // Prediction weights:
+                //   If many of people agree and disagree (minus those who think it's unclear) makes it popular
+                final double predictionPopularity = predictionAgree + predictionDisagree - (0.67d * predictionUnclear);
+                //   The correct count minus those who think it's incorrect and minus a proportion of those who think it's unresolvable
+                final double predictionCorrectness = predictionCorrect - predictionIncorrect - (0.67d * predictionUnresolvable);
 
-            setters.put(BlahDAOConstants.BLAH_STRENGTH, strength);
+                final double raw = comments + (promotions * 1.2) + (opens * 0.3) + predictionPopularity + predictionCorrectness + (pollVoteTotal * 0.3) + imageWeight + badgeWeight;
+                double strength = getWilsonLowerBound(raw, (demotions * .2));
 
-            final DBObject criteria = new BasicDBObject(BaseDAOConstants.ID, blahDBObjectId);
-            final DBObject updateObj = new BasicDBObject("$set", setters);
-            if (Main._verbose) {
-                if (raw != 0D && strength != 0D) {
-                    entries.put(blahDBObjectId.toString(), new E(raw, strength));
+                if (created.after(cutoffDate)) {
+                    if (strength < 0.67D) {
+                        final Double recentStrength = getRecentStrength(created.getTime());
+                        if (recentStrength != null) {
+                            strength = recentStrength;
+                        }
+                    }
+
+                    if (strength < 0.5) {
+                        strength = 0.5;
+                    }
+                } else if (created.before(halflifeDate)) {
+                    strength /= 4;
+                    if (created.before(dropDeadDate))
+                        strength = 0D;   // TODO:  should be the date since last activity
+
                 }
+
+
+                final BasicDBObject setters = new BasicDBObject();
+
+                setters.put(BlahDAOConstants.BLAH_STRENGTH, strength);
+
+                final DBObject criteria = new BasicDBObject(BaseDAOConstants.ID, blahDBObjectId);
+                final DBObject updateObj = new BasicDBObject("$set", setters);
+                if (Main._verbose) {
+                    if (raw != 0D && strength != 0D) {
+                        entries.put(blahDBObjectId.toString(), new E(raw, strength));
+                    }
+                }
+                blahCollection.update(criteria, updateObj);
             }
-            blahCollection.update(criteria, updateObj);
+
+
         }
 
         if (Main._verbose) {
