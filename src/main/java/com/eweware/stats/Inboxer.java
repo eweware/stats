@@ -433,7 +433,26 @@ public class Inboxer {
         return min + (int)(Math.random() * (max - min));
     }
 
+    private String truncate(String str, int limit) {
 
+        if (str.length()< limit)
+            return str;
+
+        String[] bits = str.split(" ");
+        int i = 1;
+        String finalStr = bits[0];
+
+        while (i < bits.length) {
+            if (finalStr.length() + bits[i].length() + 1 < limit)
+                finalStr = finalStr + " " + bits[i++];
+            else {
+                finalStr += "…";
+                break;
+            }
+        }
+
+        return finalStr;
+    }
 
     private BasicDBObject makeInboxItem(String groupId, DBObject blah) {
 
@@ -441,8 +460,13 @@ public class Inboxer {
         final BasicDBObject inboxItem = new BasicDBObject(InboxBlahDAOConstants.BLAH_ID, blahId);
 
 
+        String blahRawText = (String)blah.get(BlahDAOConstants.TEXT);
+        if ((blahRawText != null) && (blahRawText.length() > 64)) {
+            // truncate it
+            blahRawText = truncate(blahRawText, 64);
+        }
 
-        inboxItem.put(InboxBlahDAOConstants.BLAH_TEXT, blah.get(BlahDAOConstants.TEXT));
+        inboxItem.put(InboxBlahDAOConstants.BLAH_TEXT, blahRawText);
         inboxItem.put(InboxBlahDAOConstants.FLAGGEDCONTENT, blah.get(BlahDAOConstants.FLAGGEDCONTENT));
         inboxItem.put(InboxBlahDAOConstants.TYPE, blah.get(BlahDAOConstants.TYPE_ID));
         inboxItem.put(InboxBlahDAOConstants.GROUP_ID, groupId);
