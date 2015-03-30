@@ -173,7 +173,11 @@ public class Inboxer {
             lastInboxNumber = -1;
         }
 
-        final List<DBObject> blahs = getRelevantSafeBlahs(groupId, .05, 30, -1);
+        Integer channelHalfLife = (Integer)group.get("halflife");
+        if (channelHalfLife == null)
+            channelHalfLife = 15;
+
+        final List<DBObject> blahs = getRelevantSafeBlahs(groupId, .05, channelHalfLife * 2, -1);
         final int blahsInGroupCount = blahs.size();
 
         // If there are no blahs, there's nothing to do
@@ -199,7 +203,11 @@ public class Inboxer {
             lastInboxNumber = -1;
         }
 
-        final List<DBObject> blahs = getRelevantBlahs(groupId, .05, 30, -1);
+        Integer channelHalfLife = (Integer)group.get("halflife");
+        if (channelHalfLife == null)
+            channelHalfLife = 15;
+
+        final List<DBObject> blahs = getRelevantBlahs(groupId, .05, channelHalfLife * 2, -1);
         final int blahsInGroupCount = blahs.size();
 
         // If there are no blahs, there's nothing to do
@@ -221,11 +229,10 @@ public class Inboxer {
         final String groupId = group.get(BaseDAOConstants.ID).toString();
 
         final int blahsInGroupCount = blahs.size();
-
         // Calculate how many inboxes we need and initialize data
         Integer inboxCount = Utilities.getValueAsInteger(Math.ceil((blahsInGroupCount * 1.0d) / (MAX_BLAHS_PER_INBOX * 1.0d)), 0);
-        if (inboxCount > 10)
-            inboxCount = 10;
+        if (inboxCount > 5)
+            inboxCount = 5;
 
         final List<DBCollection> inboxCollections = new ArrayList<DBCollection>(inboxCount);
         final String inboxDbName = "inboxdb";
@@ -237,7 +244,7 @@ public class Inboxer {
             if (collectionExists) {
                 inboxCollections.add(DBCollections.getInstance().getDB(inboxDbName).getCollection(inboxCollectionName));
             } else {
-                    inboxCollections.add(DBCollections.getInstance().getCollection(inboxDbName, inboxCollectionName));
+                inboxCollections.add(DBCollections.getInstance().getCollection(inboxDbName, inboxCollectionName));
 
             }
         }
@@ -249,84 +256,172 @@ public class Inboxer {
                 inboxCollections.get(0).insert(inboxItem);
             }
         } else {
-            // use proper inbox shuffling
+            // do the inbox shuffling
+            Integer channelHalfLife = (Integer)group.get("halflife");
+            if (channelHalfLife == null)
+                channelHalfLife = 15;
 
-            int numHottest = 5;
-            int numHot = 20;   // 25
-            int numRecent = 0;  //55
-            int numMedium = 50;     // 75
-            int numCool = 15;   // 90
-            int numBad = 10;    // 100
-            int numNew = 0;
-            long  minViews = 50;   // to do - should be based on author strength
-            int inboxNumber = 0;
-            int i = 0;
+            Integer recentDays = (Integer)group.get("recentdays");
+            if (recentDays == null)
+                recentDays = 2;
 
+            Integer newlyborn = (Integer)group.get("newlyborn");
+            if (newlyborn == null)
+                newlyborn = 12;  // # hours for newly born
+
+            // TO DO:  really this should based on # channel recent members who have seen it.
+            Integer channelNewViews = (Integer)group.get("newviews");
+            if (channelNewViews == null) {
+                Long numUsers = (Long) group.get("U");
+                if ((numUsers == null) || (numUsers < 100))
+                    channelNewViews = 10;
+                else {
+                    channelNewViews = (int)(numUsers / 5);
+                    if (channelNewViews > 50)
+                        channelNewViews = 50;
+                }
+            }
+
+            Integer maxActive = (Integer)group.get("maxActive");
+            if (maxActive == null)
+                maxActive = 30;
+
+            Integer maxNewBorn = (Integer)group.get("maxnewborn");
+            if (maxNewBorn == null)
+                maxNewBorn = 20;
+
+            Integer maxRecent = (Integer)group.get("maxrecent");
+            if (maxRecent == null)
+                maxRecent = 20;
+
+            Integer maxUnseen = (Integer)group.get("maxunseen");
+            if (maxUnseen == null)
+                maxUnseen = 20;
+
+            // computed collections
             // handle new blahs
-            List<DBObject> newBlahs = new ArrayList<DBObject>();
+            List<DBObject> unseenBlahs = new ArrayList<DBObject>();
             List<DBObject> recentBlahs = new ArrayList<DBObject>();
-            Calendar currentDate = Calendar.getInstance();
-            currentDate.add(Calendar.MONTH, -1);
-            Date recentDate = currentDate.getTime();
+            List<DBObject> newlyBornBlahs = new ArrayList<DBObject>();
+            List<DBObject> activeBlahs = new ArrayList<DBObject>();
+            Calendar recentCalender = Calendar.getInstance();
+            recentCalender.add(Calendar.DAY_OF_MONTH, -recentDays);
+            Date recentDate = recentCalender.getTime();
+
+            Calendar newlybornCalendar = Calendar.getInstance();
+            newlybornCalendar.add(Calendar.HOUR_OF_DAY, -newlyborn);
+            Date newlyBornDate = recentCalender.getTime();
+
             Date curDate;
-            Object  tmp;
+            Long viewCount;
+            String blahId;
 
             for (Iterator<DBObject> itr = blahs.iterator();itr.hasNext();) {
                 DBObject element = itr.next();
-                tmp = element.get(BlahDAOConstants.VIEWS);
-                if ((tmp == null) || ((Long)tmp < minViews)) {
-                    newBlahs.add(element);
+
+                blahId = element.get("_id").toString();
+                viewCount = (Long)element.get(BlahDAOConstants.VIEWS);
+                if (checkIfBlahIsActive(blahId)) {
+                    activeBlahs.add(element);
+                } else if ((viewCount == null) || (viewCount < channelNewViews)) {
+                    unseenBlahs.add(element);
                 } else {
                     curDate = (Date)element.get(BaseDAOConstants.CREATED);
-                    if (curDate.compareTo(recentDate) > 0) {
+                    if (curDate.compareTo(newlyBornDate) > 0) {
+                        newlyBornBlahs.add(element);
+                    }
+                    else if (curDate.compareTo(recentDate) > 0) {
                         recentBlahs.add(element);
                     }
                 }
             }
 
-            if (newBlahs.size() > 0) {
-                int maxNew = 10; // up to 10 new blahs
-                if (maxNew > newBlahs.size()) {
-                    maxNew = newBlahs.size();
-                }
-                numNew = maxNew;
-                numBad -= numNew;
-            }
+            int numActive = activeBlahs.size();
+            if (numActive > maxActive)
+                numActive = maxActive;
 
-            if (recentBlahs.size() > 0) {
-                int maxRecent = 30; // up to 30 new blahs
-                if (maxRecent > recentBlahs.size()) {
-                    maxRecent = recentBlahs.size();
-                }
+            int numUnseen = unseenBlahs.size();
+            if (numUnseen > maxUnseen)
+                numUnseen = maxUnseen;
+
+            int numNewlyBorn = newlyBornBlahs.size();
+            if (numNewlyBorn > maxNewBorn)
+                numNewlyBorn = maxNewBorn;
+
+            int numRecent = recentBlahs.size();
+            if (numRecent > maxRecent)
                 numRecent = maxRecent;
-                numMedium -= numRecent;
-            }
+
+            int numHottest = 5;
+            int numBad = 5;
+
+            int totalClaimed = numActive + numUnseen + numNewlyBorn + numRecent + numHottest + numBad;
+            int totalUnclaimed = MAX_BLAHS_PER_INBOX - totalClaimed;
+
+            int numHot = (int)(totalUnclaimed * 0.3);
+            int numMedium = (int)(totalUnclaimed * 0.5);
+            int numCool = totalUnclaimed - (numHot + numMedium);
+
+            int inboxNumber = 0;
+            int i = 0;
 
             List<DBObject> curBlahs;
 
             int    curBlahIndex;
+            DBObject curBlah;
+
             while (inboxNumber < inboxCount) {
                 curBlahs = new ArrayList(blahs);
 
-                if (numNew > 0) {
-                    List<DBObject>  newBlahList = new ArrayList<DBObject>(newBlahs);
+                if (numActive > 0) {
+                    List<DBObject>  tempBlahList = new ArrayList<DBObject>(activeBlahs);
 
-                    for (i = 0; i < numNew; i++) {
-                        curBlahIndex = (int)(Math.random() * newBlahList.size());
-                        final BasicDBObject inboxItem = makeInboxItem(groupId, newBlahList.get(curBlahIndex));
+                    for (i = 0; i < numActive; i++) {
+                        curBlahIndex = (int)(Math.random() * tempBlahList.size());
+                        curBlah = tempBlahList.get(curBlahIndex);
+                        final BasicDBObject inboxItem = makeInboxItem(groupId, curBlah);
                         inboxCollections.get(inboxNumber).insert(inboxItem);
-                        curBlahs.remove(newBlahList.remove(curBlahIndex)); // prevent dupes
+                        tempBlahList.remove(curBlahIndex);
+                        curBlahs.remove(curBlah); // prevent dupes
+                    }
+                }
+
+                if (numUnseen > 0) {
+                    List<DBObject>  tempBlahList = new ArrayList<DBObject>(unseenBlahs);
+
+                    for (i = 0; i < numUnseen; i++) {
+                        curBlahIndex = (int)(Math.random() * tempBlahList.size());
+                        curBlah = tempBlahList.get(curBlahIndex);
+                        final BasicDBObject inboxItem = makeInboxItem(groupId, curBlah);
+                        inboxCollections.get(inboxNumber).insert(inboxItem);
+                        tempBlahList.remove(curBlahIndex);
+                        curBlahs.remove(curBlah); // prevent dupes
+                    }
+                }
+
+                if (numNewlyBorn > 0) {
+                    List<DBObject>  tempBlahList = new ArrayList<DBObject>(newlyBornBlahs);
+
+                    for (i = 0; i < numNewlyBorn; i++) {
+                        curBlahIndex = (int)(Math.random() * tempBlahList.size());
+                        curBlah = tempBlahList.get(curBlahIndex);
+                        final BasicDBObject inboxItem = makeInboxItem(groupId, curBlah);
+                        inboxCollections.get(inboxNumber).insert(inboxItem);
+                        tempBlahList.remove(curBlahIndex);
+                        curBlahs.remove(curBlah); // prevent dupes
                     }
                 }
 
                 if (numRecent > 0) {
-                    List<DBObject>  recentBlahList = new ArrayList<DBObject>(recentBlahs);
+                    List<DBObject>  tempBlahList = new ArrayList<DBObject>(recentBlahs);
 
                     for (i = 0; i < numRecent; i++) {
-                        curBlahIndex = (int)(Math.random() * recentBlahList.size());
-                        final BasicDBObject inboxItem = makeInboxItem(groupId, recentBlahList.get(curBlahIndex));
+                        curBlahIndex = (int)(Math.random() * tempBlahList.size());
+                        curBlah = tempBlahList.get(curBlahIndex);
+                        final BasicDBObject inboxItem = makeInboxItem(groupId, curBlah);
                         inboxCollections.get(inboxNumber).insert(inboxItem);
-                        curBlahs.remove(recentBlahList.remove(curBlahIndex));   // prevent dupes
+                        tempBlahList.remove(curBlahIndex);
+                        curBlahs.remove(curBlah); // prevent dupes
                     }
                 }
 
@@ -484,12 +579,6 @@ public class Inboxer {
         tmp = blah.get(BlahDAOConstants.IMAGE_IDS);
         if (tmp != null) {
             inboxItem.put(InboxBlahDAOConstants.IMAGE_IDS, tmp);
-            tmp = blah.get(BlahDAOConstants.GOOGLE_IMAGE_IDS);
-            if (tmp == null)
-            {
-                tmp = GenerateGoogleImageIDs(blah);
-            }
-            inboxItem.put(InboxBlahDAOConstants.GOOGLE_IMAGE_IDS, tmp);
 
         }
         tmp = blah.get(BlahDAOConstants.BADGE_IDS);
@@ -504,29 +593,6 @@ public class Inboxer {
         return inboxItem;
     }
 
-
-    private Object GenerateGoogleImageIDs(DBObject blah)
-    {
-        List<String>    imageList = new ArrayList<String>();
-        String baseURL = "https://s3-us-west-2.amazonaws.com/blahguaimages/image/";
-        List<String>    originalImageList = (List<String>)blah.get(BlahDAOConstants.IMAGE_IDS);
-        String imageIdStr = originalImageList.get(0);
-        String imageURLString = baseURL + imageIdStr + "-D.jpg";
-
-        try {
-            URL imageURL = new URL(imageURLString);
-            BufferedImage img = ImageIO.read(imageURL);
-
-
-
-        }
-        catch (Exception exp)
-        {
-
-
-        }
-        return null;
-    }
 
     private boolean checkIfBlahIsActive(String blahId)
     {
@@ -549,18 +615,6 @@ public class Inboxer {
 
 
         return isActive;
-    }
-
-    private List<List<DBObject>> makeBulkInsertList(int inboxCount, int bulkInsertMax) {
-        final ArrayList<List<DBObject>> list = new ArrayList<List<DBObject>>(inboxCount);
-        for (int i = 0; i < inboxCount; i++) {
-            list.add(new ArrayList<DBObject>(bulkInsertMax));
-        }
-        return list;
-    }
-
-    private boolean noNickname(String nickname) {
-        return (nickname == null || nickname.equals(USER_HAS_NO_NICKNAME));
     }
 
 
@@ -679,6 +733,7 @@ public class Inboxer {
         }
 
         if (blahs.size() < 100) {
+            System.out.println("Not enough blahs - fetching all of them");
              return getAllBlahs(groupId);
         }
         else
@@ -720,6 +775,7 @@ public class Inboxer {
         }
 
         if (blahs.size() < 100) {
+            System.out.println("Not enough blahs - fetching all of them");
             return getAllSafeBlahs(groupId);
         }
         else
