@@ -310,7 +310,7 @@ public class Inboxer {
 
             Calendar newlybornCalendar = Calendar.getInstance();
             newlybornCalendar.add(Calendar.HOUR_OF_DAY, -newlyborn);
-            Date newlyBornDate = recentCalender.getTime();
+            Date newlyBornDate = newlybornCalendar.getTime();
 
             Date curDate;
             Long viewCount;
