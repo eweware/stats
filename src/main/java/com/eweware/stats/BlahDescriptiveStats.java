@@ -1,9 +1,12 @@
 package com.eweware.stats;
 
+import com.eweware.service.base.store.dao.UserDAO;
+import com.eweware.service.base.store.dao.UserDAOConstants;
 import com.mongodb.*;
 import com.eweware.service.base.store.dao.BaseDAOConstants;
 import com.eweware.service.base.store.dao.BlahDAOConstants;
 import com.eweware.stats.help.Utilities;
+import org.bson.types.ObjectId;
 
 import java.text.NumberFormat;
 import java.util.*;
@@ -83,9 +86,12 @@ public class BlahDescriptiveStats {
         fieldsToReturn.put(BlahDAOConstants.IMAGE_IDS, 1);
         fieldsToReturn.put(BlahDAOConstants.BADGE_IDS, 1);
         fieldsToReturn.put(BlahDAOConstants.BLAH_STRENGTH, 1);
+        fieldsToReturn.put(BlahDAOConstants.AUTHOR_ID, 1);
         fieldsToReturn.put(BaseDAOConstants.CREATED, 1);
 
         final DBCollection blahCollection = DBCollections.getInstance().getBlahsCol();
+        final DBCollection userCollection = DBCollections.getInstance().getUsersCol();
+
         final HashMap<String, E> entries = Main._verbose ? new HashMap<String, E>() : null;
 
         ArrayList orList = new ArrayList();
@@ -154,6 +160,13 @@ public class BlahDescriptiveStats {
 
                 }
 
+                final String authorID = String.valueOf(blah.get(BlahDAOConstants.AUTHOR_ID));
+                final DBObject authorSearchObj = new BasicDBObject();
+                authorSearchObj.put("_id", new ObjectId(authorID));
+                final DBObject authorObj = userCollection.findOne(authorSearchObj);
+                if (authorObj.containsField(UserDAOConstants.IS_SPAMMER) &&
+                        (Boolean)authorObj.get(UserDAOConstants.IS_SPAMMER) == true)
+                    strength = -1;
 
                 final BasicDBObject setters = new BasicDBObject();
 

@@ -54,6 +54,14 @@ public final class UserPayload extends BasePayload implements UserDAOConstants {
         put(USER_STRENGTH, strength);
     }
 
+    public Boolean getIsSpammer() {
+        return (Boolean) get(IS_SPAMMER);
+    }
+
+    public void setIsSpammer(Boolean isSpammer) {
+        put(IS_SPAMMER, isSpammer);
+    }
+
     public Double getControversyStrength() {
         return (Double) get(USER_CONTROVERSY_STRENGTH);
     }

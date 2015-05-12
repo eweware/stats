@@ -28,6 +28,9 @@ public class UserDAOImpl extends BaseDAOImpl implements UserDAO {
         UserDAOImpl.FIELD_TO_TYPE_MAP.put(USERNAME, MongoFieldTypes.STRING);
         UserDAOImpl.FIELD_TO_TYPE_MAP.put(USER_STRENGTH, MongoFieldTypes.NUMBER);
         UserDAOImpl.FIELD_TO_TYPE_MAP.put(LAST_LOGIN, MongoFieldTypes.DATE);
+        UserDAOImpl.FIELD_TO_TYPE_MAP.put(IS_ADMIN, MongoFieldTypes.BOOLEAN);
+        UserDAOImpl.FIELD_TO_TYPE_MAP.put(IS_SPAMMER, MongoFieldTypes.BOOLEAN);
+        UserDAOImpl.FIELD_TO_TYPE_MAP.put(WANTS_MATURE, MongoFieldTypes.BOOLEAN);
         UserDAOImpl.FIELD_TO_TYPE_MAP.put(USER_CONTROVERSY_STRENGTH, MongoFieldTypes.NUMBER);
         UserDAOImpl.FIELD_TO_TYPE_MAP.put(BADGE_IDS, MongoFieldTypes.ARRAY);
         UserDAOImpl.FIELD_TO_TYPE_MAP.put(IMAGE_IDS, MongoFieldTypes.ARRAY);
@@ -147,4 +150,20 @@ public class UserDAOImpl extends BaseDAOImpl implements UserDAO {
     public Boolean getIsAdmin() {
         return (Boolean) get(IS_ADMIN);
     }
+
+    @Override
+    public Boolean getWantsMature() {
+        return (Boolean) get(WANTS_MATURE);
+    }
+
+    @Override
+    public void setWantsMature(Boolean wantsMature) { put(WANTS_MATURE, wantsMature);    }
+
+    @Override
+    public Boolean getIsSpammer() {
+        return (Boolean) get(IS_SPAMMER);
+    }
+
+    @Override
+    public void setIsSpammer(Boolean isSpammer) { put(IS_SPAMMER, isSpammer);    }
 }
