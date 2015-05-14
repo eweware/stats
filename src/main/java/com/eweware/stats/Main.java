@@ -215,14 +215,15 @@ public class Main {
         else
             Utilities.printit(true, new Date() + ": Skipping user clustering");
 
-        if (_runconfig.contains("stats"))
-        {
+        if (_runconfig.contains("stats")) {
             Utilities.printit(true, new Date() + ": Starting Descriptive Stats");
             lastTime = System.currentTimeMillis();
             blahCount = new BlahDescriptiveStats().execute();
             ms = System.currentTimeMillis() - lastTime;
             Utilities.printit(true, new Date() + ": Inboxer BlahDescriptiveStats took " + (ms / 1000) + " seconds (" + (ms / ((blahCount == 0L) ? 1L : blahCount)) + " ms/blah)");
+        }
 
+        if (_runconfig.contains("reputation")) {
             Utilities.printit(true, new Date() + ": Starting User Reputation Stats");
             lastTime = System.currentTimeMillis();
             executeReputation();
